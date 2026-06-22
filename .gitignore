@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Data (regenerated from API)
+data/*
+!data/raw/
+data/raw/*
+!data/raw/nem_realtime_7d.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
