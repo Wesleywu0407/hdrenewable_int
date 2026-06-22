@@ -7,7 +7,6 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -90,119 +89,105 @@ def ordered_groups(groups: list[str]) -> list[str]:
     return [group for group in STACK_ORDER if group in groups]
 
 
-def build_energy_terrain(df: pd.DataFrame) -> go.Figure:
+def build_realtime_mix_chart(df: pd.DataFrame) -> go.Figure:
     groups = ordered_groups(sorted(df["fueltech_group"].unique()))
+    fig = go.Figure()
+    for group in groups:
+        sub = df[df["fueltech_group"] == group].sort_values("interval")
+        fig.add_trace(
+            go.Scatter(
+                x=sub["interval"],
+                y=sub["value"],
+                name=FUEL_LABELS[group],
+                mode="lines",
+                stackgroup="generation",
+                line=dict(width=0.8, color=FUEL_COLORS[group]),
+                fillcolor=FUEL_COLORS[group],
+                opacity=0.92,
+                hovertemplate=(
+                    f"{FUEL_LABELS[group]}<br>"
+                    "%{x|%d %b %H:%M}<br>"
+                    "Power %{y:,.0f} MW<extra></extra>"
+                ),
+            )
+        )
+
     pivot = (
         df.groupby(["interval", "fueltech_group"], observed=True)["value"]
         .sum()
         .unstack(fill_value=0)
         .sort_index()
+        .reindex(columns=groups, fill_value=0)
     )
-    pivot = pivot.reindex(columns=groups, fill_value=0)
-
-    intervals = list(pivot.index)
-    start = intervals[0]
-    x_hours = np.array([(interval - start).total_seconds() / 3600 for interval in intervals])
-
-    fig = go.Figure()
-    for index, group in enumerate(groups):
-        values = pivot[group].to_numpy(dtype=float)
-        x_grid = np.vstack([x_hours, x_hours])
-        y_grid = np.vstack([
-            np.full_like(x_hours, index - 0.34, dtype=float),
-            np.full_like(x_hours, index + 0.34, dtype=float),
-        ])
-        z_grid = np.vstack([values, values])
-        fig.add_trace(
-            go.Surface(
-                x=x_grid,
-                y=y_grid,
-                z=z_grid,
-                name=FUEL_LABELS[group],
-                showscale=False,
-                opacity=0.92,
-                surfacecolor=np.full_like(z_grid, index, dtype=float),
-                colorscale=[[0, FUEL_COLORS[group]], [1, FUEL_COLORS[group]]],
-                hovertemplate=(
-                    f"{FUEL_LABELS[group]}<br>"
-                    "Hour %{x:.1f}<br>"
-                    "Power %{z:,.0f} MW<extra></extra>"
-                ),
-            )
-        )
-
     totals = pivot.sum(axis=1)
     solar_peak_time = pivot["solar"].idxmax() if "solar" in pivot else totals.idxmax()
     solar_peak = float(pivot.loc[solar_peak_time, "solar"]) if "solar" in pivot else 0.0
-    coal_avg = float(pivot["coal"].mean()) if "coal" in pivot else 0.0
-    wind_std_time = pivot["wind"].sub(pivot["wind"].mean()).abs().idxmax() if "wind" in pivot else totals.idxmax()
     evening_window = pivot[(pivot.index.hour >= 17) & (pivot.index.hour <= 21)]
     evening_peak_time = evening_window.sum(axis=1).idxmax() if not evening_window.empty else totals.idxmax()
+    coal_base = float(pivot["coal"].median()) if "coal" in pivot else 0.0
 
-    callouts = [
-        ("Solar peak", solar_peak_time, "solar", solar_peak),
-        ("Coal baseload", pivot.index[len(pivot) // 2], "coal", coal_avg),
-        ("Evening ramp", evening_peak_time, "gas" if "gas" in groups else groups[0], float(totals.loc[evening_peak_time])),
-        ("Wind variation", wind_std_time, "wind" if "wind" in groups else groups[-1], float(pivot.loc[wind_std_time].max())),
-    ]
-    for label, when, group, z_value in callouts:
-        if group not in groups:
-            continue
-        fig.add_trace(
-            go.Scatter3d(
-                x=[(when - start).total_seconds() / 3600],
-                y=[groups.index(group)],
-                z=[z_value],
-                mode="markers+text",
-                text=[label],
-                textposition="top center",
-                marker=dict(size=4, color=FUEL_COLORS.get(group, "#D8D2C0"), line=dict(width=1, color="#F5EEDC")),
-                textfont=dict(size=11, color="#EFE8D2"),
-                showlegend=False,
-                hoverinfo="skip",
-            )
+    if "coal" in pivot:
+        fig.add_hline(
+            y=coal_base,
+            line_width=0.8,
+            line_dash="dot",
+            line_color="rgba(239,232,210,0.45)",
+            annotation_text="coal baseload median",
+            annotation_position="top left",
+            annotation_font_size=11,
+            annotation_font_color="#B9B2A3",
         )
-
-    tick_positions = np.linspace(float(x_hours.min()), float(x_hours.max()), 5)
-    tick_text = [
-        (start + pd.Timedelta(hours=float(hour))).strftime("%d %b %H:%M")
-        for hour in tick_positions
-    ]
+    fig.add_annotation(
+        x=solar_peak_time,
+        y=solar_peak,
+        text="solar peak",
+        showarrow=True,
+        arrowhead=2,
+        ax=24,
+        ay=-42,
+        font=dict(size=12, color="#EFE8D2"),
+        arrowcolor="#D6A21D",
+        bgcolor="rgba(9,13,18,0.82)",
+        bordercolor="rgba(214,162,29,0.45)",
+        borderwidth=0.5,
+    )
+    fig.add_annotation(
+        x=evening_peak_time,
+        y=float(totals.loc[evening_peak_time]),
+        text="evening ramp",
+        showarrow=True,
+        arrowhead=2,
+        ax=-46,
+        ay=-38,
+        font=dict(size=12, color="#EFE8D2"),
+        arrowcolor="#C46A2B",
+        bgcolor="rgba(9,13,18,0.82)",
+        bordercolor="rgba(196,106,43,0.45)",
+        borderwidth=0.5,
+    )
 
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        height=620,
-        margin=dict(l=0, r=0, t=22, b=0),
-        scene=dict(
-            bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(
-                title="Time",
-                tickmode="array",
-                tickvals=tick_positions,
-                ticktext=tick_text,
-                gridcolor="rgba(239,232,210,0.10)",
-                zerolinecolor="rgba(239,232,210,0.12)",
-                color="#B9B2A3",
-            ),
-            yaxis=dict(
-                title="Fuel layer",
-                tickmode="array",
-                tickvals=list(range(len(groups))),
-                ticktext=[FUEL_LABELS[group] for group in groups],
-                gridcolor="rgba(239,232,210,0.08)",
-                zerolinecolor="rgba(239,232,210,0.10)",
-                color="#B9B2A3",
-            ),
-            zaxis=dict(
-                title="Power (MW)",
-                gridcolor="rgba(239,232,210,0.10)",
-                zerolinecolor="rgba(239,232,210,0.12)",
-                color="#B9B2A3",
-            ),
-            camera=dict(eye=dict(x=1.55, y=-1.85, z=1.18)),
-            aspectratio=dict(x=2.0, y=0.9, z=0.72),
+        height=560,
+        margin=dict(l=10, r=10, t=18, b=34),
+        xaxis=dict(
+            title="",
+            tickformat="%d %b<br>%H:%M",
+            gridcolor="rgba(239,232,210,0.08)",
+            zerolinecolor="rgba(239,232,210,0.12)",
+            color="#B9B2A3",
+            showspikes=True,
+            spikemode="across",
+            spikecolor="rgba(239,232,210,0.22)",
+        ),
+        yaxis=dict(
+            title="Power (MW)",
+            gridcolor="rgba(239,232,210,0.08)",
+            zerolinecolor="rgba(239,232,210,0.12)",
+            color="#B9B2A3",
+            rangemode="tozero",
         ),
         legend=dict(
             orientation="h",
@@ -212,6 +197,7 @@ def build_energy_terrain(df: pd.DataFrame) -> go.Figure:
             x=0,
             font=dict(color="#D8D2C0", size=11),
         ),
+        hovermode="x unified",
     )
     return fig
 
@@ -369,15 +355,15 @@ def render_standard_metrics(metrics: list[dict[str, str]]) -> None:
 def render_figure_one(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
     df = load_realtime_generation()
-    fig = build_energy_terrain(df)
+    fig = build_realtime_mix_chart(df)
 
     title_col, download_col = st.columns([5, 1.2], vertical_alignment="top")
     with title_col:
         st.markdown(
             f"""
-            <div class="figure-kicker">Chapter 1.2 · Figure 01 · live grid layer</div>
+            <div class="figure-kicker">Chapter 1.2 · Figure 01 · live generation profile</div>
             <h1 class="main-title">{escape(figure["title"])}</h1>
-            <div class="main-subtitle">{escape(figure["subtitle"])} · 3D fuel-layer terrain from 30-minute MW intervals</div>
+            <div class="main-subtitle">{escape(figure["subtitle"])} · 2D stacked generation profile from 30-minute MW intervals</div>
             """,
             unsafe_allow_html=True,
         )
