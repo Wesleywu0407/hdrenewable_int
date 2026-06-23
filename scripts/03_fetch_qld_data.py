@@ -198,6 +198,36 @@ def fetch_qld_fuel_mix(client: OEClient, months: int = 24) -> pd.DataFrame:
     return df
 
 
+def save_and_merge(path: Path, df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        return df
+    if path.exists():
+        print(f"  merging new data with existing historical data for {path.name}...")
+        df_old = pd.read_csv(path, low_memory=False)
+        for col in ["interval", "commissioning_date", "closure_date", "month"]:
+            if col in df_old.columns:
+                df_old[col] = pd.to_datetime(df_old[col])
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col])
+        combined = pd.concat([df_old, df], ignore_index=True)
+        if "interval" in combined.columns:
+            subset_cols = [c for c in combined.columns if c not in ["value", "price", "unit"]]
+            combined = combined.drop_duplicates(subset=subset_cols, keep="last")
+            combined = combined.sort_values("interval")
+        elif "month" in combined.columns:
+            subset_cols = [c for c in combined.columns if c not in ["capacity_mw"]]
+            combined = combined.drop_duplicates(subset=subset_cols, keep="last")
+            combined = combined.sort_values("month")
+        else:
+            subset_cols = [c for c in ["code", "unit_code", "network_region", "year"] if c in combined.columns]
+            if subset_cols:
+                combined = combined.drop_duplicates(subset=subset_cols, keep="last")
+            else:
+                combined = combined.drop_duplicates(keep="last")
+        df = combined.copy()
+    df.to_csv(path, index=False)
+    return df
+
 def summarize(path: Path, df: pd.DataFrame, note: str = "") -> None:
     size_kb = path.stat().st_size / 1024
     print(f"  saved {path.name}: {len(df):,} rows, {size_kb:.1f} KB {note}")
@@ -207,14 +237,18 @@ def summarize(path: Path, df: pd.DataFrame, note: str = "") -> None:
 def main() -> int:
     with OEClient() as client:
         # --- QLD facilities ------------------------------------------------ #
-        qld_path = RAW_DIR / "qld_facilities.parquet"
+        qld_path = RAW_DIR / "qld_facilities.csv"
         if cache_is_fresh(qld_path):
-            qld = pd.read_parquet(qld_path)
+            qld = pd.read_csv(qld_path, low_memory=False)
+            if "commissioning_date" in qld.columns:
+                qld["commissioning_date"] = pd.to_datetime(qld["commissioning_date"])
+            if "closure_date" in qld.columns:
+                qld["closure_date"] = pd.to_datetime(qld["closure_date"])
             print(f"[qld_facilities] cache hit ({len(qld)} units).")
         else:
             print("[qld_facilities] fetching QLD1 ...")
             qld = facilities_to_df(client, "QLD1")
-            qld.to_parquet(qld_path, index=False)
+            qld = save_and_merge(qld_path, qld)
             summarize(qld_path, qld)
         cod_cov = qld["commissioning_date"].notna().mean() * 100
         print(f"  QLD units: {len(qld)} | commissioning-date coverage: {cod_cov:.0f}%")
@@ -228,31 +262,33 @@ def main() -> int:
             print(f"  {region}: {len(peers[region])} units")
 
         # --- Capacity history (QLD) ---------------------------------------- #
-        ch_path = RAW_DIR / "qld_capacity_history.parquet"
+        ch_path = RAW_DIR / "qld_capacity_history.csv"
         cap_hist = build_capacity_history(qld)
-        cap_hist.to_parquet(ch_path, index=False)
+        cap_hist = save_and_merge(ch_path, cap_hist)
         summarize(ch_path, cap_hist, f"({cap_hist['month'].min():%Y-%m}..{cap_hist['month'].max():%Y-%m})")
 
         # --- Peer additions per year --------------------------------------- #
-        pa_path = RAW_DIR / "peer_capacity_additions.parquet"
+        pa_path = RAW_DIR / "peer_capacity_additions.csv"
         peer_add = build_peer_additions(peers)
-        peer_add.to_parquet(pa_path, index=False)
+        peer_add = save_and_merge(pa_path, peer_add)
         summarize(pa_path, peer_add)
 
         # --- QLD 24-month fuel mix (Fig 2) --------------------------------- #
-        fm_path = RAW_DIR / "qld_fuel_mix_24m.parquet"
+        fm_path = RAW_DIR / "qld_fuel_mix_24m.csv"
         if cache_is_fresh(fm_path):
             print(f"[qld_fuel_mix_24m] cache hit.")
         else:
             print("[qld_fuel_mix_24m] fetching QLD1 monthly fuel mix ...")
             fm = fetch_qld_fuel_mix(client, months=24)
-            fm.to_parquet(fm_path, index=False)
+            fm = save_and_merge(fm_path, fm)
             summarize(fm_path, fm, f"({fm['interval'].min():%Y-%m}..{fm['interval'].max():%Y-%m})")
 
         # --- QLD spot prices ----------------------------------------------- #
-        sp_path = RAW_DIR / "qld_spot_prices.parquet"
+        sp_path = RAW_DIR / "qld_spot_prices.csv"
         if cache_is_fresh(sp_path):
-            sp = pd.read_parquet(sp_path)
+            sp = pd.read_csv(sp_path, low_memory=False)
+            if "interval" in sp.columns:
+                sp["interval"] = pd.to_datetime(sp["interval"])
             print(f"[qld_spot_prices] cache hit ({len(sp)} hours).")
         else:
             print("[qld_spot_prices] fetching QLD1 hourly (chunked) ...")
@@ -260,7 +296,7 @@ def main() -> int:
             if sp.empty:
                 print("  WARNING: no spot price data returned — Fig 6 will be skipped.")
             else:
-                sp.to_parquet(sp_path, index=False)
+                sp = save_and_merge(sp_path, sp)
                 summarize(sp_path, sp, f"({sp['interval'].min():%Y-%m-%d}..{sp['interval'].max():%Y-%m-%d})")
                 neg = (sp["price"] < 0).sum()
                 print(f"  negative-price hours: {neg} ({neg/len(sp)*100:.1f}% of {len(sp)})")

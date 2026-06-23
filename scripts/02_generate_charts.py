@@ -14,6 +14,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
@@ -91,36 +92,94 @@ def order_groups(present: list[str]) -> list[str]:
 # Fig 1 — Real-time generation mix (past 7 days, 30-min)
 # --------------------------------------------------------------------------- #
 def fig1_realtime() -> None:
-    df = pd.read_parquet(RAW_DIR / "nem_realtime_7d.parquet")
-    df = df[df["fueltech_group"].isin(GEN_GROUPS)].copy()
-    df["value"] = df["value"].clip(lower=0)  # generation-only stack
-    groups = order_groups(sorted(df["fueltech_group"].unique()))
+    # -- Read master wide-format CSV ---------------------------------------- #
+    df = pd.read_csv(
+        RAW_DIR / "master_NEM_open_electricity.csv", parse_dates=["date"]
+    )
 
-    fig = go.Figure()
+    # No date filter; use all data in the CSV
+
+    # -- Mapping from wide MW columns to FUEL_COLORS keys ------------------- #
+    WIDE_TO_FUEL = {
+        "Coal (Brown) -  MW": "coal",
+        "Coal (Black) -  MW": "coal",
+        "Gas (Steam) -  MW": "gas",
+        "Gas (CCGT) -  MW": "gas",
+        "Gas (OCGT) -  MW": "gas",
+        "Gas (Reciprocating) -  MW": "gas",
+        "Gas (Waste Coal Mine) -  MW": "gas",
+        "Solar (Utility) -  MW": "solar",
+        "Solar (Rooftop) -  MW": "solar",
+        "Wind -  MW": "wind",
+        "Hydro -  MW": "hydro",
+        "Battery (Discharging) -  MW": "battery",
+        "Bioenergy (Biomass) -  MW": "bioenergy",
+        "Distillate -  MW": "distillate",
+    }
+
+    # -- Extract price before melting --------------------------------------- #
+    price_df = (
+        df[["date", "Price - AUD/MWh"]]
+        .dropna(subset=["Price - AUD/MWh"])
+        .rename(columns={"Price - AUD/MWh": "value"})
+        .sort_values("date")
+    )
+
+    # -- Melt only the MW power columns into long format -------------------- #
+    mw_cols = [c for c in WIDE_TO_FUEL if c in df.columns]
+    melted = pd.melt(
+        df, id_vars=["date"], value_vars=mw_cols,
+        var_name="fueltech_group", value_name="value",
+    )
+    melted["fueltech_group"] = melted["fueltech_group"].map(WIDE_TO_FUEL)
+    melted["value"] = melted["value"].clip(lower=0)  # generation-only stack
+
+    # -- Aggregate by fuel group (e.g. coal_brown + coal_black → coal) ------ #
+    melted = (
+        melted.groupby(["date", "fueltech_group"], as_index=False)["value"].sum()
+    )
+    groups = order_groups(sorted(melted["fueltech_group"].unique()))
+
+    # -- Build chart -------------------------------------------------------- #
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
     for g in groups:
-        sub = df[df["fueltech_group"] == g].sort_values("interval")
+        sub = melted[melted["fueltech_group"] == g].sort_values("date")
         fig.add_trace(
             go.Scatter(
-                x=sub["interval"],
+                x=sub["date"],
                 y=sub["value"],
                 name=g,
                 mode="lines",
                 stackgroup="one",
                 line=dict(width=0.5, color=FUEL_COLORS.get(g, "#999")),
                 fillcolor=FUEL_COLORS.get(g, "#999"),
-            )
+            ),
+            secondary_y=False,
         )
+
+    fig.add_trace(
+        go.Scatter(
+            x=price_df["date"],
+            y=price_df["value"],
+            name="Price",
+            mode="lines",
+            line=dict(width=1.5, color="red", dash="dot"),
+        ),
+        secondary_y=True,
+    )
+
     fig.update_layout(
         template=TEMPLATE,
         title=english_title(
-            "NEM Real-time Generation Mix — Past 7 Days (30-min)"
+            "NEM Real-time Generation Mix & Price — Full Window (30-min)"
         ),
         yaxis_title="Power (MW)",
-        xaxis_title="",
         hovermode="x unified",
         legend_title="Fuel group",
         margin=dict(b=110),
     )
+    fig.update_yaxes(title_text="Power (MW)", secondary_y=False)
+    fig.update_yaxes(title_text="Price (AUD/MWh)", secondary_y=True)
     fig.update_xaxes(tickformat="%m-%d %H:%M")
     add_source_footer(fig, "Generation-only (battery charging & pumps excluded)")
     save(fig, "fig1_nem_realtime_mix.html")
@@ -130,7 +189,7 @@ def fig1_realtime() -> None:
 # Fig 2 — Monthly generation by fuel (available history)
 # --------------------------------------------------------------------------- #
 def fig2_annual() -> None:
-    df = pd.read_parquet(RAW_DIR / "nem_annual_fuel_mix.parquet")
+    df = pd.read_csv(RAW_DIR / "nem_annual_fuel_mix.csv", parse_dates=["interval"])
     df = df[df["fueltech_group"].isin(GEN_GROUPS)].copy()
     df["value"] = df["value"].clip(lower=0)
     groups = order_groups(sorted(df["fueltech_group"].unique()))
@@ -153,7 +212,7 @@ def fig2_annual() -> None:
     fig.update_layout(
         template=TEMPLATE,
         title=english_title(
-            "NEM Monthly Generation by Fuel Type"
+            "NEM-Wide Monthly Generation by Fuel Type (All Regions)"
         ),
         yaxis_title="Energy (MWh)",
         xaxis_title="",
@@ -173,7 +232,7 @@ def fig2_annual() -> None:
 # Fig 3 — Cross-state generation mix (latest 12 months)
 # --------------------------------------------------------------------------- #
 def fig3_state_comparison() -> None:
-    df = pd.read_parquet(RAW_DIR / "nem_state_fuel_mix.parquet")
+    df = pd.read_csv(RAW_DIR / "nem_state_fuel_mix.csv")
     df = df[df["fueltech_group"].isin(GEN_GROUPS) & df["network_region"].notna()].copy()
     df["value"] = df["value"].clip(lower=0)
     # Sum over the full 12-month window per region × group.
@@ -213,61 +272,10 @@ def fig3_state_comparison() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 4 — Renewable share evolution per state
+# Fig 4 — Coal retirement timeline (Gantt)
 # --------------------------------------------------------------------------- #
-def fig4_renewable_share() -> None:
-    df = pd.read_parquet(RAW_DIR / "nem_renewable_share.parquet")
-    df = df[df["network_region"].notna()].copy()
-    # Pivot renewable True/False to columns, compute share %.
-    piv = (
-        df.pivot_table(
-            index=["network_region", "interval"],
-            columns="renewable",
-            values="value",
-            aggfunc="sum",
-        )
-        .rename(columns={True: "renewable", False: "non_renewable"})
-        .reset_index()
-    )
-    piv["share"] = piv["renewable"] / (piv["renewable"] + piv["non_renewable"]) * 100
-
-    fig = go.Figure()
-    for r in [x for x in REGION_ORDER if x in piv["network_region"].unique()]:
-        sub = piv[piv["network_region"] == r].sort_values("interval")
-        fig.add_trace(
-            go.Scatter(
-                x=sub["interval"],
-                y=sub["share"],
-                name=REGION_LABELS.get(r, r),
-                mode="lines+markers",
-            )
-        )
-    dmin, dmax = piv["interval"].min(), piv["interval"].max()
-    fig.update_layout(
-        template=TEMPLATE,
-        title=english_title(
-            "Renewable Energy Share by State"
-        ),
-        yaxis_title="Renewable share (%)",
-        xaxis_title="",
-        hovermode="x unified",
-        legend_title="State",
-        margin=dict(b=120),
-    )
-    fig.update_xaxes(tickformat="%Y-%m")
-    fig.update_yaxes(range=[0, 100])
-    add_source_footer(
-        fig,
-        f"COMMUNITY plan: data limited to {dmin:%Y-%m}–{dmax:%Y-%m} (not full 2020–2025)",
-    )
-    save(fig, "fig4_renewable_share_evolution.html")
-
-
-# --------------------------------------------------------------------------- #
-# Fig 5 — Coal retirement timeline (Gantt)
-# --------------------------------------------------------------------------- #
-def fig5_coal_timeline() -> None:
-    df = pd.read_parquet(RAW_DIR / "nem_coal_facilities.parquet").copy()
+def fig4_coal_timeline() -> None:
+    df = pd.read_csv(RAW_DIR / "nem_coal_facilities.csv").copy()
     df["commenced"] = pd.to_datetime(df["commenced"], utc=True).dt.tz_localize(None)
     df["retired"] = pd.to_datetime(df["retired"], utc=True).dt.tz_localize(None)
     df = df.dropna(subset=["commenced", "retired"])
@@ -297,7 +305,7 @@ def fig5_coal_timeline() -> None:
     )
     fig.update_xaxes(tickformat="%Y")
     add_source_footer(fig, "End date for operating units = expected closure date")
-    save(fig, "fig5_coal_retirement_timeline.html")
+    save(fig, "fig4_coal_retirement_timeline.html")
 
 
 def main() -> int:
@@ -305,8 +313,7 @@ def main() -> int:
     fig1_realtime()
     fig2_annual()
     fig3_state_comparison()
-    fig4_renewable_share()
-    fig5_coal_timeline()
+    fig4_coal_timeline()
     print("Done.")
     return 0
 

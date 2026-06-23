@@ -37,10 +37,47 @@ if not API_KEY or API_KEY.startswith("<"):
     sys.exit(1)
 
 from openelectricity import OEClient  # noqa: E402
-from openelectricity.types import DataMetric, FueltechGroupType, UnitStatusType  # noqa: E402
+from openelectricity.types import DataMetric, FueltechGroupType, UnitStatusType, MarketMetric  # noqa: E402
 
 CACHE_MAX_AGE_H = 24
 NEM_REGIONS = ["NSW1", "QLD1", "VIC1", "SA1", "TAS1"]
+
+# --------------------------------------------------------------------------- #
+# Fueltech ID → Wide-format column name mappings (must match master CSV headers)
+# NOTE: The double space in " -  MW" is intentional and matches the team files.
+# --------------------------------------------------------------------------- #
+FUELTECH_POWER_COLS: dict[str, str] = {
+    "battery_charging": "Battery (Charging) -  MW",
+    "pumps": "Pumps -  MW",
+    "coal_brown": "Coal (Brown) -  MW",
+    "coal_black": "Coal (Black) -  MW",
+    "bioenergy_biomass": "Bioenergy (Biomass) -  MW",
+    "bioenergy_biogas": "Bioenergy (Biogas) -  MW",
+    "distillate": "Distillate -  MW",
+    "gas_steam": "Gas (Steam) -  MW",
+    "gas_ccgt": "Gas (CCGT) -  MW",
+    "gas_ocgt": "Gas (OCGT) -  MW",
+    "gas_recip": "Gas (Reciprocating) -  MW",
+    "gas_wcmg": "Gas (Waste Coal Mine) -  MW",
+    "battery_discharging": "Battery (Discharging) -  MW",
+    "hydro": "Hydro -  MW",
+    "wind": "Wind -  MW",
+    "solar_utility": "Solar (Utility) -  MW",
+    "solar_rooftop": "Solar (Rooftop) -  MW",
+}
+
+FUELTECH_EMISSIONS_COLS: dict[str, str] = {
+    "coal_brown": "Coal (Brown) Emissions Vol - tCO\u2082e",
+    "coal_black": "Coal (Black) Emissions Vol - tCO\u2082e",
+    "bioenergy_biomass": "Bioenergy (Biomass) Emissions Vol - tCO\u2082e",
+    "bioenergy_biogas": "Bioenergy (Biogas) Emissions Vol - tCO\u2082e",
+    "distillate": "Distillate Emissions Vol - tCO\u2082e",
+    "gas_steam": "Gas (Steam) Emissions Vol - tCO\u2082e",
+    "gas_ccgt": "Gas (CCGT) Emissions Vol - tCO\u2082e",
+    "gas_ocgt": "Gas (OCGT) Emissions Vol - tCO\u2082e",
+    "gas_recip": "Gas (Reciprocating) Emissions Vol - tCO\u2082e",
+    "gas_wcmg": "Gas (Waste Coal Mine) Emissions Vol - tCO\u2082e",
+}
 
 # COMMUNITY plan only exposes ~the last 730 days of history, and the 1M interval
 # is capped at a 732-day range per request. We clamp long-range queries to this
@@ -133,7 +170,10 @@ def fetch_cached(path: Path, label: str, fetch_fn) -> pd.DataFrame | None:
     """Generic cache-or-fetch wrapper with graceful error handling."""
     print(f"\n[{label}] -> {path.name}")
     if cache_is_fresh(path):
-        df = pd.read_parquet(path)
+        df = pd.read_csv(path, low_memory=False)
+        for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired"]:
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col])
         print(f"  cache hit (< {CACHE_MAX_AGE_H}h old), skipping API call.")
         summarize(path, df)
         return df
@@ -143,14 +183,103 @@ def fetch_cached(path: Path, label: str, fetch_fn) -> pd.DataFrame | None:
         print(f"  FETCH FAILED: {type(exc).__name__}: {exc}")
         if path.exists():
             print("  using stale cache as fallback.")
-            return pd.read_parquet(path)
+            df_fallback = pd.read_csv(path, low_memory=False)
+            for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired"]:
+                if col in df_fallback.columns:
+                    df_fallback[col] = pd.to_datetime(df_fallback[col])
+            return df_fallback
         return None
     if df is None or df.empty:
         print("  WARNING: API returned no data.")
         return df
-    df.to_parquet(path, index=False)
+
+    if path.exists():
+        print("  merging new data with existing historical data...")
+        df_old = pd.read_csv(path, low_memory=False)
+        for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired"]:
+            if col in df_old.columns:
+                df_old[col] = pd.to_datetime(df_old[col])
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col])
+        
+        combined = pd.concat([df_old, df], ignore_index=True)
+        if "interval" in combined.columns:
+            subset_cols = [c for c in combined.columns if c not in ["value", "price"]]
+            combined = combined.drop_duplicates(subset=subset_cols, keep="last")
+            combined = combined.sort_values("interval")
+        else:
+            subset_cols = [c for c in ["code", "unit_code", "facility_code"] if c in combined.columns]
+            if subset_cols:
+                combined = combined.drop_duplicates(subset=subset_cols, keep="last")
+            else:
+                combined = combined.drop_duplicates(keep="last")
+        df = combined.copy()
+
+    df.to_csv(path, index=False)
     summarize(path, df)
     return df
+
+
+def pivot_to_wide(df: pd.DataFrame) -> pd.DataFrame:
+    """Pivot long-format fueltech data into wide format matching master CSV headers.
+
+    Expects a DataFrame with columns: interval, value, metric, fueltech (at minimum).
+    Returns a DataFrame indexed by 'date' with one column per fueltech+metric.
+    """
+    if df.empty or "fueltech" not in df.columns:
+        return pd.DataFrame()
+
+    # Build a mapping from (metric, fueltech) → wide column name.
+    def _col_name(row):
+        ft = row.get("fueltech")
+        metric = str(row.get("metric", ""))
+        if metric == "power":
+            return FUELTECH_POWER_COLS.get(ft)
+        elif metric == "emissions":
+            return FUELTECH_EMISSIONS_COLS.get(ft)
+        return None
+
+    work = df[["interval", "value", "metric", "fueltech"]].copy()
+    work["col_name"] = work.apply(_col_name, axis=1)
+    work = work.dropna(subset=["col_name"])
+
+    if work.empty:
+        return pd.DataFrame()
+
+    wide = work.pivot_table(
+        index="interval", columns="col_name", values="value", aggfunc="mean"
+    )
+    wide.columns.name = None  # remove the "col_name" label
+    wide = wide.reset_index().rename(columns={"interval": "date"})
+    return wide
+
+
+def append_to_master(master_path: Path, new_df: pd.DataFrame, label: str) -> None:
+    """Append new wide-format data to an existing master CSV file.
+
+    Deduplicates on the 'date' column (keeping most recent data) and sorts.
+    Preserves any columns in the master file that are not present in new_df.
+    """
+    if new_df.empty:
+        print(f"  [{label}] no new data to append.")
+        return
+
+    new_df["date"] = pd.to_datetime(new_df["date"])
+
+    if master_path.exists():
+        print(f"  [{label}] reading existing master file...")
+        master = pd.read_csv(master_path, low_memory=False)
+        master["date"] = pd.to_datetime(master["date"])
+        combined = pd.concat([master, new_df], ignore_index=True)
+    else:
+        print(f"  [{label}] creating new master file...")
+        combined = new_df.copy()
+
+    combined = combined.drop_duplicates(subset=["date"], keep="last")
+    combined = combined.sort_values("date").reset_index(drop=True)
+    combined.to_csv(master_path, index=False)
+    summarize(master_path, combined)
+    print(f"  [{label}] master file updated: {len(combined):,} total rows.")
 
 
 # --------------------------------------------------------------------------- #
@@ -171,31 +300,107 @@ def main() -> int:
 
     with OEClient() as client:
 
-        # --- Dataset A: real-time generation, past 7 days, 5m (resampled to 30m later)
-        def fetch_a():
-            resp = client.get_network_data(
-                network_code="NEM",
-                metrics=[DataMetric.POWER],
-                interval="5m",
-                date_start=now - timedelta(days=7),
-                date_end=now,
-                secondary_grouping="fueltech_group",
-            )
-            df = timeseries_to_df(resp)
-            # Resample to 30-min per fueltech_group (faithful to the 30-min spec).
-            if not df.empty and "fueltech_group" in df.columns:
-                df = (
-                    df.set_index("interval")
-                    .groupby("fueltech_group")["value"]
-                    .resample("30min")
-                    .mean()
-                    .reset_index()
+        # ================================================================== #
+        # Master file update: NEM (power + emissions + price, 7 days, 5 min)
+        # ================================================================== #
+        nem_master = RAW_DIR / "master_NEM_open_electricity.csv"
+        print(f"\n[NEM master] -> {nem_master.name}")
+        if cache_is_fresh(nem_master):
+            print(f"  cache hit (< {CACHE_MAX_AGE_H}h old), skipping NEM master update.")
+        else:
+            try:
+                print("  fetching NEM power + emissions (fueltech, 5m, 7d)...")
+                resp_gen = client.get_network_data(
+                    network_code="NEM",
+                    metrics=[DataMetric.POWER, DataMetric.EMISSIONS],
+                    interval="5m",
+                    date_start=now - timedelta(days=7),
+                    date_end=now,
+                    secondary_grouping="fueltech",
                 )
-                df["metric"] = "power"
-                df["unit"] = "MW"
-            return df
+                df_gen = timeseries_to_df(resp_gen)
+                print(f"  fetched {len(df_gen):,} generation/emissions rows.")
 
-        fetch_cached(RAW_DIR / "nem_realtime_7d.parquet", "A realtime 7d", fetch_a)
+                print("  fetching NEM price (5m, 7d)...")
+                resp_price = client.get_market(
+                    network_code="NEM",
+                    metrics=[MarketMetric.PRICE],
+                    interval="5m",
+                    date_start=now - timedelta(days=7),
+                    date_end=now,
+                )
+                df_price = timeseries_to_df(resp_price)
+                print(f"  fetched {len(df_price):,} price rows.")
+
+                # Pivot generation data to wide format.
+                wide = pivot_to_wide(df_gen)
+
+                # Add price column.
+                if not df_price.empty:
+                    price_wide = (
+                        df_price[["interval", "value"]]
+                        .rename(columns={"interval": "date", "value": "Price - AUD/MWh"})
+                    )
+                    price_wide["date"] = pd.to_datetime(price_wide["date"])
+                    if not wide.empty:
+                        wide["date"] = pd.to_datetime(wide["date"])
+                        wide = wide.merge(price_wide, on="date", how="outer")
+                    else:
+                        wide = price_wide
+
+                append_to_master(nem_master, wide, "NEM master")
+            except Exception as exc:  # noqa: BLE001
+                print(f"  NEM MASTER FETCH FAILED: {type(exc).__name__}: {exc}")
+
+        # ================================================================== #
+        # Master file update: WEM / WA SWIS (power + emissions + price, 7d)
+        # ================================================================== #
+        wem_master = RAW_DIR / "master_WA_SWIS_open_electricity.csv"
+        print(f"\n[WEM master] -> {wem_master.name}")
+        if cache_is_fresh(wem_master):
+            print(f"  cache hit (< {CACHE_MAX_AGE_H}h old), skipping WEM master update.")
+        else:
+            try:
+                print("  fetching WEM power + emissions (fueltech, 5m, 7d)...")
+                resp_gen_wem = client.get_network_data(
+                    network_code="WEM",
+                    metrics=[DataMetric.POWER, DataMetric.EMISSIONS],
+                    interval="5m",
+                    date_start=now - timedelta(days=7),
+                    date_end=now,
+                    secondary_grouping="fueltech",
+                )
+                df_gen_wem = timeseries_to_df(resp_gen_wem)
+                print(f"  fetched {len(df_gen_wem):,} WEM generation/emissions rows.")
+
+                print("  fetching WEM price (5m, 7d)...")
+                resp_price_wem = client.get_market(
+                    network_code="WEM",
+                    metrics=[MarketMetric.PRICE],
+                    interval="5m",
+                    date_start=now - timedelta(days=7),
+                    date_end=now,
+                )
+                df_price_wem = timeseries_to_df(resp_price_wem)
+                print(f"  fetched {len(df_price_wem):,} WEM price rows.")
+
+                wide_wem = pivot_to_wide(df_gen_wem)
+
+                if not df_price_wem.empty:
+                    price_wide_wem = (
+                        df_price_wem[["interval", "value"]]
+                        .rename(columns={"interval": "date", "value": "Price - AUD/MWh"})
+                    )
+                    price_wide_wem["date"] = pd.to_datetime(price_wide_wem["date"])
+                    if not wide_wem.empty:
+                        wide_wem["date"] = pd.to_datetime(wide_wem["date"])
+                        wide_wem = wide_wem.merge(price_wide_wem, on="date", how="outer")
+                    else:
+                        wide_wem = price_wide_wem
+
+                append_to_master(wem_master, wide_wem, "WEM master")
+            except Exception as exc:  # noqa: BLE001
+                print(f"  WEM MASTER FETCH FAILED: {type(exc).__name__}: {exc}")
 
         # --- Dataset B: annual generation by fuel, 2020->now, 1M, fueltech_group
         def fetch_b():
@@ -209,7 +414,7 @@ def main() -> int:
             )
             return timeseries_to_df(resp)
 
-        fetch_cached(RAW_DIR / "nem_annual_fuel_mix.parquet", "B annual fuel mix", fetch_b)
+        fetch_cached(RAW_DIR / "nem_annual_fuel_mix.csv", "B annual fuel mix", fetch_b)
 
         # --- Dataset C: per-state generation, past 12 months, 1M, region + fueltech_group
         def fetch_c():
@@ -224,7 +429,7 @@ def main() -> int:
             )
             return timeseries_to_df(resp)
 
-        fetch_cached(RAW_DIR / "nem_state_fuel_mix.parquet", "C state fuel mix", fetch_c)
+        fetch_cached(RAW_DIR / "nem_state_fuel_mix.csv", "C state fuel mix", fetch_c)
 
         # --- Dataset D: renewable share evolution, 2020->now, 1M, region + renewable flag
         def fetch_d():
@@ -239,7 +444,7 @@ def main() -> int:
             )
             return timeseries_to_df(resp)
 
-        fetch_cached(RAW_DIR / "nem_renewable_share.parquet", "D renewable share", fetch_d)
+        fetch_cached(RAW_DIR / "nem_renewable_share.csv", "D renewable share", fetch_d)
 
         # --- Dataset E: coal facilities (incl. retirement dates from unit metadata)
         def fetch_e():
@@ -269,7 +474,7 @@ def main() -> int:
                     )
             return pd.DataFrame(records)
 
-        fetch_cached(RAW_DIR / "nem_coal_facilities.parquet", "E coal facilities", fetch_e)
+        fetch_cached(RAW_DIR / "nem_coal_facilities.csv", "E coal facilities", fetch_e)
 
     print("\nDone fetching all datasets.")
     return 0

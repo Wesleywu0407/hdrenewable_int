@@ -9,6 +9,7 @@ from typing import Any
 
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
 
 try:
@@ -77,21 +78,59 @@ def selected_entry(figures: list[dict[str, Any]]) -> dict[str, Any] | None:
 
 
 @st.cache_data(show_spinner=False)
-def load_realtime_generation() -> pd.DataFrame:
-    df = pd.read_parquet(RAW_DIR / "nem_realtime_7d.parquet")
-    df = df[df["fueltech_group"].isin(GEN_GROUPS)].copy()
-    df["value"] = df["value"].clip(lower=0)
-    df["interval"] = pd.to_datetime(df["interval"])
-    return df
+def load_realtime_generation() -> tuple[pd.DataFrame, pd.DataFrame]:
+    df = pd.read_csv(RAW_DIR / "master_NEM_open_electricity.csv", parse_dates=["date"])
+    
+    # Use all data in the CSV
+
+    WIDE_TO_FUEL = {
+        "Coal (Brown) -  MW": "coal",
+        "Coal (Black) -  MW": "coal",
+        "Gas (Steam) -  MW": "gas",
+        "Gas (CCGT) -  MW": "gas",
+        "Gas (OCGT) -  MW": "gas",
+        "Gas (Reciprocating) -  MW": "gas",
+        "Gas (Waste Coal Mine) -  MW": "gas",
+        "Solar (Utility) -  MW": "solar",
+        "Solar (Rooftop) -  MW": "solar",
+        "Wind -  MW": "wind",
+        "Hydro -  MW": "hydro",
+        "Battery (Discharging) -  MW": "battery",
+        "Bioenergy (Biomass) -  MW": "bioenergy",
+        "Distillate -  MW": "distillate",
+    }
+
+    price_df = (
+        df[["date", "Price - AUD/MWh"]]
+        .dropna(subset=["Price - AUD/MWh"])
+        .rename(columns={"Price - AUD/MWh": "value", "date": "interval"})
+        .sort_values("interval")
+    )
+    price_df["interval"] = pd.to_datetime(price_df["interval"])
+
+    mw_cols = [c for c in WIDE_TO_FUEL if c in df.columns]
+    melted = pd.melt(
+        df, id_vars=["date"], value_vars=mw_cols,
+        var_name="fueltech_group", value_name="value",
+    )
+    melted["fueltech_group"] = melted["fueltech_group"].map(WIDE_TO_FUEL)
+    melted["value"] = melted["value"].clip(lower=0)
+    melted = melted.rename(columns={"date": "interval"})
+    melted["interval"] = pd.to_datetime(melted["interval"])
+    
+    melted = melted.groupby(["interval", "fueltech_group"], as_index=False)["value"].sum()
+    melted = melted[melted["fueltech_group"].isin(GEN_GROUPS)].copy()
+    
+    return melted, price_df
 
 
 def ordered_groups(groups: list[str]) -> list[str]:
     return [group for group in STACK_ORDER if group in groups]
 
 
-def build_realtime_mix_chart(df: pd.DataFrame) -> go.Figure:
+def build_realtime_mix_chart(df: pd.DataFrame, price_df: pd.DataFrame) -> go.Figure:
     groups = ordered_groups(sorted(df["fueltech_group"].unique()))
-    fig = go.Figure()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
     for group in groups:
         sub = df[df["fueltech_group"] == group].sort_values("interval")
         fig.add_trace(
@@ -109,69 +148,35 @@ def build_realtime_mix_chart(df: pd.DataFrame) -> go.Figure:
                     "%{x|%d %b %H:%M}<br>"
                     "Power %{y:,.0f} MW<extra></extra>"
                 ),
-            )
+            ),
+            secondary_y=False,
         )
 
-    pivot = (
-        df.groupby(["interval", "fueltech_group"], observed=True)["value"]
-        .sum()
-        .unstack(fill_value=0)
-        .sort_index()
-        .reindex(columns=groups, fill_value=0)
+    fig.add_trace(
+        go.Scatter(
+            x=price_df["interval"],
+            y=price_df["value"],
+            name="Price",
+            mode="lines",
+            line=dict(width=1.5, color="#E74C3C", dash="dot"),
+            hovertemplate="Price<br>%{x|%d %b %H:%M}<br>$%{y:,.2f}/MWh<extra></extra>",
+        ),
+        secondary_y=True,
     )
-    totals = pivot.sum(axis=1)
-    solar_peak_time = pivot["solar"].idxmax() if "solar" in pivot else totals.idxmax()
-    solar_peak = float(pivot.loc[solar_peak_time, "solar"]) if "solar" in pivot else 0.0
-    evening_window = pivot[(pivot.index.hour >= 17) & (pivot.index.hour <= 21)]
-    evening_peak_time = evening_window.sum(axis=1).idxmax() if not evening_window.empty else totals.idxmax()
-    coal_base = float(pivot["coal"].median()) if "coal" in pivot else 0.0
 
-    if "coal" in pivot:
-        fig.add_hline(
-            y=coal_base,
-            line_width=0.8,
-            line_dash="dot",
-            line_color="rgba(239,232,210,0.45)",
-            annotation_text="coal baseload median",
-            annotation_position="top left",
-            annotation_font_size=11,
-            annotation_font_color="#B9B2A3",
-        )
-    fig.add_annotation(
-        x=solar_peak_time,
-        y=solar_peak,
-        text="solar peak",
-        showarrow=True,
-        arrowhead=2,
-        ax=24,
-        ay=-42,
-        font=dict(size=12, color="#EFE8D2"),
-        arrowcolor="#D6A21D",
-        bgcolor="rgba(9,13,18,0.82)",
-        bordercolor="rgba(214,162,29,0.45)",
-        borderwidth=0.5,
-    )
-    fig.add_annotation(
-        x=evening_peak_time,
-        y=float(totals.loc[evening_peak_time]),
-        text="evening ramp",
-        showarrow=True,
-        arrowhead=2,
-        ax=-46,
-        ay=-38,
-        font=dict(size=12, color="#EFE8D2"),
-        arrowcolor="#C46A2B",
-        bgcolor="rgba(9,13,18,0.82)",
-        bordercolor="rgba(196,106,43,0.45)",
-        borderwidth=0.5,
-    )
+    if not df.empty:
+        max_date = df["interval"].max()
+        min_date = max_date - pd.Timedelta(days=7)
+        range_opts = dict(range=[min_date, max_date])
+    else:
+        range_opts = {}
 
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         height=560,
-        margin=dict(l=10, r=10, t=18, b=34),
+        margin=dict(l=10, r=10, t=35, b=34),
         xaxis=dict(
             title="",
             tickformat="%d %b<br>%H:%M",
@@ -181,12 +186,35 @@ def build_realtime_mix_chart(df: pd.DataFrame) -> go.Figure:
             showspikes=True,
             spikemode="across",
             spikecolor="rgba(239,232,210,0.22)",
+            **range_opts,
+            rangeselector=dict(
+                x=1,
+                y=1.12,
+                xanchor="right",
+                yanchor="bottom",
+                buttons=list([
+                    dict(count=7, label="1w", step="day", stepmode="backward"),
+                    dict(count=14, label="2w", step="day", stepmode="backward"),
+                    dict(count=1, label="1m", step="month", stepmode="backward"),
+                    dict(step="all", label="all")
+                ]),
+                bgcolor="rgba(0,0,0,0.5)",
+                activecolor="rgba(255,255,255,0.2)",
+            )
         ),
         yaxis=dict(
             title="Power (MW)",
             gridcolor="rgba(239,232,210,0.08)",
             zerolinecolor="rgba(239,232,210,0.12)",
             color="#B9B2A3",
+            rangemode="tozero",
+        ),
+        yaxis2=dict(
+            title="Price (AUD/MWh)",
+            gridcolor="rgba(0,0,0,0)",
+            color="#E74C3C",
+            overlaying="y",
+            side="right",
             rangemode="tozero",
         ),
         legend=dict(
@@ -210,7 +238,7 @@ def realtime_metrics(df: pd.DataFrame) -> list[dict[str, str]]:
     wind_share = float(totals.get("wind", 0) / total * 100)
     coal_share = float(totals.get("coal", 0) / total * 100)
     return [
-        {"label": "Coal baseload", "value": f"{coal_share:.1f}", "unit": "%", "note": "Share of seven-day generation"},
+        {"label": "Coal baseload", "value": f"{coal_share:.1f}", "unit": "%", "note": "Share of generation in window"},
         {"label": "Solar peak", "value": f"{solar_peak / 1000:.1f}", "unit": "GW", "note": "Highest observed interval"},
         {"label": "Wind contribution", "value": f"{wind_share:.1f}", "unit": "%", "note": "Energy share across window"},
         {"label": "Renewable share", "value": f"{renewable / total * 100:.1f}", "unit": "%", "note": "Solar, wind, hydro, bioenergy"},
@@ -354,8 +382,8 @@ def render_standard_metrics(metrics: list[dict[str, str]]) -> None:
 
 def render_figure_one(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
-    df = load_realtime_generation()
-    fig = build_realtime_mix_chart(df)
+    df, price_df = load_realtime_generation()
+    fig = build_realtime_mix_chart(df, price_df)
 
     title_col, download_col = st.columns([5, 1.2], vertical_alignment="top")
     with title_col:
@@ -375,15 +403,6 @@ def render_figure_one(entry: dict[str, Any]) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
 
     render_metric_tiles(realtime_metrics(df))
-    st.markdown(
-        """
-        <div class="research-note">
-            <div class="note-label">research note</div>
-            <div>Coal remains the structural baseload layer, while solar creates the strongest intraday shape. Midday renewable surplus is followed by a visible evening ramp.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def render_standard_figure(entry: dict[str, Any]) -> None:
