@@ -150,8 +150,54 @@ CHAPTERS = [
         "id": "2.1",
         "title": "Electricity trading market",
         "subtitle": "Electricity Trading Market Volatility",
-        "status": "planned",
-        "figures": [],
+        "status": "done",
+        "figures": [
+            {
+                "id": "fig2_1",
+                "number": 1,
+                "title": "Spot Price Volatility Heatmap",
+                "sidebar_title": "SPOT PRICE HEATMAP",
+                "subtitle": "Average Spot Prices by Hour and Day",
+                "html_path": "outputs/figures/fig2_1_spot_heatmap.html",
+                "png_path": "outputs/figures/png/fig2_1_spot_heatmap.png",
+                "metrics": [
+                    {"label": "Data Source", "value": "Real"}
+                ],
+                "takeaway": (
+                    "Identifying peak pricing hours is essential for dispatchable storage and battery ROI."
+                ),
+            },
+            {
+                "id": "fig2_2",
+                "number": 2,
+                "title": "Regulation FCAS Prices & Volumes",
+                "sidebar_title": "REGULATION FCAS",
+                "subtitle": "Continuous Frequency Correction (Regulation Raise/Lower)",
+                "html_path": "outputs/figures/fig2_2_fcas_regulation.html",
+                "png_path": "outputs/figures/png/fig2_2_fcas_regulation.png",
+                "metrics": [
+                    {"label": "Data Source", "value": "Synthetic"}
+                ],
+                "takeaway": (
+                    "Battery storage has high opportunity for continuous frequency correction revenue."
+                ),
+            },
+            {
+                "id": "fig2_3",
+                "number": 3,
+                "title": "Contingency FCAS Market Value Breakdown",
+                "sidebar_title": "CONTINGENCY FCAS",
+                "subtitle": "Value of Fast (6s), Slow (60s), and Delayed (5m) responses",
+                "html_path": "outputs/figures/fig2_3_fcas_contingency.html",
+                "png_path": "outputs/figures/png/fig2_3_fcas_contingency.png",
+                "metrics": [
+                    {"label": "Data Source", "value": "Synthetic"}
+                ],
+                "takeaway": (
+                    "Fast response services represent a significant portion of the contingency market value."
+                ),
+            }
+        ],
     },
     {
         "id": "3.1",
