@@ -43,8 +43,8 @@ SOURCE_FOOTER = "Source: OpenElectricity API (openelectricity.org.au)"
 TEMPLATE = "plotly_white"
 
 
-def bilingual_title(en: str, zh: str) -> str:
-    return f"{en}<br><sub style='color:#666'>{zh}</sub>"
+def english_title(en: str) -> str:
+    return en
 
 
 def add_source_footer(fig: go.Figure, extra: str = "") -> None:
@@ -102,13 +102,12 @@ def fig1_renewable_vs_peers() -> None:
     # Use an ISO string (tz-aware Timestamps are not JSON-serializable for PNG export).
     last = pd.Timestamp(qn["interval"].max()).tz_localize(None).isoformat()
     fig.add_annotation(
-        x=last, y=33, text="QLD has converged with NSW (~32%)<br>QLD 已追平 NSW（約 32%）",
+        x=last, y=33, text="QLD has converged with NSW (~32%)",
         showarrow=True, arrowhead=2, ax=-90, ay=-50, font=dict(size=11, color="#c0392b"),
     )
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title("QLD Renewable Share vs Peer States (Last 24 Months)",
-                              "昆士蘭再生能源佔比與其他州比較（最近 24 個月）"),
+        title=english_title("QLD Renewable Share vs Peer States (Last 24 Months)"),
         yaxis_title="Renewable share (%)", xaxis_title="", hovermode="x unified",
         legend_title="State", margin=dict(b=120),
     )
@@ -136,8 +135,7 @@ def fig2_fuel_mix() -> None:
         ))
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title("QLD Monthly Generation by Fuel Type (Last 24 Months)",
-                              "昆士蘭各燃料類型每月發電量（最近 24 個月）"),
+        title=english_title("QLD Monthly Generation by Fuel Type (Last 24 Months)"),
         yaxis_title="Energy (MWh)", xaxis_title="", hovermode="x unified",
         legend_title="Fuel group", margin=dict(b=120),
     )
@@ -153,8 +151,8 @@ def fig3_solar_vs_wind() -> None:
     ch = pd.read_parquet(RAW_DIR / "qld_capacity_history.parquet")
     ch = ch[ch["month"] >= pd.Timestamp(2010, 1, 1)]
     fig = go.Figure()
-    for ft, label, color in [("solar_utility", "Utility solar 大型太陽能", FUEL_COLORS["solar"]),
-                             ("wind", "Wind 風電", FUEL_COLORS["wind"])]:
+    for ft, label, color in [("solar_utility", "Utility solar", FUEL_COLORS["solar"]),
+                             ("wind", "Wind", FUEL_COLORS["wind"])]:
         sub = ch[ch["fueltech"] == ft].sort_values("month")
         fig.add_trace(go.Scatter(
             x=sub["month"], y=sub["capacity_mw"], name=label, mode="lines",
@@ -162,8 +160,7 @@ def fig3_solar_vs_wind() -> None:
         ))
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title("QLD Utility Solar vs Wind — Cumulative Installed Capacity",
-                              "昆士蘭大型太陽能與風電 — 累計裝置容量"),
+        title=english_title("QLD Utility Solar vs Wind — Cumulative Installed Capacity"),
         yaxis_title="Installed capacity (MW)", xaxis_title="", hovermode="x unified",
         legend_title="Technology", margin=dict(b=110),
     )
@@ -190,8 +187,7 @@ def fig4_capacity_growth() -> None:
         ))
     fig.update_layout(
         template=TEMPLATE, barmode="group",
-        title=bilingual_title("Renewable Capacity Added per Year — QLD vs NSW vs VIC",
-                              "每年新增再生能源容量 — 昆士蘭 vs 新南威爾斯 vs 維多利亞"),
+        title=english_title("Renewable Capacity Added per Year — QLD vs NSW vs VIC"),
         yaxis_title="MW added (commissioned that year)", xaxis_title="Year",
         legend_title="State", margin=dict(b=110),
     )
@@ -223,14 +219,13 @@ def fig5_coal_operating() -> None:
     ))
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title("QLD Coal Plants Still Operating — Capacity & Expected Retirement",
-                              "昆士蘭仍運轉的燃煤電廠 — 容量與預期除役年"),
+        title=english_title("QLD Coal Plants Still Operating — Capacity & Expected Retirement"),
         xaxis_title="Operating capacity (MW)", yaxis_title="",
         margin=dict(b=110, l=160), height=max(450, 40 * len(grp)),
     )
     fig.add_annotation(
         x=1, y=1.02, xref="paper", yref="paper", showarrow=False, align="right",
-        text=f"Total operating black coal: {total_mw:,.0f} MW　|　運轉中燃煤總計 {total_mw:,.0f} MW",
+        text=f"Total operating black coal: {total_mw:,.0f} MW",
         font=dict(size=12, color="#c0392b"),
     )
     add_source_footer(fig, "Retirement years are expected closures (AEMO-sourced); TBD = not disclosed")
@@ -250,14 +245,13 @@ def fig6_negative_prices() -> None:
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=monthly["month"], y=monthly["neg_hours"], name="Negative-price hours 負電價時數",
+        x=monthly["month"], y=monthly["neg_hours"], name="Negative-price hours",
         marker_color="#c0392b",
         text=[f"{h:.0f}h" for h in monthly["neg_hours"]], textposition="outside",
     ))
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title("QLD1 Negative Spot-Price Hours per Month",
-                              "昆士蘭 QLD1 每月負電價時數"),
+        title=english_title("QLD1 Negative Spot-Price Hours per Month"),
         yaxis_title="Hours with price < $0/MWh", xaxis_title="", margin=dict(b=120),
     )
     fig.update_xaxes(tickformat="%Y-%m")

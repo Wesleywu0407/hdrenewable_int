@@ -11,7 +11,7 @@ CHAPTERS = [
     {
         "id": "1.2",
         "title": "NEM grid analysis",
-        "subtitle": "澳洲國家電力市場電網分析",
+        "subtitle": "National Electricity Market Grid Analysis",
         "status": "done",
         "figures": [
             {
@@ -19,7 +19,7 @@ CHAPTERS = [
                 "number": 1,
                 "title": "NEM real-time generation mix",
                 "sidebar_title": "LIVE GENERATION MIX",
-                "subtitle": "NEM 即時發電組合（過去 7 天）",
+                "subtitle": "NEM Real-time Generation Mix (Past 7 Days)",
                 "html_path": "outputs/figures/fig1_nem_realtime_mix.html",
                 "png_path": "outputs/figures/png/fig1_nem_realtime_mix.png",
                 "metrics": [
@@ -38,7 +38,7 @@ CHAPTERS = [
                 "number": 2,
                 "title": "NEM monthly generation by fuel type",
                 "sidebar_title": "MONTHLY FUEL TYPE",
-                "subtitle": "NEM 各燃料類型每月發電量",
+                "subtitle": "NEM Monthly Generation by Fuel Type",
                 "html_path": "outputs/figures/fig2_annual_generation_by_fuel.html",
                 "png_path": "outputs/figures/png/fig2_annual_generation_by_fuel.png",
                 "metrics": [
@@ -57,7 +57,7 @@ CHAPTERS = [
                 "number": 3,
                 "title": "Generation mix by state",
                 "sidebar_title": "STATE MIX",
-                "subtitle": "各州發電組合比較（最近 12 個月）",
+                "subtitle": "Generation Mix by State (Latest 12 Months)",
                 "html_path": "outputs/figures/fig3_state_comparison.html",
                 "png_path": "outputs/figures/png/fig3_state_comparison.png",
                 "metrics": [
@@ -76,7 +76,7 @@ CHAPTERS = [
                 "number": 4,
                 "title": "Renewable energy share by state",
                 "sidebar_title": "RENEWABLE SHARE",
-                "subtitle": "各州再生能源佔比演化",
+                "subtitle": "Renewable Energy Share by State",
                 "html_path": "outputs/figures/fig4_renewable_share_evolution.html",
                 "png_path": "outputs/figures/png/fig4_renewable_share_evolution.png",
                 "metrics": [
@@ -95,7 +95,7 @@ CHAPTERS = [
                 "number": 5,
                 "title": "NEM coal unit operating and retirement timeline",
                 "sidebar_title": "COAL RETIREMENT TIMELINE",
-                "subtitle": "NEM 燃煤機組運轉與除役時間軸",
+                "subtitle": "NEM Coal Unit Operating & Retirement Timeline",
                 "html_path": "outputs/figures/fig5_coal_retirement_timeline.html",
                 "png_path": "outputs/figures/png/fig5_coal_retirement_timeline.png",
                 "metrics": [
@@ -114,21 +114,21 @@ CHAPTERS = [
     {
         "id": "1.1",
         "title": "Queensland renewables",
-        "subtitle": "昆士蘭再生能源發展",
+        "subtitle": "Queensland Renewable Energy Development",
         "status": "wip",
         "figures": [],
     },
     {
         "id": "2.1",
         "title": "Electricity trading market",
-        "subtitle": "電力交易市場波動",
+        "subtitle": "Electricity Trading Market Volatility",
         "status": "planned",
         "figures": [],
     },
     {
         "id": "3.1",
         "title": "AI data center demand",
-        "subtitle": "AI 資料中心用電衝擊",
+        "subtitle": "AI Data Center Demand Impact",
         "status": "planned",
         "figures": [],
     },

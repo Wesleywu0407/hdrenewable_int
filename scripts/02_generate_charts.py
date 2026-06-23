@@ -1,7 +1,7 @@
 """Step 4 — Generate the 5 NEM analysis charts as standalone HTML.
 
 Loads the 5 Parquet datasets from data/raw/ and writes interactive Plotly
-charts to outputs/figures/. Bilingual (EN + 繁中) titles, consistent fuel
+charts to outputs/figures/. English titles, consistent fuel
 colors, plotly_white template.
 
 Run: python scripts/02_generate_charts.py
@@ -56,9 +56,9 @@ SOURCE_FOOTER = "Source: OpenElectricity API (openelectricity.org.au)"
 TEMPLATE = "plotly_white"
 
 
-def bilingual_title(en: str, zh: str) -> str:
-    """Main English title with a 繁體中文 subtitle line."""
-    return f"{en}<br><sub style='color:#666'>{zh}</sub>"
+def english_title(en: str) -> str:
+    """Main English title."""
+    return en
 
 
 def add_source_footer(fig: go.Figure, extra: str = "") -> None:
@@ -112,9 +112,8 @@ def fig1_realtime() -> None:
         )
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title(
-            "NEM Real-time Generation Mix — Past 7 Days (30-min)",
-            "NEM 即時發電組合 — 過去 7 天（30 分鐘間隔）",
+        title=english_title(
+            "NEM Real-time Generation Mix — Past 7 Days (30-min)"
         ),
         yaxis_title="Power (MW)",
         xaxis_title="",
@@ -153,9 +152,8 @@ def fig2_annual() -> None:
         )
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title(
-            "NEM Monthly Generation by Fuel Type",
-            "NEM 各燃料類型每月發電量",
+        title=english_title(
+            "NEM Monthly Generation by Fuel Type"
         ),
         yaxis_title="Energy (MWh)",
         xaxis_title="",
@@ -202,9 +200,8 @@ def fig3_state_comparison() -> None:
     fig.update_layout(
         template=TEMPLATE,
         barmode="stack",
-        title=bilingual_title(
-            "Generation Mix by State — Latest 12 Months",
-            "各州發電組合比較 — 最近 12 個月",
+        title=english_title(
+            "Generation Mix by State — Latest 12 Months"
         ),
         xaxis_title="Energy (MWh)",
         yaxis_title="",
@@ -248,9 +245,8 @@ def fig4_renewable_share() -> None:
     dmin, dmax = piv["interval"].min(), piv["interval"].max()
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title(
-            "Renewable Energy Share by State",
-            "各州再生能源佔比",
+        title=english_title(
+            "Renewable Energy Share by State"
         ),
         yaxis_title="Renewable share (%)",
         xaxis_title="",
@@ -291,9 +287,8 @@ def fig5_coal_timeline() -> None:
     fig.update_yaxes(autorange="reversed", title="")
     fig.update_layout(
         template=TEMPLATE,
-        title=bilingual_title(
-            "NEM Coal Unit Operating & Retirement Timeline",
-            "NEM 燃煤機組運轉與除役時間軸",
+        title=english_title(
+            "NEM Coal Unit Operating & Retirement Timeline"
         ),
         xaxis_title="",
         legend_title="Status",
