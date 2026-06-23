@@ -2,12 +2,24 @@
 .env
 
 # Data (regenerated from API)
-data/*
-!data/raw/
-data/raw/*
-!data/raw/nem_realtime_7d.parquet
+data/
 
-# Python
+# IDE / Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Python Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -19,3 +31,7 @@ venv/
 
 # OS
 .DS_Store
+
+# Generated deliverables
+outputs/figures/**/*.html
+outputs/figures/**/*.png

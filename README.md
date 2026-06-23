@@ -1,56 +1,41 @@
-# HDRE NEM Research — Chapter 1.2: National Electricity Market (NEM) Grid Analysis
+# HDRE Australia NEM Grid Research Dashboard
 
-Data pipeline and visualization workflow for HDRE Taiwan's research report on Australia's
-electricity market. This chapter produces **5 interactive charts + bilingual analytical
-commentary** explaining the structure and evolution of Australia's NEM grid over the past 5 years.
+## Quick Start (Run instantly with cached data)
 
-## Deliverables
-
-| # | File | Description |
-|---|------|-------------|
-| Fig 1 | `outputs/figures/fig1_nem_realtime_mix.html` | NEM real-time generation mix (past 7 days, 30-min) |
-| Fig 2 | `outputs/figures/fig2_annual_generation_by_fuel.html` | Annual generation by fuel, 2020–2025 |
-| Fig 3 | `outputs/figures/fig3_state_comparison.html` | Cross-state generation mix comparison |
-| Fig 4 | `outputs/figures/fig4_renewable_share_evolution.html` | Renewable share (%) over time, per state |
-| Fig 5 | `outputs/figures/fig5_coal_retirement_timeline.html` | Coal plant retirement Gantt timeline |
-| — | `outputs/commentary_chapter_1_2.md` | Bilingual (EN + 繁中) analytical commentary |
-
-## Setup
-
+To start the Streamlit dashboard immediately using pre-cached datasets:
 ```bash
-cd HDRE_NEM_Research
-uv venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
-
-# Configure API key
-cp .env.example .env
-# edit .env and paste your OpenElectricity API key
+./run.sh --dashboard
 ```
 
-Get an API key at https://platform.openelectricity.org.au/
+## Running the Complete Pipeline
 
-## Usage
+To fetch fresh data and regenerate charts, configure your API credentials:
 
-```bash
-python scripts/00_test_api.py        # verify connectivity
-python scripts/01_fetch_nem_data.py  # fetch + cache all datasets to data/raw/
-python scripts/02_generate_charts.py # build the 5 HTML charts
-```
+1. **Create `.env` file**:
+   Create a `.env` file in the project root containing your API key:
+   ```env
+   OPENELECTRICITY_API_KEY=your_actual_api_key_here
+   ```
+   Get a free API key at [OpenElectricity Platform](https://platform.openelectricity.org.au/).
 
-## Data source
+2. **Run setup, fetch, generate, and start dashboard**:
+   ```bash
+   ./run.sh
+   ```
 
-OpenElectricity API — https://openelectricity.org.au/ (docs: https://docs.openelectricity.org.au/)
+## CLI Reference
 
-## Project layout
+* **Run dashboard only (cached mode)**:
+  ```bash
+  ./run.sh --dashboard
+  ```
 
-```
-HDRE_NEM_Research/
-├── .env                  # API key (gitignored — never commit)
-├── data/raw/             # cached raw API responses (Parquet)
-├── data/processed/       # cleaned data ready for plotting
-├── scripts/              # 00_test_api, 01_fetch, 02_generate_charts
-├── notebooks/            # free-form exploration
-├── outputs/figures/      # generated HTML charts
-└── dashboard/            # placeholder for later Streamlit phase
-```
+* **Run data pipeline only (fetch & generate charts)**:
+  ```bash
+  ./run.sh --fetch --generate
+  ```
+
+* **Check all options**:
+  ```bash
+  ./run.sh --help
+  ```

@@ -1,0 +1,11 @@
+# Auto detect text files and perform LF normalization on checkout
+* text=auto
+
+# Force shell scripts to always use LF line endings (required for Unix systems to run them)
+*.sh text eol=lf
+
+# Force python files to always use LF line endings
+*.py text eol=lf
+
+# Force markdown files to always use LF line endings
+*.md text eol=lf

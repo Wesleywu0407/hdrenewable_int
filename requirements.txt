@@ -1,8 +1,0 @@
-openelectricity[analysis]
-pandas
-plotly
-python-dotenv
-jupyter
-pyarrow
-kaleido
-streamlit>=1.32
