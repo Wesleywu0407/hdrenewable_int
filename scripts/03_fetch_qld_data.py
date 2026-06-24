@@ -1,10 +1,10 @@
-"""Chapter 1.1 Step 1 — Fetch & derive QLD-specific datasets.
+"""Chapter 1.1 Step 3 — Fetch & derive QLD-specific datasets.
 
-Reuses cached Chapter 1.2 Parquet where possible and adds QLD drill-down data:
-  - qld_facilities.parquet         : all QLD1 units (operating + retired)
-  - qld_capacity_history.parquet   : derived monthly cumulative capacity per fueltech
-  - peer_capacity_additions.parquet: QLD/NSW/VIC renewable additions per year (for Fig 4)
-  - qld_spot_prices.parquet        : hourly QLD1 spot price, last 12 months (chunked)
+Reuses cached Chapter 1.2 CSV data where possible and adds QLD drill-down data:
+  - qld_facilities.csv         : all QLD1 units (operating + retired)
+  - qld_capacity_history.csv   : derived monthly cumulative capacity per fueltech
+  - peer_capacity_additions.csv: QLD/NSW/VIC renewable additions per year (for Fig 4)
+  - qld_spot_prices.csv        : hourly QLD1 spot price, last 12 months (chunked)
 
 Run: python scripts/03_fetch_qld_data.py
 """

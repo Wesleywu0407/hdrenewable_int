@@ -12,9 +12,9 @@ DATA_DIR = PROJECT_ROOT / "data" / "raw"
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "figures"
 PNG_DIR = OUTPUT_DIR / "png"
 
-# We use the same theme as the rest of the project
+# Use plotly_white to be consistent with the rest of the project's chart scripts
 THEME = dict(
-    template="plotly_dark",
+    template="plotly_white",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(color="#D8D2C0", family="sans-serif"),
@@ -146,14 +146,14 @@ def build_deficit_chart(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(margin=dict(l=20, r=20, t=40, b=100))
     return fig
 
-def main():
+def main() -> int:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     PNG_DIR.mkdir(parents=True, exist_ok=True)
 
     csv_path = DATA_DIR / "ai_demand_projections.csv"
     if not csv_path.exists():
         print(f"Error: {csv_path} not found. Run 07_fetch_ai_demand.py first.")
-        return
+        return 1
 
     df = pd.read_csv(csv_path)
 
@@ -166,6 +166,8 @@ def main():
     fig3_1.write_html(html_path_1, include_plotlyjs="cdn", config={"displayModeBar": False})
     fig3_1.write_image(png_path_1, width=800, height=450, scale=2)
     
+    # fig3_2 (deficit chart) is built but not yet published.
+    # Uncomment to enable it when ready:
     # print("Generating Figure 3.2 (Deficit Chart)...")
     # fig3_2 = build_deficit_chart(df)
     # html_path_2 = OUTPUT_DIR / "fig3_2_ai_energy_deficit.html"
@@ -174,6 +176,7 @@ def main():
     # fig3_2.write_image(png_path_2, width=800, height=450, scale=2)
     
     print("Done generating AI charts.")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

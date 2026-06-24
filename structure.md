@@ -32,11 +32,12 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
         * *Source*: OpenElectricity `/facilities`
         * *Aggregation*: Commenced and expected closure dates to map operating lifespans
 * **2. Electricity Trading Market Volatility**
+  * > **Dashboard note:** Figures 2.1, 2.2, and 2.3 are all grouped under a single `2.1` chapter in `config.py` (Electricity trading market).
   * 2.1 Spot Market (Power Supply) `[Completed]`
     * *Tracks hourly/daily price volatility to identify lucrative trading windows. Includes potential diagrams:*
-      * **Fig 1: Spot Price Volatility Heatmap**: A daily/hourly heatmap to identify the most lucrative trading windows.
+      * **Fig 1: Spot Price Volatility Heatmap**: A daily/hourly heatmap to identify the most lucrative trading windows. Uses QLD1 as representative NEM region.
         * *Source*: OpenElectricity `/network/pricing`
-        * *Aggregation*: 5-minute spot prices averaged into hourly buckets across days
+        * *Aggregation*: 5-minute spot prices averaged into hourly buckets across days (past 365 days)
   * 2.2 Regulation FCAS `[Completed]`
     * *Monitors continuous frequency correction markets (Raise/Lower) to gauge battery storage opportunities. Includes potential diagrams:*
       * **Fig 2: Regulation FCAS Prices & Volumes**: Line charts tracking the cost and volume of continuous frequency correction (Regulation Raise/Lower).

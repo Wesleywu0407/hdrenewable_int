@@ -11,14 +11,15 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 FIG_DIR = PROJECT_ROOT / "outputs" / "figures"
+PNG_DIR = FIG_DIR / "png"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
+PNG_DIR.mkdir(parents=True, exist_ok=True)
 
 SOURCE_FOOTER = "Source: OpenElectricity API (openelectricity.org.au)"
 TEMPLATE = "plotly_white"
@@ -39,10 +40,14 @@ def add_source_footer(fig: go.Figure, extra: str = "", source: str = SOURCE_FOOT
         align="left",
     )
 
-def save(fig: go.Figure, name: str) -> Path:
+def save(fig: go.Figure, name: str, png_name: str | None = None) -> Path:
     path = FIG_DIR / name
     fig.write_html(path, include_plotlyjs="cdn")
     print(f"  wrote {name} ({path.stat().st_size / 1024:.0f} KB)")
+    if png_name:
+        png_path = PNG_DIR / png_name
+        fig.write_image(png_path, width=1200, height=600, scale=2)
+        print(f"  wrote {png_name} ({png_path.stat().st_size / 1024:.0f} KB)")
     return path
 
 def fig2_1_spot_heatmap() -> None:
@@ -75,8 +80,8 @@ def fig2_1_spot_heatmap() -> None:
         yaxis_title="Day of Week",
         margin=dict(b=110),
     )
-    add_source_footer(fig, "Averaged over the past 90 days")
-    save(fig, "fig2_1_spot_heatmap.html")
+    add_source_footer(fig, "QLD1 region · Averaged over the past 365 days")
+    save(fig, "fig2_1_spot_heatmap.html", "fig2_1_spot_heatmap.png")
 
 def fig2_2_fcas_regulation() -> None:
     # Read Regulation FCAS
@@ -139,7 +144,7 @@ def fig2_2_fcas_regulation() -> None:
         )
 
     add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
-    save(fig, "fig2_2_fcas_regulation.html")
+    save(fig, "fig2_2_fcas_regulation.html", "fig2_2_fcas_regulation.png")
 
 def fig2_3_fcas_contingency() -> None:
     # Read Contingency FCAS
@@ -192,7 +197,7 @@ def fig2_3_fcas_contingency() -> None:
             rangeslider=dict(visible=True, range=[first_date, last_date])
         )
     add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
-    save(fig, "fig2_3_fcas_contingency.html")
+    save(fig, "fig2_3_fcas_contingency.html", "fig2_3_fcas_contingency.png")
 
 def main() -> int:
     print("Generating trading charts -> outputs/figures/")

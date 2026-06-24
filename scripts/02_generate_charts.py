@@ -1,6 +1,6 @@
-"""Step 4 — Generate the 5 NEM analysis charts as standalone HTML.
+"""Step 2 — Generate the 4 NEM analysis charts as standalone HTML.
 
-Loads the 5 Parquet datasets from data/raw/ and writes interactive Plotly
+Loads the 4 CSV datasets from data/raw/ and writes interactive Plotly
 charts to outputs/figures/. English titles, consistent fuel
 colors, plotly_white template.
 
@@ -171,7 +171,7 @@ def fig1_realtime() -> None:
     fig.update_layout(
         template=TEMPLATE,
         title=english_title(
-            "NEM Real-time Generation Mix & Price — Full Window (30-min)"
+            "NEM Real-time Generation Mix & Price — Full Window (5-min)"
         ),
         yaxis_title="Power (MW)",
         hovermode="x unified",

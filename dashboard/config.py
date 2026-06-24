@@ -13,6 +13,7 @@ CHAPTERS = [
         "title": "Queensland renewables",
         "subtitle": "Queensland Renewable Energy Development",
         "status": "done",
+        "source": "OpenElectricity API",
         "figures": [
             {
                 "id": "fig1_1",
@@ -22,6 +23,7 @@ CHAPTERS = [
                 "subtitle": "QLD vs NSW Renewable Generation Share",
                 "html_path": "outputs/figures/fig1_1_qld_renewable_share.html",
                 "png_path": "outputs/figures/png/fig1_1_qld_renewable_share.png",
+                "source": "OpenElectricity API",
                 "metrics": [
                     {"label": "QLD renewable", "value": "Rising"},
                     {"label": "Comparison", "value": "Converging"}
@@ -41,6 +43,7 @@ CHAPTERS = [
                 "subtitle": "QLD Generation Mix Evolution (Last 24 Months)",
                 "html_path": "outputs/figures/fig1_2_qld_fuel_mix.html",
                 "png_path": "outputs/figures/png/fig1_2_qld_fuel_mix.png",
+                "source": "OpenElectricity API",
                 "metrics": [
                     {"label": "Renewables", "value": "Increasing"}
                 ],
@@ -59,6 +62,7 @@ CHAPTERS = [
                 "subtitle": "Monthly Hours below $0/MWh",
                 "html_path": "outputs/figures/fig1_3_qld_negative_prices.html",
                 "png_path": "outputs/figures/png/fig1_3_qld_negative_prices.png",
+                "source": "OpenElectricity API",
                 "metrics": [
                     {"label": "Price Volatility", "value": "High"}
                 ],
@@ -76,6 +80,7 @@ CHAPTERS = [
         "title": "National Electricity Market grid analysis",
         "subtitle": "National Electricity Market Grid Analysis",
         "status": "done",
+        "source": "OpenElectricity API",
         "figures": [
             {
                 "id": "fig1",
@@ -85,6 +90,8 @@ CHAPTERS = [
                 "subtitle": "NEM Real-time Generation Mix & Price (Past 7 Days)",
                 "html_path": "outputs/figures/fig1_nem_realtime_mix.html",
                 "png_path": "outputs/figures/png/fig1_nem_realtime_mix.png",
+                "source": "OpenElectricity API",
+                # Note: metrics for fig1 are computed live via realtime_metrics()
                 "metrics": [
                     {"label": "Coal", "value": "53.3%"},
                     {"label": "Wind", "value": "18.5%"},
@@ -107,10 +114,11 @@ CHAPTERS = [
                 "subtitle": "National Electricity Market (All Regions) Monthly Generation",
                 "html_path": "outputs/figures/fig2_annual_generation_by_fuel.html",
                 "png_path": "outputs/figures/png/fig2_annual_generation_by_fuel.png",
+                "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Coal average", "value": "52.3%"},
-                    {"label": "Solar average", "value": "21.5%"},
-                    {"label": "Wind average", "value": "15.6%"},
+                    {"label": "Coal average", "value": "52.3%", "note": "as of last data refresh"},
+                    {"label": "Solar average", "value": "21.5%", "note": "as of last data refresh"},
+                    {"label": "Wind average", "value": "15.6%", "note": "as of last data refresh"},
                 ],
                 "takeaway": (
                     "Even within the available 2024-06 to 2026-06 window, zero-marginal-cost "
@@ -129,10 +137,11 @@ CHAPTERS = [
                 "subtitle": "Generation Mix by State (Latest 12 Months)",
                 "html_path": "outputs/figures/fig3_state_comparison.html",
                 "png_path": "outputs/figures/png/fig3_state_comparison.png",
+                "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "QLD coal", "value": "59.2%"},
-                    {"label": "NSW coal", "value": "57.6%"},
-                    {"label": "SA coal", "value": "0%"},
+                    {"label": "QLD coal", "value": "59.2%", "note": "as of last data refresh"},
+                    {"label": "NSW coal", "value": "57.6%", "note": "as of last data refresh"},
+                    {"label": "SA coal", "value": "0%", "note": "as of last data refresh"},
                 ],
                 "takeaway": (
                     "South Australia shows a near-fully-renewable synchronous grid in "
@@ -151,10 +160,11 @@ CHAPTERS = [
                 "subtitle": "NEM Coal Unit Operating & Retirement Timeline",
                 "html_path": "outputs/figures/fig4_coal_retirement_timeline.html",
                 "png_path": "outputs/figures/png/fig4_coal_retirement_timeline.png",
+                "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Retired units", "value": "43"},
-                    {"label": "Operating units", "value": "44"},
-                    {"label": "Retiring by 2035", "value": "12.9 GW"},
+                    {"label": "Retired units", "value": "43", "note": "as of last data refresh"},
+                    {"label": "Operating units", "value": "44", "note": "as of last data refresh"},
+                    {"label": "Retiring by 2035", "value": "12.9 GW", "note": "as of last data refresh"},
                 ],
                 "takeaway": (
                     "Expected coal retirements create a large, date-certain capacity gap "
@@ -172,21 +182,27 @@ CHAPTERS = [
         "title": "Electricity trading market",
         "subtitle": "Electricity Trading Market Volatility",
         "status": "done",
+        "source": "OpenElectricity API / NEMOSIS (AEMO MMS Data)",
         "figures": [
             {
                 "id": "fig2_1",
                 "number": 1,
                 "title": "Spot Price Volatility Heatmap",
                 "sidebar_title": "SPOT PRICE HEATMAP",
-                "subtitle": "Average Spot Prices by Hour and Day",
+                "subtitle": "QLD Average Spot Prices by Hour and Day (Past 365 Days)",
                 "html_path": "outputs/figures/fig2_1_spot_heatmap.html",
                 "png_path": "outputs/figures/png/fig2_1_spot_heatmap.png",
-                "metrics": [],
+                "source": "OpenElectricity API",
+                "metrics": [
+                    {"label": "Region", "value": "QLD1", "note": "Representative NEM state"},
+                    {"label": "Data window", "value": "365 days", "note": "Historical spot prices"},
+                    {"label": "Interval", "value": "Hourly avg", "note": "By hour & day of week"},
+                ],
                 "takeaway": (
                     "Identifying peak pricing hours is essential for dispatchable storage and battery ROI."
                 ),
                 "description": (
-                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing)."
+                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing)."
                 ),
             },
             {
@@ -197,7 +213,11 @@ CHAPTERS = [
                 "subtitle": "Continuous Frequency Correction (Regulation Raise/Lower)",
                 "html_path": "outputs/figures/fig2_2_fcas_regulation.html",
                 "png_path": "outputs/figures/png/fig2_2_fcas_regulation.png",
-                "metrics": [],
+                "source": "NEMOSIS (AEMO MMS Data)",
+                "metrics": [
+                    {"label": "Data source", "value": "AEMO MMS", "note": "Via NEMOSIS"},
+                    {"label": "Services", "value": "Reg Raise/Lower", "note": "Continuous correction"},
+                ],
                 "takeaway": (
                     "Battery storage has high opportunity for continuous frequency correction revenue."
                 ),
@@ -215,7 +235,11 @@ CHAPTERS = [
                 "subtitle": "Value of Fast (6s), Slow (60s), and Delayed (5m) responses",
                 "html_path": "outputs/figures/fig2_3_fcas_contingency.html",
                 "png_path": "outputs/figures/png/fig2_3_fcas_contingency.png",
-                "metrics": [],
+                "source": "NEMOSIS (AEMO MMS Data)",
+                "metrics": [
+                    {"label": "Data source", "value": "AEMO MMS", "note": "Via NEMOSIS"},
+                    {"label": "Services", "value": "6 types", "note": "Fast/Slow/Delayed Raise/Lower"},
+                ],
                 "takeaway": (
                     "Fast response services represent a significant portion of the contingency market value."
                 ),
@@ -236,6 +260,7 @@ CHAPTERS = [
         "title": "AI data center demand",
         "subtitle": "AI Data Center Demand Impact",
         "status": "done",
+        "source": "2024 Global Industry Estimates",
         "figures": [
             {
                 "id": "fig3_1",
@@ -245,6 +270,7 @@ CHAPTERS = [
                 "subtitle": "Australian Growth vs Global Benchmarks",
                 "html_path": "outputs/figures/fig3_1_global_assessment.html",
                 "png_path": "outputs/figures/png/fig3_1_global_assessment.png",
+                "source": "2024 Global Industry Estimates",
                 "metrics": [
                     {"label": "Data Center Growth", "value": "Accelerating"}
                 ],

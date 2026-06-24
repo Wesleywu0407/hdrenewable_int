@@ -12,9 +12,7 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import random
 
-import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 
@@ -34,8 +32,7 @@ if not API_KEY or API_KEY.startswith("<"):
     print("ERROR: OPENELECTRICITY_API_KEY not set in .env.")
     sys.exit(1)
 
-from openelectricity import OEClient  # noqa: E402
-from openelectricity.types import MarketMetric  # noqa: E402
+from openelectricity import OEClient  # noqa: E402 (imported for potential future use)
 
 CACHE_MAX_AGE_H = 24
 
@@ -145,7 +142,7 @@ def fetch_fcas_regulation(path: Path, now: datetime) -> pd.DataFrame:
     import nemosis
     start = "2023/12/01 00:00:00"
     end = now.strftime("%Y/%m/%d %H:%M:%S")
-    cache_dir = PROJECT_ROOT / "data" / "nemosis_cache"
+    cache_dir = PROJECT_ROOT / "nemosis_cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     
     try:
@@ -199,7 +196,7 @@ def fetch_fcas_contingency(path: Path, now: datetime) -> pd.DataFrame:
     import nemosis
     start = "2023/12/01 00:00:00"
     end = now.strftime("%Y/%m/%d %H:%M:%S")
-    cache_dir = PROJECT_ROOT / "data" / "nemosis_cache"
+    cache_dir = PROJECT_ROOT / "nemosis_cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     
     try:
@@ -228,6 +225,7 @@ def fetch_fcas_contingency(path: Path, now: datetime) -> pd.DataFrame:
     for srv, (p_col, v_col) in services.items():
         merged[p_col] = pd.to_numeric(merged[p_col], errors="coerce")
         merged[v_col] = pd.to_numeric(merged[v_col], errors="coerce")
+        # 12.0 converts 5-minute dispatch intervals to hourly revenue (12 × 5min = 1hr)
         merged[srv] = merged[p_col] * merged[v_col] / 12.0
         
     daily_value = merged.groupby(merged["SETTLEMENTDATE"].dt.date)[list(services.keys())].sum().reset_index()
@@ -241,8 +239,7 @@ def fetch_fcas_contingency(path: Path, now: datetime) -> pd.DataFrame:
     return daily_value
 
 def main() -> int:
-    # Use a fixed date in 2026 (last month) so we can reliably fetch real historical data from AEMO archive
-    now = datetime(2026, 5, 31, tzinfo=timezone.utc).replace(tzinfo=None)
+    now = nem_now()
 
     fetch_fcas_regulation(RAW_DIR / "fcas_regulation.csv", now)
     fetch_fcas_contingency(RAW_DIR / "fcas_contingency.csv", now)

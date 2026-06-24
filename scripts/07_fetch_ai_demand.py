@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
-Generate synthetic data for AI Data Center Power Demand vs Renewable Supply projections.
-This script creates a mock dataset (2025-2035) to model the "Green Energy Deficit".
+Generate synthetic AI Data Center Power Demand vs Renewable Supply projections.
+
+NOTE: This script generates SYNTHETIC projections using hardcoded growth parameters.
+It does NOT fetch any external data. The output (ai_demand_projections.csv) is a
+modelled dataset, not real-world observations.
+
+Parameters used:
+  - Baseline grid demand: 25,000 MW growing at 200 MW/yr
+  - AI data center demand: 800 MW base with 35% YoY growth
+  - Renewable supply: 15,000 MW base growing at 1,500 MW/yr + acceleration
 """
 
-import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -51,7 +58,7 @@ def generate_projections() -> pd.DataFrame:
         
     return pd.DataFrame(records)
 
-def main() -> None:
+def main() -> int:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     out_path = DATA_DIR / "ai_demand_projections.csv"
     
@@ -61,6 +68,7 @@ def main() -> None:
     df.to_csv(out_path, index=False)
     print(f"Saved projections to {out_path}")
     print(df.head(11))
+    return 0
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

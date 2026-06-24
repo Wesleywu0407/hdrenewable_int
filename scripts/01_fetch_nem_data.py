@@ -1,6 +1,6 @@
-"""Step 3 — Fetch all NEM data needed for the 5 charts.
+"""Step 1 — Fetch all NEM data needed for the 4 charts.
 
-Pulls 5 datasets from the OpenElectricity API and caches each as Parquet under
+Pulls datasets from the OpenElectricity API and caches each as CSV under
 data/raw/. If a cache file exists and is < 24h old, the API call is skipped.
 
 Run: python scripts/01_fetch_nem_data.py

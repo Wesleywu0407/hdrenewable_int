@@ -8,7 +8,7 @@ This project covers the research, analysis, and dashboard development for the Na
 - **Dashboard Development**: Build and iterate data dashboards to visualize the key findings of this project, specifically tracking Queensland solar deployment, electricity trading market volatility (Spot & FCAS), and AI data center power demand projections.
 
 ## 1. NEM Grid & Queensland Solar Deployment
-### 1.1 [Uncompleted] Research and Analysis on the Stagnation of Renewable Energy Development and Government Policies in Queensland
+### 1.1 [Completed] Research and Analysis on the Stagnation of Renewable Energy Development and Government Policies in Queensland
 ### 1.2 National Electricity Market (NEM) Grid Analysis
 
 ## 2. Electricity Trading Market Volatility and Opportunity Windows

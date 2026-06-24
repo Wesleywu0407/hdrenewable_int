@@ -1,4 +1,4 @@
-"""Step 5 — Generate the QLD-specific analysis charts (Section 1.1).
+"""Step 4 — Generate the QLD-specific analysis charts (Section 1.1).
 
 Run: python scripts/04_generate_qld_charts.py
 """
@@ -13,7 +13,9 @@ import plotly.graph_objects as go
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 FIG_DIR = PROJECT_ROOT / "outputs" / "figures"
+PNG_DIR = FIG_DIR / "png"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
+PNG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Shared style
 FUEL_COLORS = {
@@ -57,10 +59,14 @@ def add_source_footer(fig: go.Figure, extra: str = "") -> None:
     )
 
 
-def save(fig: go.Figure, name: str) -> Path:
+def save(fig: go.Figure, name: str, png_name: str | None = None) -> Path:
     path = FIG_DIR / name
     fig.write_html(path, include_plotlyjs="cdn")
     print(f"  wrote {name} ({path.stat().st_size / 1024:.0f} KB)")
+    if png_name:
+        png_path = PNG_DIR / png_name
+        fig.write_image(png_path, width=1200, height=600, scale=2)
+        print(f"  wrote {png_name} ({png_path.stat().st_size / 1024:.0f} KB)")
     return path
 
 
@@ -121,7 +127,7 @@ def fig1_1_qld_renewable_share() -> None:
     )
     fig.update_xaxes(tickformat="%Y-%m")
     add_source_footer(fig)
-    save(fig, "fig1_1_qld_renewable_share.html")
+    save(fig, "fig1_1_qld_renewable_share.html", "fig1_1_qld_renewable_share.png")
 
 
 # --------------------------------------------------------------------------- #
@@ -164,7 +170,7 @@ def fig1_2_qld_fuel_mix() -> None:
     )
     fig.update_xaxes(tickformat="%Y-%m")
     add_source_footer(fig)
-    save(fig, "fig1_2_qld_fuel_mix.html")
+    save(fig, "fig1_2_qld_fuel_mix.html", "fig1_2_qld_fuel_mix.png")
 
 
 # --------------------------------------------------------------------------- #
@@ -205,7 +211,7 @@ def fig1_3_qld_negative_prices() -> None:
     )
     fig.update_xaxes(tickformat="%Y-%m")
     add_source_footer(fig, "Count of hourly spot prices < $0/MWh")
-    save(fig, "fig1_3_qld_negative_prices.html")
+    save(fig, "fig1_3_qld_negative_prices.html", "fig1_3_qld_negative_prices.png")
 
 
 def main() -> int:

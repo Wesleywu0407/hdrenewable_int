@@ -56,7 +56,7 @@ source .venv/bin/activate
 
 # Ensure requirements are installed
 echo "Checking and verifying dependencies..."
-pip install openelectricity[analysis] pandas plotly python-dotenv jupyter pyarrow kaleido "streamlit>=1.32" --quiet
+pip install openelectricity[analysis] pandas plotly python-dotenv jupyter pyarrow kaleido "streamlit>=1.32" nemosis --quiet
 
 # Execute Fetch phase
 if [ "$FETCH" = true ]; then
@@ -73,6 +73,8 @@ if [ "$FETCH" = true ]; then
     fi
     python scripts/01_fetch_nem_data.py
     python scripts/03_fetch_qld_data.py
+    python scripts/05_fetch_trading_data.py
+    python scripts/07_fetch_ai_demand.py
 fi
 
 # Execute Generate phase
@@ -82,6 +84,8 @@ if [ "$GENERATE" = true ]; then
     echo "=========================================="
     python scripts/02_generate_charts.py
     python scripts/04_generate_qld_charts.py
+    python scripts/06_generate_trading_charts.py
+    python scripts/08_generate_ai_charts.py
 fi
 
 # Execute Dashboard phase

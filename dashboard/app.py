@@ -22,7 +22,20 @@ except ImportError:
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
-UPDATED_DATE = datetime(2026, 6, 22)
+
+
+def get_last_updated() -> datetime:
+    """Return the most recent modification time of any raw data file."""
+    raw_dir = PROJECT_ROOT / "data" / "raw"
+    if not raw_dir.exists():
+        return datetime.now()
+    data_files = list(raw_dir.glob("*.csv"))
+    if not data_files:
+        return datetime.now()
+    return datetime.fromtimestamp(max(f.stat().st_mtime for f in data_files))
+
+
+UPDATED_DATE = get_last_updated()
 
 GEN_GROUPS = ["coal", "gas", "hydro", "wind", "solar", "bioenergy", "distillate", "battery"]
 STACK_ORDER = ["coal", "gas", "distillate", "hydro", "wind", "solar", "bioenergy", "battery"]
@@ -233,16 +246,18 @@ def build_realtime_mix_chart(df: pd.DataFrame, price_df: pd.DataFrame) -> go.Fig
 def realtime_metrics(df: pd.DataFrame) -> list[dict[str, str]]:
     totals = df.groupby("fueltech_group")["value"].sum()
     total = float(totals.sum())
+    # Guard against division by zero when dataframe is empty or all-NaN
+    safe_total = total or 1
     renewable = float(totals.reindex(list(RENEWABLE_GROUPS), fill_value=0).sum())
-    solar_peak = float(df[df["fueltech_group"] == "solar"]["value"].max())
-    wind_share = float(totals.get("wind", 0) / total * 100)
-    coal_share = float(totals.get("coal", 0) / total * 100)
+    solar_peak = float(df[df["fueltech_group"] == "solar"]["value"].max()) if not df.empty else 0.0
+    wind_share = float(totals.get("wind", 0) / safe_total * 100)
+    coal_share = float(totals.get("coal", 0) / safe_total * 100)
     return [
         {"label": "Coal baseload", "value": f"{coal_share:.1f}", "unit": "%", "note": "Share of generation in window"},
         {"label": "Solar peak", "value": f"{solar_peak / 1000:.1f}", "unit": "GW", "note": "Highest observed interval"},
         {"label": "Wind contribution", "value": f"{wind_share:.1f}", "unit": "%", "note": "Energy share across window"},
-        {"label": "Renewable share", "value": f"{renewable / total * 100:.1f}", "unit": "%", "note": "Solar, wind, hydro, bioenergy"},
-        {"label": "Data points", "value": f"{len(df):,}", "unit": "rows", "note": "30-minute fuel-group records"},
+        {"label": "Renewable share", "value": f"{renewable / safe_total * 100:.1f}", "unit": "%", "note": "Solar, wind, hydro, bioenergy"},
+        {"label": "Data points", "value": f"{len(df):,}", "unit": "rows", "note": "5-minute fuel-group records"},
     ]
 
 
@@ -265,12 +280,14 @@ def render_downloads(figure: dict[str, Any]) -> None:
 def render_header(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
     chapter = entry["chapter"]
+    # Determine the source label: prefer figure-level, then chapter-level, then fallback
+    source_label = figure.get("source") or chapter.get("source") or "AEMO / OpenElectricity"
     st.markdown(
         f"""
         <div class="topbar">
             <div>
                 <div class="terminal-label">HDRE NEM research terminal</div>
-                <div class="terminal-meta">AEMO / OpenElectricity source · Updated {UPDATED_DATE:%d %b %Y} · Chapter {escape(chapter["id"])}</div>
+                <div class="terminal-meta">{escape(source_label)} · Updated {UPDATED_DATE:%d %b %Y} · Chapter {escape(chapter["id"])}</div>
             </div>
             <div class="system-state">published artifact · fig {figure["number"]:02d}</div>
         </div>
@@ -336,12 +353,13 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                 unsafe_allow_html=True,
             )
 
+        total_figures = sum(len(ch.get("figures", [])) for ch in CHAPTERS if ch.get("status") == "done")
         st.markdown(
-            """
+            f"""
             <div class="sidebar-footer">
                 <div class="sidebar-footer-label">operational scope</div>
                 <div class="sidebar-footer-row"><span>NEM regions</span><span>5</span></div>
-                <div class="sidebar-footer-row"><span>Published figures</span><span>5</span></div>
+                <div class="sidebar-footer-row"><span>Published figures</span><span>{total_figures}</span></div>
                 <div class="sidebar-footer-row"><span>Mode</span><span>research</span></div>
             </div>
             """,
@@ -385,13 +403,14 @@ def render_figure_one(entry: dict[str, Any]) -> None:
     df, price_df = load_realtime_generation()
     fig = build_realtime_mix_chart(df, price_df)
 
+    chapter = entry["chapter"]
     title_col, download_col = st.columns([5, 1.2], vertical_alignment="top")
     with title_col:
         st.markdown(
             f"""
-            <div class="figure-kicker">Chapter 1.2 · Figure 01 · live generation profile</div>
+            <div class="figure-kicker">Chapter {escape(chapter["id"])} · Figure {figure["number"]:02d} · live generation profile</div>
             <h1 class="main-title">{escape(figure["title"])}</h1>
-            <div class="main-subtitle">{escape(figure["subtitle"])} · 2D stacked generation profile from 30-minute MW intervals</div>
+            <div class="main-subtitle">{escape(figure["subtitle"])} · 2D stacked generation profile from 5-minute MW intervals</div>
             """,
             unsafe_allow_html=True,
         )
