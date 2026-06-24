@@ -74,7 +74,6 @@ if [ "$FETCH" = true ]; then
     python scripts/01_fetch_nem_data.py
     python scripts/03_fetch_qld_data.py
     python scripts/05_fetch_trading_data.py
-    python scripts/07_fetch_ai_demand.py
 fi
 
 # Execute Generate phase
@@ -85,7 +84,7 @@ if [ "$GENERATE" = true ]; then
     python scripts/02_generate_charts.py
     python scripts/04_generate_qld_charts.py
     python scripts/06_generate_trading_charts.py
-    python scripts/08_generate_ai_charts.py
+
 fi
 
 # Execute Dashboard phase

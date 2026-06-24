@@ -111,11 +111,6 @@ To power the dashboard above, the data ingestion and chart generation pipeline i
 * `scripts/06_generate_trading_charts.py` `[Completed]`
   * *Generates visual heatmaps and line/bar charts showing price volatility spikes and FCAS market trends.*
 
-### Chapter 3: AI Data Center Power Demand
-* `scripts/07_fetch_ai_demand.py` `[Completed]`
-  * *Will ingest AI demand projections, scrape global benchmark reports, or load static energy deficit models.*
-* `scripts/08_generate_ai_charts.py` `[Completed]`
-  * *Will visualize the gap between current renewable supply trajectories and future AI data center energy needs.*
 
 ---
 
