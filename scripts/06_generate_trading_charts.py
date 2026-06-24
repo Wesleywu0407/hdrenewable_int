@@ -139,8 +139,8 @@ def fig2_2_fcas_regulation() -> None:
         last_date = df["interval"].max()
         first_date = df["interval"].min()
         fig.update_xaxes(
-            range=[last_date - pd.Timedelta(days=365), last_date],
-            rangeslider=dict(visible=True, range=[first_date, last_date])
+            range=[(last_date - pd.Timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')],
+            rangeslider=dict(visible=True, range=[first_date.strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')])
         )
 
     add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
@@ -193,8 +193,8 @@ def fig2_3_fcas_contingency() -> None:
         last_date = df["interval"].max()
         first_date = df["interval"].min()
         fig.update_xaxes(
-            range=[last_date - pd.Timedelta(days=365), last_date],
-            rangeslider=dict(visible=True, range=[first_date, last_date])
+            range=[(last_date - pd.Timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')],
+            rangeslider=dict(visible=True, range=[first_date.strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')])
         )
     add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
     save(fig, "fig2_3_fcas_contingency.html", "fig2_3_fcas_contingency.png")

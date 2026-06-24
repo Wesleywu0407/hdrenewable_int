@@ -91,7 +91,7 @@ def selected_entry(figures: list[dict[str, Any]]) -> dict[str, Any] | None:
 
 
 @st.cache_data(show_spinner=False)
-def load_realtime_generation() -> tuple[pd.DataFrame, pd.DataFrame]:
+def load_realtime_generation(updated_timestamp: float = 0.0) -> tuple[pd.DataFrame, pd.DataFrame]:
     df = pd.read_csv(RAW_DIR / "master_NEM_open_electricity.csv", parse_dates=["date"])
     
     # Use all data in the CSV
@@ -400,7 +400,7 @@ def render_standard_metrics(metrics: list[dict[str, str]]) -> None:
 
 def render_figure_one(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
-    df, price_df = load_realtime_generation()
+    df, price_df = load_realtime_generation(UPDATED_DATE.timestamp())
     fig = build_realtime_mix_chart(df, price_df)
 
     chapter = entry["chapter"]
@@ -457,8 +457,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
 
     st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
     if html_path and html_path.exists():
-        import streamlit.components.v1 as components
-        components.html(html_path.read_text(encoding="utf-8"), height=560)
+        st.iframe(html_path, height=560)
     else:
         missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))
         st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)

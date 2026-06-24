@@ -164,7 +164,7 @@ def fetch_spot_prices(client: OEClient, region: str, days: int = 365) -> pd.Data
         cur = chunk_end
     df = pd.DataFrame(rows)
     if not df.empty:
-        df["interval"] = pd.to_datetime(df["interval"], utc=True).dt.tz_localize(None)
+        df["interval"] = pd.to_datetime(df["interval"], utc=True).dt.tz_convert(NEM_TZ).dt.tz_localize(None)
         df = df.drop_duplicates(subset=["interval"]).sort_values("interval")
     return df
 
@@ -194,7 +194,7 @@ def fetch_qld_fuel_mix(client: OEClient, months: int = 24) -> pd.DataFrame:
                 rows.append({"interval": t, "value": v, "fueltech_group": ft, "unit": ts.unit})
     df = pd.DataFrame(rows)
     if not df.empty:
-        df["interval"] = pd.to_datetime(df["interval"])
+        df["interval"] = pd.to_datetime(df["interval"], utc=True).dt.tz_convert(NEM_TZ).dt.tz_localize(None)
     return df
 
 
@@ -209,22 +209,31 @@ def save_and_merge(path: Path, df: pd.DataFrame) -> pd.DataFrame:
                 df_old[col] = pd.to_datetime(df_old[col], utc=True).dt.tz_localize(None)
             if col in df.columns:
                 df[col] = pd.to_datetime(df[col], utc=True).dt.tz_localize(None)
-        combined = pd.concat([df_old, df], ignore_index=True)
-        if "interval" in combined.columns:
-            subset_cols = [c for c in combined.columns if c not in ["value", "price", "unit"]]
-            combined = combined.drop_duplicates(subset=subset_cols, keep="last")
-            combined = combined.sort_values("interval")
-        elif "month" in combined.columns:
-            subset_cols = [c for c in combined.columns if c not in ["capacity_mw"]]
-            combined = combined.drop_duplicates(subset=subset_cols, keep="last")
-            combined = combined.sort_values("month")
+        
+        # Use combine_first to prevent NaNs in new data from overwriting valid old data
+        if "interval" in df.columns:
+            # Need to handle potential duplicate intervals in df before setting index
+            df = df.drop_duplicates(subset=["interval"], keep="last")
+            df_old = df_old.drop_duplicates(subset=["interval"], keep="last")
+            df = df.set_index("interval").combine_first(df_old.set_index("interval")).reset_index()
+            df = df.sort_values("interval")
+        elif "month" in df.columns:
+            # Need to handle potential duplicate intervals in df before setting index
+            subset_cols = [c for c in df.columns if c not in ["capacity_mw"]]
+            df = df.drop_duplicates(subset=subset_cols, keep="last")
+            df_old = df_old.drop_duplicates(subset=subset_cols, keep="last")
+            df = df.set_index(subset_cols).combine_first(df_old.set_index(subset_cols)).reset_index()
+            df = df.sort_values("month")
         else:
-            subset_cols = [c for c in ["code", "unit_code", "network_region", "year"] if c in combined.columns]
+            subset_cols = [c for c in ["code", "unit_code", "network_region", "year"] if c in df.columns]
             if subset_cols:
-                combined = combined.drop_duplicates(subset=subset_cols, keep="last")
+                df = df.drop_duplicates(subset=subset_cols, keep="last")
+                df_old = df_old.drop_duplicates(subset=subset_cols, keep="last")
+                df = df.set_index(subset_cols).combine_first(df_old.set_index(subset_cols)).reset_index()
             else:
-                combined = combined.drop_duplicates(keep="last")
-        df = combined.copy()
+                combined = pd.concat([df_old, df], ignore_index=True)
+                df = combined.drop_duplicates(keep="last")
+                
     df.to_csv(path, index=False)
     return df
 

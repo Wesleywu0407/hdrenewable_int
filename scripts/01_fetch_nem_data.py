@@ -162,7 +162,7 @@ def timeseries_to_df(response) -> pd.DataFrame:
                 records.append(rec)
     df = pd.DataFrame(records)
     if not df.empty:
-        df["interval"] = pd.to_datetime(df["interval"], utc=True).dt.tz_localize(None)
+        df["interval"] = pd.to_datetime(df["interval"], utc=True)
     return df
 
 
@@ -249,6 +249,11 @@ def pivot_to_wide(df: pd.DataFrame) -> pd.DataFrame:
     wide = work.pivot_table(
         index="interval", columns="col_name", values="value", aggfunc="mean"
     )
+    
+    # Fill small API gaps (e.g., 30-minute rooftop solar intervals in a 5-minute dataset)
+    # method='time' ensures linear interpolation across timestamps. limit=6 covers 30 mins.
+    wide = wide.interpolate(method="time", limit=6)
+    
     wide.columns.name = None  # remove the "col_name" label
     wide = wide.reset_index().rename(columns={"interval": "date"})
     return wide
@@ -274,12 +279,18 @@ def append_to_master(master_path: Path, new_df: pd.DataFrame, label: str) -> Non
         master["date"] = pd.to_datetime(master["date"])
         if master["date"].dt.tz is not None:
             master["date"] = master["date"].dt.tz_localize(None)
-        combined = pd.concat([master, new_df], ignore_index=True)
+            
+        master = master.set_index("date")
+        new_idx = new_df.set_index("date")
+        
+        # Combine new data with old data. 
+        # new_idx.combine_first(master) prioritizes new_idx, but if new_idx has NaNs, 
+        # it fills them with values from master. This prevents API gaps from overwriting good data.
+        combined = new_idx.combine_first(master).reset_index()
     else:
         print(f"  [{label}] creating new master file...")
         combined = new_df.copy()
 
-    combined = combined.drop_duplicates(subset=["date"], keep="last")
     combined = combined.sort_values("date").reset_index(drop=True)
     combined.to_csv(master_path, index=False)
     summarize(master_path, combined)
@@ -309,7 +320,7 @@ def main() -> int:
         # ================================================================== #
         nem_master = RAW_DIR / "master_NEM_open_electricity.csv"
         print(f"\n[NEM master] -> {nem_master.name}")
-        if cache_is_fresh(nem_master, max_age_h=0.083):
+        if cache_is_fresh(nem_master, max_age_h=0):
             print(f"  cache hit (< 0.083h old), skipping NEM master update.")
         else:
             try:
@@ -336,6 +347,12 @@ def main() -> int:
                 df_price = timeseries_to_df(resp_price)
                 print(f"  fetched {len(df_price):,} price rows.")
 
+                # Convert to local time
+                if not df_gen.empty:
+                    df_gen["interval"] = df_gen["interval"].dt.tz_convert(NEM_TZ).dt.tz_localize(None)
+                if not df_price.empty:
+                    df_price["interval"] = df_price["interval"].dt.tz_convert(NEM_TZ).dt.tz_localize(None)
+
                 # Pivot generation data to wide format.
                 wide = pivot_to_wide(df_gen)
 
@@ -361,7 +378,7 @@ def main() -> int:
         # ================================================================== #
         wem_master = RAW_DIR / "master_WA_SWIS_open_electricity.csv"
         print(f"\n[WEM master] -> {wem_master.name}")
-        if cache_is_fresh(wem_master, max_age_h=0.083):
+        if cache_is_fresh(wem_master, max_age_h=0):
             print(f"  cache hit (< 0.083h old), skipping WEM master update.")
         else:
             try:
@@ -387,6 +404,13 @@ def main() -> int:
                 )
                 df_price_wem = timeseries_to_df(resp_price_wem)
                 print(f"  fetched {len(df_price_wem):,} WEM price rows.")
+
+                WEM_TZ = timezone(timedelta(hours=8))
+                # Convert to local time
+                if not df_gen_wem.empty:
+                    df_gen_wem["interval"] = df_gen_wem["interval"].dt.tz_convert(WEM_TZ).dt.tz_localize(None)
+                if not df_price_wem.empty:
+                    df_price_wem["interval"] = df_price_wem["interval"].dt.tz_convert(WEM_TZ).dt.tz_localize(None)
 
                 wide_wem = pivot_to_wide(df_gen_wem)
 
@@ -416,7 +440,10 @@ def main() -> int:
                 date_end=now,
                 secondary_grouping="fueltech_group",
             )
-            return timeseries_to_df(resp)
+            df = timeseries_to_df(resp)
+            if not df.empty:
+                df["interval"] = df["interval"].dt.tz_convert(NEM_TZ).dt.tz_localize(None)
+            return df
 
         fetch_cached(RAW_DIR / "nem_annual_fuel_mix.csv", "B annual fuel mix", fetch_b)
 
@@ -431,7 +458,10 @@ def main() -> int:
                 primary_grouping="network_region",
                 secondary_grouping="fueltech_group",
             )
-            return timeseries_to_df(resp)
+            df = timeseries_to_df(resp)
+            if not df.empty:
+                df["interval"] = df["interval"].dt.tz_convert(NEM_TZ).dt.tz_localize(None)
+            return df
 
         fetch_cached(RAW_DIR / "nem_state_fuel_mix.csv", "C state fuel mix", fetch_c)
 
@@ -446,7 +476,10 @@ def main() -> int:
                 primary_grouping="network_region",
                 secondary_grouping="renewable",
             )
-            return timeseries_to_df(resp)
+            df = timeseries_to_df(resp)
+            if not df.empty:
+                df["interval"] = df["interval"].dt.tz_convert(NEM_TZ).dt.tz_localize(None)
+            return df
 
         fetch_cached(RAW_DIR / "nem_renewable_share.csv", "D renewable share", fetch_d)
 
