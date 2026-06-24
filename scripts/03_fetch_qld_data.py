@@ -164,7 +164,7 @@ def fetch_spot_prices(client: OEClient, region: str, days: int = 365) -> pd.Data
         cur = chunk_end
     df = pd.DataFrame(rows)
     if not df.empty:
-        df["interval"] = pd.to_datetime(df["interval"])
+        df["interval"] = pd.to_datetime(df["interval"], utc=True).dt.tz_localize(None)
         df = df.drop_duplicates(subset=["interval"]).sort_values("interval")
     return df
 
@@ -204,11 +204,11 @@ def save_and_merge(path: Path, df: pd.DataFrame) -> pd.DataFrame:
     if path.exists():
         print(f"  merging new data with existing historical data for {path.name}...")
         df_old = pd.read_csv(path, low_memory=False)
-        for col in ["interval", "commissioning_date", "closure_date", "month"]:
+        for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired", "month"]:
             if col in df_old.columns:
-                df_old[col] = pd.to_datetime(df_old[col])
+                df_old[col] = pd.to_datetime(df_old[col], utc=True).dt.tz_localize(None)
             if col in df.columns:
-                df[col] = pd.to_datetime(df[col])
+                df[col] = pd.to_datetime(df[col], utc=True).dt.tz_localize(None)
         combined = pd.concat([df_old, df], ignore_index=True)
         if "interval" in combined.columns:
             subset_cols = [c for c in combined.columns if c not in ["value", "price", "unit"]]
@@ -241,9 +241,9 @@ def main() -> int:
         if cache_is_fresh(qld_path):
             qld = pd.read_csv(qld_path, low_memory=False)
             if "commissioning_date" in qld.columns:
-                qld["commissioning_date"] = pd.to_datetime(qld["commissioning_date"])
+                qld["commissioning_date"] = pd.to_datetime(qld["commissioning_date"], utc=True).dt.tz_localize(None)
             if "closure_date" in qld.columns:
-                qld["closure_date"] = pd.to_datetime(qld["closure_date"])
+                qld["closure_date"] = pd.to_datetime(qld["closure_date"], utc=True).dt.tz_localize(None)
             print(f"[qld_facilities] cache hit ({len(qld)} units).")
         else:
             print("[qld_facilities] fetching QLD1 ...")
@@ -288,7 +288,7 @@ def main() -> int:
         if cache_is_fresh(sp_path):
             sp = pd.read_csv(sp_path, low_memory=False)
             if "interval" in sp.columns:
-                sp["interval"] = pd.to_datetime(sp["interval"])
+                sp["interval"] = pd.to_datetime(sp["interval"], utc=True).dt.tz_localize(None)
             print(f"[qld_spot_prices] cache hit ({len(sp)} hours).")
         else:
             print("[qld_spot_prices] fetching QLD1 hourly (chunked) ...")

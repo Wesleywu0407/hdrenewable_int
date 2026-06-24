@@ -162,7 +162,7 @@ def timeseries_to_df(response) -> pd.DataFrame:
                 records.append(rec)
     df = pd.DataFrame(records)
     if not df.empty:
-        df["interval"] = pd.to_datetime(df["interval"])
+        df["interval"] = pd.to_datetime(df["interval"], utc=True).dt.tz_localize(None)
     return df
 
 
@@ -173,7 +173,7 @@ def fetch_cached(path: Path, label: str, fetch_fn) -> pd.DataFrame | None:
         df = pd.read_csv(path, low_memory=False)
         for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired"]:
             if col in df.columns:
-                df[col] = pd.to_datetime(df[col])
+                df[col] = pd.to_datetime(df[col], utc=True).dt.tz_localize(None)
         print(f"  cache hit (< {CACHE_MAX_AGE_H}h old), skipping API call.")
         summarize(path, df)
         return df
@@ -186,7 +186,7 @@ def fetch_cached(path: Path, label: str, fetch_fn) -> pd.DataFrame | None:
             df_fallback = pd.read_csv(path, low_memory=False)
             for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired"]:
                 if col in df_fallback.columns:
-                    df_fallback[col] = pd.to_datetime(df_fallback[col])
+                    df_fallback[col] = pd.to_datetime(df_fallback[col], utc=True).dt.tz_localize(None)
             return df_fallback
         return None
     if df is None or df.empty:
@@ -198,9 +198,9 @@ def fetch_cached(path: Path, label: str, fetch_fn) -> pd.DataFrame | None:
         df_old = pd.read_csv(path, low_memory=False)
         for col in ["interval", "commissioning_date", "closure_date", "commenced", "retired"]:
             if col in df_old.columns:
-                df_old[col] = pd.to_datetime(df_old[col])
+                df_old[col] = pd.to_datetime(df_old[col], utc=True).dt.tz_localize(None)
             if col in df.columns:
-                df[col] = pd.to_datetime(df[col])
+                df[col] = pd.to_datetime(df[col], utc=True).dt.tz_localize(None)
         
         combined = pd.concat([df_old, df], ignore_index=True)
         if "interval" in combined.columns:

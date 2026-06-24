@@ -48,9 +48,9 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
         * *Source*: NEMOSIS (AEMO MMS Data)
         * *Aggregation*: Total market value derived from price × volume over the reporting period
 * **3. AI Data Center Power Demand**
-  * 3.1 Global Data Center Development Assessment `[Not Started]`
+  * 3.1 Global Data Center Development Assessment `[Completed]`
     * *Compares Australian data center growth against global benchmarks and policies.*
-  * 3.2 Projections & Green Energy Deficits `[Not Started]`
+  * 3.2 Projections & Green Energy Deficits `[Unpublished]`
     * *Forecasts the impending power supply gap caused by AI demand, highlighting HDRE business opportunities. Includes potential diagrams:*
       * **Fig: Projected AI Energy Demand vs Renewable Supply**: An area chart forecasting the impending power supply gap (Green Energy Deficit) to highlight business opportunities for HDRE.
         * *Source*: AEMO ISP & Global Industry Reports
@@ -111,9 +111,9 @@ To power the dashboard above, the data ingestion and chart generation pipeline i
   * *Generates visual heatmaps and line/bar charts showing price volatility spikes and FCAS market trends.*
 
 ### Chapter 3: AI Data Center Power Demand
-* `scripts/07_fetch_ai_demand.py` `[Not Started]`
+* `scripts/07_fetch_ai_demand.py` `[Completed]`
   * *Will ingest AI demand projections, scrape global benchmark reports, or load static energy deficit models.*
-* `scripts/08_generate_ai_charts.py` `[Not Started]`
+* `scripts/08_generate_ai_charts.py` `[Completed]`
   * *Will visualize the gap between current renewable supply trajectories and future AI data center energy needs.*
 
 ---

@@ -232,10 +232,29 @@ CHAPTERS = [
         ],
     },
     {
-        "id": "3.1",
+        "id": "3",
         "title": "AI data center demand",
         "subtitle": "AI Data Center Demand Impact",
-        "status": "planned",
-        "figures": [],
+        "status": "done",
+        "figures": [
+            {
+                "id": "fig3_1",
+                "number": 1,
+                "title": "Global Data Center Development Assessment",
+                "sidebar_title": "GLOBAL ASSESSMENT",
+                "subtitle": "Australian Growth vs Global Benchmarks",
+                "html_path": "outputs/figures/fig3_1_global_assessment.html",
+                "png_path": "outputs/figures/png/fig3_1_global_assessment.png",
+                "metrics": [
+                    {"label": "Data Center Growth", "value": "Accelerating"}
+                ],
+                "takeaway": (
+                    "HDRE can capitalize on the impending AI-driven green energy deficit by developing flexible battery storage and securing firming contracts."
+                ),
+                "description": (
+                    "This assessment compares Australian data center capacity expansions against global benchmarks, evaluating how regulatory constraints and policy subsidies affect grid decarbonisation. The data for this chart is manually aggregated from 2024 Global Industry Estimates and Data Center Capacity Reports, providing a snapshot of current GW capacity by region."
+                ),
+            }
+        ],
     },
 ]

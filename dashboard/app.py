@@ -438,7 +438,8 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
 
     st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
     if html_path and html_path.exists():
-        st.iframe(html_path.read_text(encoding="utf-8"), height=560)
+        import streamlit.components.v1 as components
+        components.html(html_path.read_text(encoding="utf-8"), height=560)
     else:
         missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))
         st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)
