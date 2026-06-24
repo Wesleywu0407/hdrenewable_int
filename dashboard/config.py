@@ -29,6 +29,9 @@ CHAPTERS = [
                 "takeaway": (
                     "QLD is accelerating its renewable deployment and converging with its peer state NSW."
                 ),
+                "description": (
+                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels."
+                ),
             },
             {
                 "id": "fig1_2",
@@ -44,6 +47,9 @@ CHAPTERS = [
                 "takeaway": (
                     "The past 24 months show a steady increase in renewable penetration in Queensland's fuel mix."
                 ),
+                "description": (
+                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source."
+                ),
             },
             {
                 "id": "fig1_3",
@@ -58,6 +64,9 @@ CHAPTERS = [
                 ],
                 "takeaway": (
                     "High instances of negative spot prices indicate excess solar generation during midday."
+                ),
+                "description": (
+                    "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power."
                 ),
             }
         ],
@@ -86,6 +95,9 @@ CHAPTERS = [
                     "firming demand are already creating the duck-curve dynamics that "
                     "make storage and flexible capacity commercially attractive."
                 ),
+                "description": (
+                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals."
+                ),
             },
             {
                 "id": "fig2",
@@ -104,6 +116,9 @@ CHAPTERS = [
                     "Even within the available 2024-06 to 2026-06 window, zero-marginal-cost "
                     "solar and wind are visibly eroding coal's share across the entire NEM, "
                     "with seasonal solar peaks reshaping the monthly mix."
+                ),
+                "description": (
+                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix."
                 ),
             },
             {
@@ -124,6 +139,9 @@ CHAPTERS = [
                     "operation, while QLD and NSW remain the largest decarbonisation and "
                     "investment headroom in the NEM."
                 ),
+                "description": (
+                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal."
+                ),
             },
             {
                 "id": "fig4",
@@ -143,6 +161,9 @@ CHAPTERS = [
                     "that must be filled by renewables and firming, making the timeline a "
                     "practical map for project development and offtake positioning."
                 ),
+                "description": (
+                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets."
+                ),
             },
         ],
     },
@@ -160,11 +181,12 @@ CHAPTERS = [
                 "subtitle": "Average Spot Prices by Hour and Day",
                 "html_path": "outputs/figures/fig2_1_spot_heatmap.html",
                 "png_path": "outputs/figures/png/fig2_1_spot_heatmap.png",
-                "metrics": [
-                    {"label": "Data Source", "value": "Real"}
-                ],
+                "metrics": [],
                 "takeaway": (
                     "Identifying peak pricing hours is essential for dispatchable storage and battery ROI."
+                ),
+                "description": (
+                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing)."
                 ),
             },
             {
@@ -175,11 +197,14 @@ CHAPTERS = [
                 "subtitle": "Continuous Frequency Correction (Regulation Raise/Lower)",
                 "html_path": "outputs/figures/fig2_2_fcas_regulation.html",
                 "png_path": "outputs/figures/png/fig2_2_fcas_regulation.png",
-                "metrics": [
-                    {"label": "Data Source", "value": "Synthetic"}
-                ],
+                "metrics": [],
                 "takeaway": (
                     "Battery storage has high opportunity for continuous frequency correction revenue."
+                ),
+                "description": (
+                    "This chart visualizes the market prices and cleared volumes for Regulation Frequency Control Ancillary Services (FCAS). Regulation FCAS is a service used by the grid operator to continuously correct minor deviations in grid frequency (50Hz) caused by momentary imbalances between electricity supply and demand.\n\n"
+                    "- Regulation Raise\n"
+                    "- Regulation Lower"
                 ),
             },
             {
@@ -190,11 +215,18 @@ CHAPTERS = [
                 "subtitle": "Value of Fast (6s), Slow (60s), and Delayed (5m) responses",
                 "html_path": "outputs/figures/fig2_3_fcas_contingency.html",
                 "png_path": "outputs/figures/png/fig2_3_fcas_contingency.png",
-                "metrics": [
-                    {"label": "Data Source", "value": "Synthetic"}
-                ],
+                "metrics": [],
                 "takeaway": (
                     "Fast response services represent a significant portion of the contingency market value."
+                ),
+                "description": (
+                    "This visualization breaks down the market value of Contingency FCAS, which are services that respond to sudden, major grid events like a generator tripping off. It shows the value split between Fast (6 seconds), Slow (60 seconds), and Delayed (5 minutes) response times, demonstrating the premium paid for rapid-response assets like batteries.\n\n"
+                    "- Fast Raise: Increase generation or reduce load within 6 seconds during under-frequency events\n"
+                    "- Fast Lower: Reduce generation or increase load within 6 seconds during over-frequency events\n"
+                    "- Slow Raise: Stabilize low frequency within 60 seconds\n"
+                    "- Slow Lower: Stabilize high frequency within 60 seconds\n"
+                    "- Delayed Raise: Restore frequency within 5 minutes\n"
+                    "- Delayed Lower: Restore frequency within 5 minutes"
                 ),
             }
         ],

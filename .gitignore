@@ -37,3 +37,6 @@ venv/
 # Generated deliverables
 outputs/figures/**/*.html
 outputs/figures/**/*.png
+
+
+nemosis_cache

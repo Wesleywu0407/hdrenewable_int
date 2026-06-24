@@ -270,7 +270,7 @@ def render_header(entry: dict[str, Any]) -> None:
         <div class="topbar">
             <div>
                 <div class="terminal-label">HDRE NEM research terminal</div>
-                <div class="terminal-meta">OpenElectricity source · Updated {UPDATED_DATE:%d %b %Y} · Chapter {escape(chapter["id"])}</div>
+                <div class="terminal-meta">AEMO / OpenElectricity source · Updated {UPDATED_DATE:%d %b %Y} · Chapter {escape(chapter["id"])}</div>
             </div>
             <div class="system-state">published artifact · fig {figure["number"]:02d}</div>
         </div>
@@ -403,6 +403,19 @@ def render_figure_one(entry: dict[str, Any]) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
 
     render_metric_tiles(realtime_metrics(df))
+    
+    takeaway = figure.get("takeaway", "")
+    description = figure.get("description", "")
+    if takeaway or description:
+        st.markdown(
+            f"""
+            <div class="research-note">
+                {f'<div class="note-label">key takeaway</div><div>{escape(takeaway)}</div>' if takeaway else ''}
+                {f'<div class="note-label" style="margin-top: 1rem;">graph description</div><div>{escape(description)}</div>' if description else ''}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_standard_figure(entry: dict[str, Any]) -> None:
@@ -432,15 +445,19 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
 
     render_standard_metrics(figure.get("metrics", []))
-    st.markdown(
-        f"""
-        <div class="research-note">
-            <div class="note-label">key takeaway</div>
-            <div>{escape(figure.get("takeaway", ""))}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    
+    takeaway = figure.get("takeaway", "")
+    description = figure.get("description", "")
+    if takeaway or description:
+        st.markdown(
+            f"""
+            <div class="research-note">
+                {f'<div class="note-label">key takeaway</div><div>{escape(takeaway)}</div>' if takeaway else ''}
+                {f'<div class="note-label" style="margin-top: 1rem;">graph description</div><div>{escape(description)}</div>' if description else ''}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def main() -> None:

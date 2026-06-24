@@ -89,12 +89,12 @@ MAX_HISTORY_DAYS = 728
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
-def cache_is_fresh(path: Path) -> bool:
-    """True if the file exists and is younger than CACHE_MAX_AGE_H hours."""
+def cache_is_fresh(path: Path, max_age_h: float = CACHE_MAX_AGE_H) -> bool:
+    """True if the file exists and is younger than max_age_h hours."""
     if not path.exists():
         return False
     age_h = (time.time() - path.stat().st_mtime) / 3600
-    return age_h < CACHE_MAX_AGE_H
+    return age_h < max_age_h
 
 
 def summarize(path: Path, df: pd.DataFrame) -> None:
@@ -265,11 +265,15 @@ def append_to_master(master_path: Path, new_df: pd.DataFrame, label: str) -> Non
         return
 
     new_df["date"] = pd.to_datetime(new_df["date"])
+    if new_df["date"].dt.tz is not None:
+        new_df["date"] = new_df["date"].dt.tz_localize(None)
 
     if master_path.exists():
         print(f"  [{label}] reading existing master file...")
         master = pd.read_csv(master_path, low_memory=False)
         master["date"] = pd.to_datetime(master["date"])
+        if master["date"].dt.tz is not None:
+            master["date"] = master["date"].dt.tz_localize(None)
         combined = pd.concat([master, new_df], ignore_index=True)
     else:
         print(f"  [{label}] creating new master file...")
@@ -305,8 +309,8 @@ def main() -> int:
         # ================================================================== #
         nem_master = RAW_DIR / "master_NEM_open_electricity.csv"
         print(f"\n[NEM master] -> {nem_master.name}")
-        if cache_is_fresh(nem_master):
-            print(f"  cache hit (< {CACHE_MAX_AGE_H}h old), skipping NEM master update.")
+        if cache_is_fresh(nem_master, max_age_h=0.083):
+            print(f"  cache hit (< 0.083h old), skipping NEM master update.")
         else:
             try:
                 print("  fetching NEM power + emissions (fueltech, 5m, 7d)...")
@@ -357,8 +361,8 @@ def main() -> int:
         # ================================================================== #
         wem_master = RAW_DIR / "master_WA_SWIS_open_electricity.csv"
         print(f"\n[WEM master] -> {wem_master.name}")
-        if cache_is_fresh(wem_master):
-            print(f"  cache hit (< {CACHE_MAX_AGE_H}h old), skipping WEM master update.")
+        if cache_is_fresh(wem_master, max_age_h=0.083):
+            print(f"  cache hit (< 0.083h old), skipping WEM master update.")
         else:
             try:
                 print("  fetching WEM power + emissions (fueltech, 5m, 7d)...")

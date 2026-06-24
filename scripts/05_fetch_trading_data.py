@@ -135,85 +135,117 @@ def fetch_cached(path: Path, label: str, fetch_fn) -> pd.DataFrame | None:
     summarize(path, df)
     return df
 
-def generate_mock_fcas_regulation(path: Path, now: datetime) -> pd.DataFrame:
-    print(f"\n[Regulation FCAS (Mock)] -> {path.name}")
-    dates = [now - timedelta(days=i) for i in range(30, 0, -1)]
-    records = []
+def fetch_fcas_regulation(path: Path, now: datetime) -> pd.DataFrame:
+    print(f"\n[Regulation FCAS] -> {path.name}")
+    if cache_is_fresh(path):
+        df = pd.read_csv(path)
+        print("  cache hit, skipping.")
+        return df
+
+    import nemosis
+    start = "2023/12/01 00:00:00"
+    end = now.strftime("%Y/%m/%d %H:%M:%S")
+    cache_dir = PROJECT_ROOT / "data" / "nemosis_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
     
-    raise_price_base = 15.0
-    lower_price_base = 10.0
-    raise_vol_base = 250.0
-    lower_vol_base = 200.0
+    try:
+        print("  Fetching DISPATCHPRICE...")
+        dp = nemosis.dynamic_data_compiler(start, end, "DISPATCHPRICE", str(cache_dir))
+        print("  Fetching DISPATCHREGIONSUM...")
+        ds = nemosis.dynamic_data_compiler(start, end, "DISPATCHREGIONSUM", str(cache_dir))
+    except Exception as e:
+        print(f"  Error fetching from nemosis: {e}")
+        return pd.DataFrame()
+
+    dp["SETTLEMENTDATE"] = pd.to_datetime(dp["SETTLEMENTDATE"])
+    ds["SETTLEMENTDATE"] = pd.to_datetime(ds["SETTLEMENTDATE"])
     
-    for dt in dates:
-        r_price = max(0, raise_price_base + np.random.normal(0, 5))
-        l_price = max(0, lower_price_base + np.random.normal(0, 3))
-        r_vol = max(50, raise_vol_base + np.random.normal(0, 30))
-        l_vol = max(50, lower_vol_base + np.random.normal(0, 20))
-        
-        if random.random() > 0.9:
-            r_price += random.uniform(20, 80)
-            
-        records.append({
-            "interval": dt.strftime("%Y-%m-%d"),
-            "raise_price": r_price,
-            "lower_price": l_price,
-            "raise_volume": r_vol,
-            "lower_volume": l_vol
-        })
-        
-    df = pd.DataFrame(records)
+    # Convert columns to float
+    for col in ["RAISEREGRRP", "LOWERREGRRP"]:
+        dp[col] = pd.to_numeric(dp[col], errors="coerce")
+    for col in ["RAISEREGLOCALDISPATCH", "LOWERREGLOCALDISPATCH"]:
+        ds[col] = pd.to_numeric(ds[col], errors="coerce")
+    
+    dp_daily = dp.groupby(dp["SETTLEMENTDATE"].dt.date).agg({
+        "RAISEREGRRP": "mean",
+        "LOWERREGRRP": "mean"
+    }).reset_index()
+    
+    ds_daily = ds.groupby(ds["SETTLEMENTDATE"].dt.date).agg({
+        "RAISEREGLOCALDISPATCH": "mean",
+        "LOWERREGLOCALDISPATCH": "mean"
+    }).reset_index()
+
+    df = pd.merge(dp_daily, ds_daily, on="SETTLEMENTDATE")
+    df = df.rename(columns={
+        "SETTLEMENTDATE": "interval",
+        "RAISEREGRRP": "raise_price",
+        "LOWERREGRRP": "lower_price",
+        "RAISEREGLOCALDISPATCH": "raise_volume",
+        "LOWERREGLOCALDISPATCH": "lower_volume"
+    })
+    
     df.to_csv(path, index=False)
-    print(f"  Generated mock Regulation FCAS: {len(df)} rows")
+    print(f"  Saved Regulation FCAS: {len(df)} rows")
     return df
 
-def generate_mock_fcas_contingency(path: Path, now: datetime) -> pd.DataFrame:
-    print(f"\n[Contingency FCAS (Mock)] -> {path.name}")
-    dates = []
-    current_date = now.replace(day=1)
-    for _ in range(12):
-        dates.append(current_date)
-        month = current_date.month - 1
-        year = current_date.year
-        if month == 0:
-            month = 12
-            year -= 1
-        current_date = current_date.replace(year=year, month=month)
-    dates.reverse()
+def fetch_fcas_contingency(path: Path, now: datetime) -> pd.DataFrame:
+    print(f"\n[Contingency FCAS] -> {path.name}")
+    if cache_is_fresh(path):
+        df = pd.read_csv(path)
+        print("  cache hit, skipping.")
+        return df
+
+    import nemosis
+    start = "2023/12/01 00:00:00"
+    end = now.strftime("%Y/%m/%d %H:%M:%S")
+    cache_dir = PROJECT_ROOT / "data" / "nemosis_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
     
-    records = []
-    for dt in dates:
-        fast_raise = random.uniform(5, 15)
-        fast_lower = random.uniform(2, 8)
-        slow_raise = random.uniform(8, 20)
-        slow_lower = random.uniform(3, 10)
-        delayed_raise = random.uniform(10, 25)
-        delayed_lower = random.uniform(5, 12)
+    try:
+        print("  Fetching DISPATCHPRICE...")
+        dp = nemosis.dynamic_data_compiler(start, end, "DISPATCHPRICE", str(cache_dir))
+        print("  Fetching DISPATCHREGIONSUM...")
+        ds = nemosis.dynamic_data_compiler(start, end, "DISPATCHREGIONSUM", str(cache_dir))
+    except Exception as e:
+        print(f"  Error fetching from nemosis: {e}")
+        return pd.DataFrame()
+
+    dp["SETTLEMENTDATE"] = pd.to_datetime(dp["SETTLEMENTDATE"])
+    ds["SETTLEMENTDATE"] = pd.to_datetime(ds["SETTLEMENTDATE"])
+    
+    merged = pd.merge(dp, ds, on=["SETTLEMENTDATE", "REGIONID"])
+    
+    services = {
+        "fast_raise": ("RAISE6SECRRP", "RAISE6SECLOCALDISPATCH"),
+        "fast_lower": ("LOWER6SECRRP", "LOWER6SECLOCALDISPATCH"),
+        "slow_raise": ("RAISE60SECRRP", "RAISE60SECLOCALDISPATCH"),
+        "slow_lower": ("LOWER60SECRRP", "LOWER60SECLOCALDISPATCH"),
+        "delayed_raise": ("RAISE5MINRRP", "RAISE5MINLOCALDISPATCH"),
+        "delayed_lower": ("LOWER5MINRRP", "LOWER5MINLOCALDISPATCH")
+    }
+    
+    for srv, (p_col, v_col) in services.items():
+        merged[p_col] = pd.to_numeric(merged[p_col], errors="coerce")
+        merged[v_col] = pd.to_numeric(merged[v_col], errors="coerce")
+        merged[srv] = merged[p_col] * merged[v_col] / 12.0
         
-        if dt.month in [1, 2, 6, 7]:
-            fast_raise *= 1.5
-            slow_raise *= 1.3
-            
-        records.append({
-            "interval": dt.strftime("%Y-%m"),
-            "fast_raise": fast_raise,
-            "fast_lower": fast_lower,
-            "slow_raise": slow_raise,
-            "slow_lower": slow_lower,
-            "delayed_raise": delayed_raise,
-            "delayed_lower": delayed_lower
-        })
+    daily_value = merged.groupby(merged["SETTLEMENTDATE"].dt.date)[list(services.keys())].sum().reset_index()
+    for srv in services.keys():
+        daily_value[srv] = daily_value[srv] / 1e6
         
-    df = pd.DataFrame(records)
-    df.to_csv(path, index=False)
-    print(f"  Generated mock Contingency FCAS: {len(df)} rows")
-    return df
+    daily_value = daily_value.rename(columns={"SETTLEMENTDATE": "interval"})
+    
+    daily_value.to_csv(path, index=False)
+    print(f"  Saved Contingency FCAS: {len(daily_value)} rows")
+    return daily_value
 
 def main() -> int:
-    now = nem_now()
+    # Use a fixed date in 2026 (last month) so we can reliably fetch real historical data from AEMO archive
+    now = datetime(2026, 5, 31, tzinfo=timezone.utc).replace(tzinfo=None)
 
-    generate_mock_fcas_regulation(RAW_DIR / "fcas_regulation_mock.csv", now)
-    generate_mock_fcas_contingency(RAW_DIR / "fcas_contingency_mock.csv", now)
+    fetch_fcas_regulation(RAW_DIR / "fcas_regulation.csv", now)
+    fetch_fcas_contingency(RAW_DIR / "fcas_contingency.csv", now)
 
     print("\nDone fetching trading data.")
     return 0

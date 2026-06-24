@@ -1,8 +1,8 @@
 # Dashboard & Project Structure Plan
 
-Here is the structural outline for the HTML Dashboard and the underlying data pipelines, including the current completion status and a brief summary of what each component is supposed to do.
+Here is the structural outline for the Streamlit Dashboard and the underlying data pipelines, including the current completion status and a brief summary of what each component is supposed to do.
 
-## 1. UI Structure (The HTML Dashboard)
+## 1. UI Structure (The Streamlit Dashboard)
 
 ### Sidebar Navigation (Chapters)
 * **1. NEM Grid & Queensland Solar**
@@ -32,20 +32,20 @@ Here is the structural outline for the HTML Dashboard and the underlying data pi
         * *Source*: OpenElectricity `/facilities`
         * *Aggregation*: Commenced and expected closure dates to map operating lifespans
 * **2. Electricity Trading Market Volatility**
-  * 2.1 Spot Market (Power Supply) `[Not Started]`
+  * 2.1 Spot Market (Power Supply) `[Completed]`
     * *Tracks hourly/daily price volatility to identify lucrative trading windows. Includes potential diagrams:*
-      * **Fig: Spot Price Volatility Heatmap**: A daily/hourly heatmap to identify the most lucrative trading windows.
+      * **Fig 1: Spot Price Volatility Heatmap**: A daily/hourly heatmap to identify the most lucrative trading windows.
         * *Source*: OpenElectricity `/network/pricing`
         * *Aggregation*: 5-minute spot prices averaged into hourly buckets across days
-  * 2.2 Regulation FCAS `[Not Started]`
+  * 2.2 Regulation FCAS `[Completed]`
     * *Monitors continuous frequency correction markets (Raise/Lower) to gauge battery storage opportunities. Includes potential diagrams:*
-      * **Fig: Regulation FCAS Prices & Volumes**: Line charts tracking the cost and volume of continuous frequency correction (Regulation Raise/Lower).
-        * *Source*: OpenElectricity FCAS endpoints
+      * **Fig 2: Regulation FCAS Prices & Volumes**: Line charts tracking the cost and volume of continuous frequency correction (Regulation Raise/Lower).
+        * *Source*: NEMOSIS (AEMO MMS Data)
         * *Aggregation*: 5-minute pricing and enabled volumes averaged daily/monthly
-  * 2.3 Contingency FCAS `[Not Started]`
+  * 2.3 Contingency FCAS `[Completed]`
     * *Analyzes fast, slow, and delayed frequency response markets triggered by grid disruptions. Includes potential diagrams:*
-      * **Fig: Contingency FCAS Market Value Breakdown**: Stacked bar chart comparing the value of Fast (6s), Slow (60s), and Delayed (5m) responses.
-        * *Source*: OpenElectricity FCAS endpoints
+      * **Fig 3: Contingency FCAS Market Value Breakdown**: Stacked bar chart comparing the value of Fast (6s), Slow (60s), and Delayed (5m) responses.
+        * *Source*: NEMOSIS (AEMO MMS Data)
         * *Aggregation*: Total market value derived from price × volume over the reporting period
 * **3. AI Data Center Power Demand**
   * 3.1 Global Data Center Development Assessment `[Not Started]`
@@ -66,6 +66,14 @@ Here is the structural outline for the HTML Dashboard and the underlying data pi
 * **Research Notes & Takeaways** `[Completed]`
   * *Stylized text callouts providing qualitative analysis, conclusions, and strategic opportunities for HDRE based on the chart.*
 
+### Streamlit Implementation
+* `dashboard/app.py` `[Completed]`
+  * *Main Streamlit application file containing the UI layout and rendering logic.*
+* `dashboard/config.py` `[Completed]`
+  * *Configuration file defining chapters, figures, and metadata.*
+* `dashboard/styles.py` `[Completed]`
+  * *Injects custom CSS to style the Streamlit application.*
+
 ---
 
 ## 2. Data Pipeline Structure (Python Scripts)
@@ -73,8 +81,18 @@ Here is the structural outline for the HTML Dashboard and the underlying data pi
 To power the dashboard above, the data ingestion and chart generation pipeline is structured as follows:
 
 ### Setup & Utilities
+* `run.sh` `[Completed]`
+  * *Shell script to launch the Streamlit dashboard.*
 * `scripts/00_test_api.py` `[Completed]`
   * *Validates the OpenElectricity API key setup and ensures the python environment can connect to the data endpoints.*
+* `scripts/verify_data_integrity.py` `[Completed]`
+  * *Verifies data from OpenElectricity API matches expectations and checks integrity against the master CSV.*
+* `scripts/test_nemosis.py` `[Completed]`
+  * *Validates NEMOSIS package installation and connectivity.*
+* `scripts/check_nov20.py`, `scripts/check_very_fast.py`, `scripts/check_weekly.py` `[Completed]`
+  * *Additional spot-check scripts for data validation and API query testing.*
+* `test_plotly.py` `[Completed]`
+  * *Testing script to verify Plotly rendering functionality.*
 
 ### Chapter 1: NEM & QLD Grid Analysis
 * `scripts/01_fetch_nem_data.py` `[Completed]`
@@ -87,10 +105,10 @@ To power the dashboard above, the data ingestion and chart generation pipeline i
   * *Converts the fetched QLD CSV data into standalone, interactive Plotly HTML charts.*
 
 ### Chapter 2: Electricity Trading Market Volatility
-* `scripts/05_fetch_trading_data.py` `[Not Started]`
-  * *Will pull NEM spot market price history and FCAS market (Regulation and Contingency) volumes and pricing.*
-* `scripts/06_generate_trading_charts.py` `[Not Started]`
-  * *Will generate visual heatmaps or line charts showing price volatility spikes and FCAS market trends.*
+* `scripts/05_fetch_trading_data.py` `[Completed]`
+  * *Pulls NEM spot market price history (via QLD script) and FCAS market (Regulation and Contingency) volumes and pricing using NEMOSIS.*
+* `scripts/06_generate_trading_charts.py` `[Completed]`
+  * *Generates visual heatmaps and line/bar charts showing price volatility spikes and FCAS market trends.*
 
 ### Chapter 3: AI Data Center Power Demand
 * `scripts/07_fetch_ai_demand.py` `[Not Started]`
