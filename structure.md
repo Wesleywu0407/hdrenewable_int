@@ -50,12 +50,18 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
         * *Aggregation*: Total market value derived from price × volume over the reporting period
 * **3. AI Data Center Power Demand**
   * 3.1 Global Data Center Development Assessment `[Completed]`
-    * *Compares Australian data center growth against global benchmarks and policies.*
-  * 3.2 Projections & Green Energy Deficits `[Unpublished]`
-    * *Forecasts the impending power supply gap caused by AI demand, highlighting HDRE business opportunities. Includes potential diagrams:*
-      * **Fig: Projected AI Energy Demand vs Renewable Supply**: An area chart forecasting the impending power supply gap (Green Energy Deficit) to highlight business opportunities for HDRE.
-        * *Source*: AEMO ISP & Global Industry Reports
-        * *Aggregation*: Overlaying long-term renewable supply forecasts with extrapolated data center demand
+    * *Compares Australian data center growth against global benchmarks and policies. Uses web scraping to continuously gather up-to-date international benchmark data and government policy metrics.*
+  * 3.1.2 Projections of Power Consumption Growth and Green Energy Deficits `[Unpublished]`
+    * *Forecasts the impending power supply gap caused by AI demand, highlighting HDRE business opportunities using statistical predictions on downloaded historical data. Includes the following diagrams:*
+      * **Fig 1: Historical Power Consumption vs. Statistical AI Growth Predictions**: A time-series forecasting chart (with confidence intervals) projecting future grid strain.
+        * *Source*: Downloaded local historical datasets & AI data center growth estimates
+        * *Aggregation*: Statistical prediction models (e.g., Prophet/ARIMA) applied to historical data to forecast future demand
+      * **Fig 2: Green Energy Deficit Forecast**: An area chart forecasting the impending power supply gap to highlight specific capacity needs.
+        * *Source*: Predictive model outputs vs. AEMO ISP planned renewable projects
+        * *Aggregation*: Subtracting forecasted AI/Base demand from planned green generation capacity
+      * **Fig 3: HDRE Opportunity Windows**: A bar chart mapping predicted deficit periods to pinpoint where HDRE can step in.
+        * *Source*: Synthesized from deficit forecast
+        * *Aggregation*: Highlighting maximum deficit years and corresponding strategic opportunities
 
 ### Main Dashboard Layout
 * **Header / Topbar** `[Completed]`
@@ -111,6 +117,16 @@ To power the dashboard above, the data ingestion and chart generation pipeline i
 * `scripts/06_generate_trading_charts.py` `[Completed]`
   * *Generates visual heatmaps and line/bar charts showing price volatility spikes and FCAS market trends.*
 
+### Chapter 3: AI Data Center Power Demand
+* `scripts/07_scrape_ai_benchmarks.py` `[Unpublished]`
+  * *Uses web scraping libraries (e.g., BeautifulSoup or Playwright) to extract live global data center benchmarks, international power demand statistics, and policy reports, replacing static data ingestion.*
+* `scripts/08_statistical_predictions.py` `[Unpublished]`
+  * *Loads local downloaded data from `data/raw/` (specifically `master_NEM_open_electricity.csv`, `qld_spot_prices.csv`, and `nem_annual_fuel_mix.csv`) and applies statistical models (like ARIMA, Prophet, or regression) to forecast future power consumption growth and estimate green energy deficits.*
+* `scripts/09_generate_projection_charts.py` `[Unpublished]`
+  * *Converts the statistical predictions and deficit models into interactive Plotly charts showcasing the projections and business opportunities. Specifically, it will generate the following diagrams for the dashboard:*
+    * ***Fig 1**: Historical Power Consumption vs. Statistical AI Growth Predictions*
+    * ***Fig 2**: Green Energy Deficit Forecast*
+    * ***Fig 3**: HDRE Opportunity Windows*
 
 ---
 

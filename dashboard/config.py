@@ -32,7 +32,7 @@ CHAPTERS = [
                     "QLD is accelerating its renewable deployment and converging with its peer state NSW."
                 ),
                 "description": (
-                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels."
+                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels.\n\nData is based off scripts/03_fetch_qld_data.py and charted by scripts/04_generate_qld_charts.py."
                 ),
             },
             {
@@ -51,7 +51,7 @@ CHAPTERS = [
                     "The past 24 months show a steady increase in renewable penetration in Queensland's fuel mix."
                 ),
                 "description": (
-                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source."
+                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source.\n\nData is based off scripts/03_fetch_qld_data.py and charted by scripts/04_generate_qld_charts.py."
                 ),
             },
             {
@@ -70,7 +70,7 @@ CHAPTERS = [
                     "High instances of negative spot prices indicate excess solar generation during midday."
                 ),
                 "description": (
-                    "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power."
+                    "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power.\n\nData is based off scripts/03_fetch_qld_data.py and charted by scripts/04_generate_qld_charts.py."
                 ),
             }
         ],
@@ -103,7 +103,7 @@ CHAPTERS = [
                     "make storage and flexible capacity commercially attractive."
                 ),
                 "description": (
-                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals."
+                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
                 ),
             },
             {
@@ -126,7 +126,7 @@ CHAPTERS = [
                     "with seasonal solar peaks reshaping the monthly mix."
                 ),
                 "description": (
-                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix."
+                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
                 ),
             },
             {
@@ -149,7 +149,7 @@ CHAPTERS = [
                     "investment headroom in the NEM."
                 ),
                 "description": (
-                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal."
+                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
                 ),
             },
             {
@@ -172,7 +172,7 @@ CHAPTERS = [
                     "practical map for project development and offtake positioning."
                 ),
                 "description": (
-                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets."
+                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
                 ),
             },
         ],
@@ -202,7 +202,7 @@ CHAPTERS = [
                     "Identifying peak pricing hours is essential for dispatchable storage and battery ROI."
                 ),
                 "description": (
-                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing)."
+                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing).\n\nData is based off scripts/05_fetch_trading_data.py and charted by scripts/06_generate_trading_charts.py."
                 ),
             },
             {
@@ -224,7 +224,8 @@ CHAPTERS = [
                 "description": (
                     "This chart visualizes the market prices and cleared volumes for Regulation Frequency Control Ancillary Services (FCAS). Regulation FCAS is a service used by the grid operator to continuously correct minor deviations in grid frequency (50Hz) caused by momentary imbalances between electricity supply and demand.\n\n"
                     "- Regulation Raise\n"
-                    "- Regulation Lower"
+                    "- Regulation Lower\n\n"
+                    "Data is based off scripts/05_fetch_trading_data.py and charted by scripts/06_generate_trading_charts.py."
                 ),
             },
             {
@@ -250,7 +251,8 @@ CHAPTERS = [
                     "- Slow Raise: Stabilize low frequency within 60 seconds\n"
                     "- Slow Lower: Stabilize high frequency within 60 seconds\n"
                     "- Delayed Raise: Restore frequency within 5 minutes\n"
-                    "- Delayed Lower: Restore frequency within 5 minutes"
+                    "- Delayed Lower: Restore frequency within 5 minutes\n\n"
+                    "Data is based off scripts/05_fetch_trading_data.py and charted by scripts/06_generate_trading_charts.py."
                 ),
             }
         ],
@@ -258,28 +260,51 @@ CHAPTERS = [
     {
         "id": "3",
         "title": "AI data center demand",
-        "subtitle": "AI Data Center Demand Impact",
+        "subtitle": "Projections of Power Consumption Growth & Green Energy Deficits",
         "status": "done",
-        "source": "2024 Global Industry Estimates",
+        "source": "Predictive Models & Local Datasets",
         "figures": [
             {
                 "id": "fig3_1",
                 "number": 1,
-                "title": "Global Data Center Development Assessment",
-                "sidebar_title": "GLOBAL ASSESSMENT",
-                "subtitle": "Australian Growth vs Global Benchmarks",
-                "html_path": "outputs/figures/fig3_1_global_assessment.html",
-                "png_path": "outputs/figures/png/fig3_1_global_assessment.png",
-                "source": "2024 Global Industry Estimates",
-                "metrics": [
-                    {"label": "Data Center Growth", "value": "Accelerating"}
-                ],
-                "takeaway": (
-                    "HDRE can capitalize on the impending AI-driven green energy deficit by developing flexible battery storage and securing firming contracts."
-                ),
-                "description": (
-                    "This assessment compares Australian data center capacity expansions against global benchmarks, evaluating how regulatory constraints and policy subsidies affect grid decarbonisation. The data for this chart is manually aggregated from 2024 Global Industry Estimates and Data Center Capacity Reports, providing a snapshot of current GW capacity by region."
-                ),
+                "title": "Historical Power Consumption vs. AI Growth Predictions",
+                "sidebar_title": "AI GROWTH PREDICTIONS",
+                "subtitle": "Statistical AI Growth Predictions",
+                "html_path": "",
+                "png_path": "",
+                "status": "unpublished",
+                "source": "Downloaded local historical datasets",
+                "metrics": [],
+                "takeaway": "",
+                "description": "",
+            },
+            {
+                "id": "fig3_2",
+                "number": 2,
+                "title": "Green Energy Deficit Forecast",
+                "sidebar_title": "DEFICIT FORECAST",
+                "subtitle": "Forecasted Impending Power Supply Gap",
+                "html_path": "",
+                "png_path": "",
+                "status": "unpublished",
+                "source": "Predictive model outputs",
+                "metrics": [],
+                "takeaway": "",
+                "description": "",
+            },
+            {
+                "id": "fig3_3",
+                "number": 3,
+                "title": "HDRE Opportunity Windows",
+                "sidebar_title": "OPPORTUNITY WINDOWS",
+                "subtitle": "Predicted Deficit Periods vs HDRE Projects",
+                "html_path": "",
+                "png_path": "",
+                "status": "unpublished",
+                "source": "Synthesized from deficit forecast",
+                "metrics": [],
+                "takeaway": "",
+                "description": "",
             }
         ],
     },

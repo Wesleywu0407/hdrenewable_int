@@ -77,7 +77,8 @@ def all_figures() -> list[dict[str, Any]]:
     figures: list[dict[str, Any]] = []
     for chapter in CHAPTERS:
         for figure in chapter.get("figures", []):
-            figures.append({"key": figure_key(chapter, figure), "chapter": chapter, "figure": figure})
+            if figure.get("status", "published") != "unpublished":
+                figures.append({"key": figure_key(chapter, figure), "chapter": chapter, "figure": figure})
     return figures
 
 
@@ -322,6 +323,20 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                 )
                 for figure in chapter["figures"]:
                     key = figure_key(chapter, figure)
+                    fig_status = figure.get("status", "published")
+                    if fig_status == "unpublished":
+                        st.markdown(
+                            f"""
+                            <div class="artifact-card" style="opacity: 0.5;">
+                                <div class="artifact-number">FIG {figure["number"]:02d}</div>
+                                <div class="artifact-title">{escape(figure.get("sidebar_title", figure["title"]).upper())}</div>
+                                <div class="artifact-status">status: unpublished</div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                        continue
+
                     label = f"FIG {figure['number']:02d}\n{figure.get('sidebar_title', figure['title']).upper()}\nstatus: published"
                     active = st.session_state.get("selected_figure") == key
                     if active:
