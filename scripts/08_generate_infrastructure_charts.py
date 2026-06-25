@@ -100,9 +100,9 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             bess_existing = bess_valid[existing_mask]
             bess_proposed = bess_valid[~existing_mask]
 
-            for subset_df, color, name_label in [
-                (bess_existing, BESS_COLOR, "🔋 Existing BESS Sites"),
-                (bess_proposed, "#9b59b6", "🏗️ Proposed BESS Sites")
+            for subset_df, color, name_label, border_color in [
+                (bess_existing, BESS_COLOR, "🔋 Existing BESS Sites", BESS_COLOR_BORDER),
+                (bess_proposed, "#9b59b6", "🏗️ Proposed BESS Sites", "#5e3370")
             ]:
                 if subset_df.empty:
                     continue
@@ -124,6 +124,24 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         f"<i>Source: {source}</i>"
                     )
 
+                # Border trace
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=subset_df["lat"],
+                        lon=subset_df["lon"],
+                        mode="markers",
+                        marker=dict(
+                            size=sizes + 3,
+                            color=border_color,
+                            opacity=0.7,
+                        ),
+                        text=subset_df["name"].tolist(),
+                        hoverinfo="skip",
+                        showlegend=False,
+                        legendgroup="bess",
+                    )
+                )
+                # Fill trace
                 fig.add_trace(
                     go.Scattermapbox(
                         lat=subset_df["lat"],
@@ -166,6 +184,24 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         f"<i>Source: {source}</i>"
                     )
 
+                # Border trace
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=solar_existing["lat"],
+                        lon=solar_existing["lon"],
+                        mode="markers",
+                        marker=dict(
+                            size=sizes + 3,
+                            color="#b8860b",
+                            opacity=0.7,
+                        ),
+                        text=solar_existing["name"].tolist(),
+                        hoverinfo="skip",
+                        showlegend=False,
+                        legendgroup="solar",
+                    )
+                )
+                # Fill trace
                 fig.add_trace(
                     go.Scattermapbox(
                         lat=solar_existing["lat"],

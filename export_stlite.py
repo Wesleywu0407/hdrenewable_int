@@ -1,18 +1,26 @@
 import os
 from script2stlite.functions import create_html, write_text_file, load_all_versions
 
+import sys
+sys.path.insert(0, os.path.abspath("."))
+
+from dashboard.config import CHAPTERS
+
 directory = "."
-app_files = []
+app_files = [
+    "dashboard/config.py",
+    "dashboard/styles.py"
+]
 
-exclude_dirs = {".venv", ".git", "nemosis_cache", "venv", "__pycache__", ".streamlit"}
+for chapter in CHAPTERS:
+    for figure in chapter.get("figures", []):
+        html_path = figure.get("html_path")
+        if html_path and os.path.exists(html_path) and html_path not in app_files:
+            app_files.append(html_path)
+        png_path = figure.get("png_path")
+        if png_path and os.path.exists(png_path) and png_path not in app_files:
+            app_files.append(png_path)
 
-for root, dirs, files in os.walk(directory):
-    dirs[:] = [d for d in dirs if d not in exclude_dirs]
-    for file in files:
-        if file.endswith((".py", ".csv", ".html", ".png", ".toml", ".md")):
-            filepath = os.path.relpath(os.path.join(root, file), directory)
-            if filepath != "dashboard/app.py" and filepath != "export_stlite.py":
-                app_files.append(filepath)
 
 css_vers, top_css, js_vers, top_js, pyo_vers, top_pyo = load_all_versions()
 
