@@ -187,14 +187,15 @@ CHAPTERS = [
             {
                 "id": "fig1_4",
                 "number": 1,
-                "title": "Australian Infrastructure Map: BESS & Data Centres",
+                "title": "Australian Infrastructure Map: BESS, Solar & Data Centres",
                 "sidebar_title": "INFRASTRUCTURE MAP",
-                "subtitle": "Battery Energy Storage Systems & Major Data Centre Locations",
+                "subtitle": "Battery Energy Storage Systems, Solar Farms & Major Data Centre Locations",
                 "html_path": "outputs/figures/fig1_4_infrastructure_map.html",
                 "png_path": "outputs/figures/png/fig1_4_infrastructure_map.png",
                 "source": "OpenElectricity API · Wikipedia · nextdc.com · airtrunk.com · Equinix/OSM",
                 "metrics": [
                     {"label": "BESS Sites", "value": "91", "note": "Australia-wide, all NEM states"},
+                    {"label": "Solar Farms", "value": "136", "note": "Utility-scale"},
                     {"label": "Data Centres", "value": "42", "note": "NextDC, Equinix, AirTrunk, AWS, Google, Microsoft"},
                     {"label": "Coverage", "value": "National", "note": "All NEM regions + WA"},
                 ],
@@ -205,14 +206,14 @@ CHAPTERS = [
                     "opportunities for on-site firming and dispatchable renewable supply."
                 ),
                 "description": (
-                    "This interactive map overlays the locations of Battery Energy Storage Systems (BESS) "
-                    "and major Data Centres across Australia. BESS markers are sized proportionally to "
+                    "This interactive map overlays the locations of Existing/Proposed Battery Energy Storage Systems (BESS), "
+                    "Existing Solar Panels, and major Data Centres across Australia. BESS and solar markers are sized proportionally to "
                     "registered capacity (MW), revealing the scale hierarchy from large grid-scale "
                     "installations like Hornsdale and Victorian Big Battery down to smaller utility projects. "
                     "Data centre markers identify major hyperscaler and colocation operators "
                     "(NextDC, Equinix, AirTrunk, AWS, Microsoft, Google).\n\n"
-                    "**BESS data sources:**\n"
-                    "• OpenElectricity API (openelectricity.org.au) — live registered battery units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
+                    "**BESS & Solar data sources:**\n"
+                    "• OpenElectricity API (openelectricity.org.au) — live registered battery and solar units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
                     "• Wikipedia — Battery_storage_power_station article wikitables (operating, under construction & planned Australian projects)\n"
                     "• Coordinates geocoded live via Nominatim / OpenStreetMap where not embedded in source data\n\n"
                     "**Data centre sources:**\n"

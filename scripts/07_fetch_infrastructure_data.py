@@ -147,14 +147,16 @@ def fetch_bess_openelectricity() -> pd.DataFrame:
                         fueltech = str(getattr(u, "fueltech_id", ""))
                         if "battery" not in fueltech.lower():
                             continue
+                        lat = getattr(f.location, "lat", None) if hasattr(f, "location") and f.location else None
+                        lon = getattr(f.location, "lng", None) if hasattr(f, "location") and f.location else None
                         rows.append({
                             "name": f.name,
                             "code": f.code,
                             "state": region.replace("1", ""),
                             "capacity_mw": getattr(u, "capacity_registered", None),
                             "status": str(getattr(u, "status_id", "")),
-                            "lat": None,
-                            "lon": None,
+                            "lat": lat,
+                            "lon": lon,
                             "source": "OpenElectricity API",
                         })
     except Exception as exc:
@@ -169,10 +171,10 @@ def fetch_bess_openelectricity() -> pd.DataFrame:
     df = (
         df.groupby(["name", "code", "state", "source"], as_index=False)
         .agg(capacity_mw=("capacity_mw", "sum"),
-             status=("status", "first"))
+             status=("status", "first"),
+             lat=("lat", "first"),
+             lon=("lon", "first"))
     )
-    df["lat"] = None
-    df["lon"] = None
     print(f"  [BESS/OE] {len(df)} battery facilities from API.")
     return df
 
@@ -356,6 +358,121 @@ def merge_bess(oe_df: pd.DataFrame, wiki_df: pd.DataFrame) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = None
     return df.reset_index(drop=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────── #
+# Solar: OpenElectricity API and Geocoding
+# ─────────────────────────────────────────────────────────────────────────── #
+
+def fetch_solar_openelectricity() -> pd.DataFrame:
+    """Fetch all NEM solar units from the OpenElectricity API."""
+    try:
+        from openelectricity import OEClient
+    except ImportError:
+        print("  [Solar/OE] openelectricity not installed.")
+        return pd.DataFrame()
+
+    api_key = os.getenv("OPENELECTRICITY_API_KEY")
+    if not api_key:
+        print("  [Solar/OE] No API key — skipping.")
+        return pd.DataFrame()
+
+    rows: list[dict] = []
+    regions = ["NSW1", "QLD1", "VIC1", "SA1", "TAS1"]
+
+    try:
+        with OEClient() as client:
+            for region in regions:
+                print(f"    fetching OE solar facilities {region}...")
+                resp = client.get_facilities(network_id=["NEM"], network_region=region)
+                for f in resp.data:
+                    for u in f.units:
+                        fueltech = str(getattr(u, "fueltech_id", ""))
+                        if "solar" not in fueltech.lower():
+                            continue
+                        lat = getattr(f.location, "lat", None) if hasattr(f, "location") and f.location else None
+                        lon = getattr(f.location, "lng", None) if hasattr(f, "location") and f.location else None
+                        rows.append({
+                            "name": f.name,
+                            "code": f.code,
+                            "state": region.replace("1", ""),
+                            "capacity_mw": getattr(u, "capacity_registered", None),
+                            "status": str(getattr(u, "status_id", "")),
+                            "lat": lat,
+                            "lon": lon,
+                            "source": "OpenElectricity API",
+                        })
+    except Exception as exc:
+        print(f"  [Solar/OE] error: {exc}")
+
+    if not rows:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(rows)
+    # Aggregate units to facility level
+    df["capacity_mw"] = pd.to_numeric(df["capacity_mw"], errors="coerce")
+    df = (
+        df.groupby(["name", "code", "state", "source"], as_index=False)
+        .agg(capacity_mw=("capacity_mw", "sum"),
+             status=("status", "first"),
+             lat=("lat", "first"),
+             lon=("lon", "first"))
+    )
+    print(f"  [Solar/OE] {len(df)} solar facilities from API.")
+    return df
+
+
+def fetch_solar_wikipedia() -> pd.DataFrame:
+    """Fallback stub for Wikipedia solar data."""
+    # Since there is no single comprehensive "List of solar farms in Australia" 
+    # table on Wikipedia that parses cleanly like BESS, we rely primarily 
+    # on OpenElectricity API and geocoding.
+    return pd.DataFrame()
+
+
+def geocode_solar(df: pd.DataFrame) -> pd.DataFrame:
+    """Fill missing lat/lon on Solar rows via Nominatim."""
+    missing = df["lat"].isna() | df["lon"].isna()
+    n_missing = missing.sum()
+    print(f"  [Solar/geocode] geocoding {n_missing} facilities with missing coords...")
+
+    for idx in df[missing].index:
+        name = df.at[idx, "name"]
+        state = df.at[idx, "state"]
+        
+        search_name = name.lower().replace("solar farm", "").replace("solar project", "").strip()
+        query = f"{search_name} solar farm, {state}, Australia"
+        
+        result = geocode(query)
+        if result:
+            df.at[idx, "lat"] = result[0]
+            df.at[idx, "lon"] = result[1]
+        else:
+            # fallback
+            result2 = geocode(f"{name}, {state}, Australia")
+            if result2:
+                df.at[idx, "lat"] = result2[0]
+                df.at[idx, "lon"] = result2[1]
+
+    found = df["lat"].notna().sum()
+    print(f"  [Solar/geocode] {found}/{len(df)} facilities now have coordinates.")
+    return df
+
+
+def fetch_solar() -> pd.DataFrame:
+    """Combine API and geocoded data for solar farms."""
+    oe_df = fetch_solar_openelectricity()
+    wiki_df = fetch_solar_wikipedia()
+    
+    # Merge (simple concat if wiki_df is empty)
+    if not wiki_df.empty:
+        solar_df = pd.concat([oe_df, wiki_df], ignore_index=True).drop_duplicates(subset=["name"])
+    else:
+        solar_df = oe_df
+        
+    if not solar_df.empty:
+        solar_df = geocode_solar(solar_df)
+    return solar_df
 
 
 # ─────────────────────────────────────────────────────────────────────────── #
@@ -777,6 +894,25 @@ def main() -> int:
     size_kb = dc_path.stat().st_size / 1024
     print(f"  saved datacentre_locations.csv: {len(dc_df)} sites, {size_kb:.1f} KB")
     print(f"  sources: {dc_df['source'].value_counts().to_dict()}")
+
+    # ── Solar ────────────────────────────────────────────────────────────── #
+    print("\n[3/3] Fetching Solar locations...")
+    solar_df = fetch_solar()
+    if solar_df.empty:
+        print("  WARNING: No solar data fetched.")
+    else:
+        before = len(solar_df)
+        solar_df = solar_df.dropna(subset=["lat", "lon"])
+        solar_df = solar_df[solar_df["lat"].between(-44, -10) & solar_df["lon"].between(113, 154)]
+        solar_df = solar_df.drop_duplicates(subset=["name"]).reset_index(drop=True)
+        print(f"  dropped {before - len(solar_df)} rows without valid AU coordinates.")
+
+        solar_path = RAW_DIR / "solar_locations.csv"
+        save_cols = [c for c in cols if c in solar_df.columns]
+        solar_df[save_cols].to_csv(solar_path, index=False)
+        size_kb = solar_path.stat().st_size / 1024
+        print(f"  saved solar_locations.csv: {len(solar_df)} sites, {size_kb:.1f} KB")
+        print(f"  sources: {solar_df['source'].value_counts().to_dict()}")
 
     print("\nDone.")
     return 0

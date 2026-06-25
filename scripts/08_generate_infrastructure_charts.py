@@ -56,7 +56,7 @@ def _status_label(status: str | None) -> str:
     return str(status).strip().title()
 
 
-def _capacity_to_size(cap: pd.Series, min_px: float = 8, max_px: float = 40) -> pd.Series:
+def _capacity_to_size(cap: pd.Series, min_px: float = 4, max_px: float = 20) -> pd.Series:
     """Scale MW capacity to marker pixel sizes using sqrt scaling."""
     cap = pd.to_numeric(cap, errors="coerce").fillna(50)
     cap_sqrt = cap.clip(lower=1).pow(0.5)
@@ -86,8 +86,8 @@ def save_png(fig: go.Figure, name: str, width: int = 1400, height: int = 900) ->
 # Chart builder
 # ─────────────────────────────────────────────────────────────────────────── #
 
-def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame) -> go.Figure:
-    """Build a combined Plotly Scattermapbox chart of BESS + Datacentres."""
+def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_df: pd.DataFrame = None) -> go.Figure:
+    """Build a combined Plotly Scattermapbox chart of BESS, Solar + Datacentres."""
 
     fig = go.Figure()
 
@@ -95,41 +95,94 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame) -> go.F
     if not bess_df.empty:
         bess_valid = bess_df.dropna(subset=["lat", "lon"]).copy()
         if not bess_valid.empty:
-            sizes = _capacity_to_size(bess_valid["capacity_mw"])
+            bess_valid["status_lower"] = bess_valid["status"].fillna("").astype(str).str.lower()
+            existing_mask = bess_valid["status_lower"].isin(["operating", "commissioning"])
+            bess_existing = bess_valid[existing_mask]
+            bess_proposed = bess_valid[~existing_mask]
 
-            # Build hover text
-            hover_texts = []
-            for _, row in bess_valid.iterrows():
-                cap = row.get("capacity_mw")
-                cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
-                status = _status_label(row.get("status", ""))
-                state = row.get("state", "")
-                source = row.get("source", "")
-                hover_texts.append(
-                    f"<b>{row['name']}</b><br>"
-                    f"Capacity: {cap_str}<br>"
-                    f"Status: {status}<br>"
-                    f"State: {state}<br>"
-                    f"<i>Source: {source}</i>"
-                )
+            for subset_df, color, name_label in [
+                (bess_existing, BESS_COLOR, "🔋 Existing BESS Sites"),
+                (bess_proposed, "#9b59b6", "🏗️ Proposed BESS Sites")
+            ]:
+                if subset_df.empty:
+                    continue
+                sizes = _capacity_to_size(subset_df["capacity_mw"])
 
-            fig.add_trace(
-                go.Scattermapbox(
-                    lat=bess_valid["lat"],
-                    lon=bess_valid["lon"],
-                    mode="markers",
-                    marker=dict(
-                        size=sizes,
-                        color=BESS_COLOR,
-                        opacity=0.75,
-                    ),
-                    text=hover_texts,
-                    hovertemplate="%{text}<extra></extra>",
-                    name="🔋 BESS Sites",
-                    legendgroup="bess",
+                # Build hover text
+                hover_texts = []
+                for _, row in subset_df.iterrows():
+                    cap = row.get("capacity_mw")
+                    cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
+                    status = _status_label(row.get("status", ""))
+                    state = row.get("state", "")
+                    source = row.get("source", "")
+                    hover_texts.append(
+                        f"<b>{row['name']}</b><br>"
+                        f"Capacity: {cap_str}<br>"
+                        f"Status: {status}<br>"
+                        f"State: {state}<br>"
+                        f"<i>Source: {source}</i>"
+                    )
+
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=subset_df["lat"],
+                        lon=subset_df["lon"],
+                        mode="markers",
+                        marker=dict(
+                            size=sizes,
+                            color=color,
+                            opacity=0.5,
+                        ),
+                        text=hover_texts,
+                        hovertemplate="%{text}<extra></extra>",
+                        name=name_label,
+                        legendgroup="bess",
+                    )
                 )
-            )
-            print(f"  [map] added {len(bess_valid)} BESS markers")
+                print(f"  [map] added {len(subset_df)} {name_label.strip('🔋🏗️ ')} markers")
+
+    # ── Solar trace ────────────────────────────────────────────────────────
+    if solar_df is not None and not solar_df.empty:
+        solar_valid = solar_df.dropna(subset=["lat", "lon"]).copy()
+        if not solar_valid.empty:
+            solar_valid["status_lower"] = solar_valid["status"].fillna("").astype(str).str.lower()
+            solar_existing = solar_valid[solar_valid["status_lower"].isin(["operating", "commissioning"])]
+            
+            if not solar_existing.empty:
+                sizes = _capacity_to_size(solar_existing["capacity_mw"])
+                hover_texts = []
+                for _, row in solar_existing.iterrows():
+                    cap = row.get("capacity_mw")
+                    cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
+                    status = _status_label(row.get("status", ""))
+                    state = row.get("state", "")
+                    source = row.get("source", "")
+                    hover_texts.append(
+                        f"<b>{row['name']}</b><br>"
+                        f"Capacity: {cap_str}<br>"
+                        f"Status: {status}<br>"
+                        f"State: {state}<br>"
+                        f"<i>Source: {source}</i>"
+                    )
+
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=solar_existing["lat"],
+                        lon=solar_existing["lon"],
+                        mode="markers",
+                        marker=dict(
+                            size=sizes,
+                            color="#FFD700",
+                            opacity=0.5,
+                        ),
+                        text=hover_texts,
+                        hovertemplate="%{text}<extra></extra>",
+                        name="☀️ Existing Solar Panels",
+                        legendgroup="solar",
+                    )
+                )
+                print(f"  [map] added {len(solar_existing)} Existing Solar markers")
 
     # ── Datacentre trace ───────────────────────────────────────────────────
     if not dc_df.empty:
@@ -156,7 +209,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame) -> go.F
                     lat=dc_valid["lat"],
                     lon=dc_valid["lon"],
                     mode="markers",
-                    marker=dict(size=24, color="#ffffff", opacity=0.95),
+                    marker=dict(size=14, color="#ffffff", opacity=0.8),
                     text=dc_valid["name"].tolist(),
                     hoverinfo="skip",
                     showlegend=False,
@@ -168,7 +221,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame) -> go.F
                     lat=dc_valid["lat"],
                     lon=dc_valid["lon"],
                     mode="markers",
-                    marker=dict(size=18, color=DC_COLOR, opacity=0.95),
+                    marker=dict(size=10, color=DC_COLOR, opacity=0.8),
                     text=hover_texts,
                     hovertemplate="%{text}<extra></extra>",
                     name="🖥️ Data Centres",
@@ -188,7 +241,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame) -> go.F
         ),
         title=dict(
             text="<b>Australian Energy Infrastructure Map</b><br>"
-                 "<sup>Battery Energy Storage Systems (BESS) · Major Data Centres</sup>",
+                 "<sup>Battery Energy Storage Systems (BESS) · Solar Farms · Major Data Centres</sup>",
             x=0.5,
             xanchor="center",
             font=dict(size=20, color="#1a1a2e"),
@@ -255,6 +308,7 @@ def main() -> int:
 
     bess_path = RAW_DIR / "bess_locations.csv"
     dc_path = RAW_DIR / "datacentre_locations.csv"
+    solar_path = RAW_DIR / "solar_locations.csv"
 
     if not bess_path.exists():
         print(f"WARNING: {bess_path} not found — run 07_fetch_infrastructure_data.py first.")
@@ -270,11 +324,18 @@ def main() -> int:
         dc_df = pd.read_csv(dc_path)
         print(f"  loaded datacentre_locations.csv: {len(dc_df)} rows")
 
-    if bess_df.empty and dc_df.empty:
+    if not solar_path.exists():
+        print(f"WARNING: {solar_path} not found.")
+        solar_df = pd.DataFrame()
+    else:
+        solar_df = pd.read_csv(solar_path)
+        print(f"  loaded solar_locations.csv: {len(solar_df)} rows")
+
+    if bess_df.empty and dc_df.empty and solar_df.empty:
         print("ERROR: No data available to plot.")
         return 1
 
-    fig = build_infrastructure_map(bess_df, dc_df)
+    fig = build_infrastructure_map(bess_df, dc_df, solar_df)
     save_html(fig, "fig1_4_infrastructure_map.html")
     save_png(fig, "fig1_4_infrastructure_map.png")
 
