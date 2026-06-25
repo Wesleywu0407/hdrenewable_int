@@ -91,7 +91,7 @@ def selected_entry(figures: list[dict[str, Any]]) -> dict[str, Any] | None:
     return next(entry for entry in figures if entry["key"] == st.session_state.selected_figure)
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_resource(show_spinner=False)
 def load_realtime_generation(updated_timestamp: float = 0.0) -> tuple[pd.DataFrame, pd.DataFrame]:
     df = pd.read_csv(RAW_DIR / "master_NEM_open_electricity.csv", parse_dates=["date"])
     

@@ -38,5 +38,6 @@ venv/
 outputs/figures/**/*.html
 outputs/figures/**/*.png
 
+dashboard_export*.html
 
 nemosis_cache
