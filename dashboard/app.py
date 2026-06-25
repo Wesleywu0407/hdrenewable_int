@@ -268,14 +268,14 @@ def render_downloads(figure: dict[str, Any]) -> None:
     cols = st.columns(2, gap="small")
     with cols[0]:
         if png_path and png_path.exists():
-            st.download_button("PNG", png_path.read_bytes(), png_path.name, "image/png", width="stretch")
+            st.download_button("PNG", png_path.read_bytes(), png_path.name, "image/png", use_container_width=True)
         else:
-            st.button("PNG", disabled=True, width="stretch")
+            st.button("PNG", disabled=True, use_container_width=True)
     with cols[1]:
         if html_path and html_path.exists():
-            st.download_button("HTML", html_path.read_bytes(), html_path.name, "text/html", width="stretch")
+            st.download_button("HTML", html_path.read_bytes(), html_path.name, "text/html", use_container_width=True)
         else:
-            st.button("HTML", disabled=True, width="stretch")
+            st.button("HTML", disabled=True, use_container_width=True)
 
 
 def render_header(entry: dict[str, Any]) -> None:
@@ -328,7 +328,6 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                         st.markdown(
                             f"""
                             <div class="artifact-card" style="opacity: 0.5;">
-                                <div class="artifact-number">FIG {figure["number"]:02d}</div>
                                 <div class="artifact-title">{escape(figure.get("sidebar_title", figure["title"]).upper())}</div>
                                 <div class="artifact-status">status: unpublished</div>
                             </div>
@@ -337,20 +336,19 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                         )
                         continue
 
-                    label = f"FIG {figure['number']:02d}\n{figure.get('sidebar_title', figure['title']).upper()}\nstatus: published"
+                    label = f"{figure.get('sidebar_title', figure['title']).upper()}\nstatus: published"
                     active = st.session_state.get("selected_figure") == key
                     if active:
                         st.markdown(
                             f"""
                             <div class="artifact-card active">
-                                <div class="artifact-number">FIG {figure["number"]:02d}</div>
                                 <div class="artifact-title">{escape(figure.get("sidebar_title", figure["title"]).upper())}</div>
                                 <div class="artifact-status published">status: published</div>
                             </div>
                             """,
                             unsafe_allow_html=True,
                         )
-                    elif st.button(label, key=f"nav_{key}", width="stretch"):
+                    elif st.button(label, key=f"nav_{key}", use_container_width=True):
                         st.session_state.selected_figure = key
                         st.rerun()
                 continue
@@ -433,7 +431,7 @@ def render_figure_one(entry: dict[str, Any]) -> None:
         render_downloads(figure)
 
     st.markdown('<div class="chart-module hero-module">', unsafe_allow_html=True)
-    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False, "responsive": True})
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False, "responsive": True})
     st.markdown("</div>", unsafe_allow_html=True)
 
     render_metric_tiles(realtime_metrics(df))
@@ -473,7 +471,11 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
     if html_path and html_path.exists():
         iframe_height = figure.get("height", 560)
-        st.iframe(html_path, height=iframe_height)
+        st.components.v1.html(
+            html_path.read_text(encoding="utf-8"),
+            height=iframe_height,
+            scrolling=False,
+        )
     else:
         missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))
         st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)

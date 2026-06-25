@@ -44,7 +44,14 @@ def inject_styles() -> None:
             background: var(--ink);
         }
 
-        header[data-testid="stHeader"],
+        header[data-testid="stHeader"] {
+            display: block !important;
+            visibility: visible !important;
+            height: 0 !important;
+            background: transparent !important;
+            pointer-events: none;
+        }
+
         div[data-testid="stToolbar"],
         div[data-testid="stDecoration"],
         div[data-testid="stStatusWidget"],
@@ -54,6 +61,42 @@ def inject_styles() -> None:
             display: none !important;
             visibility: hidden !important;
             height: 0 !important;
+        }
+
+        div[data-testid="stSidebarCollapseButton"] {
+            display: flex !important;
+            position: absolute;
+            top: 20px;
+            right: 14px;
+            z-index: 10;
+        }
+
+        div[data-testid="stSidebarCollapseButton"] button,
+        header[data-testid="stHeader"] button {
+            width: 30px;
+            height: 30px;
+            min-height: 30px;
+            padding: 0;
+            border: 0.5px solid var(--line);
+            border-radius: 4px;
+            background: var(--panel);
+            color: var(--muted);
+            box-shadow: none;
+            pointer-events: auto;
+        }
+
+        div[data-testid="stSidebarCollapseButton"] button:hover,
+        header[data-testid="stHeader"] button:hover {
+            border-color: var(--line-strong);
+            background: var(--panel-2);
+            color: var(--ivory);
+        }
+
+        header[data-testid="stHeader"] button {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1000;
         }
 
         section.main > div,
