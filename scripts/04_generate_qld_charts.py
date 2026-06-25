@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
@@ -84,8 +85,8 @@ def fig1_1_qld_renewable_share() -> None:
         return
 
     df = pd.read_csv(path, parse_dates=["interval"])
-    # Filter to only QLD1 and NSW1 for comparison
-    df = df[df["network_region"].isin(["QLD1", "NSW1"])].copy()
+    # Filter to only QLD1 and NEM peers for comparison
+    df = df[df["network_region"].isin(["QLD1", "NSW1", "VIC1", "SA1", "TAS1"])].copy()
     
     # Calculate renewable percentage per region, per month
     pivot = df.pivot_table(
@@ -104,7 +105,7 @@ def fig1_1_qld_renewable_share() -> None:
     pivot["renew_pct"] = (pivot[True] / pivot["total"]) * 100
 
     fig = go.Figure()
-    for region in ["QLD1", "NSW1"]:
+    for region in ["QLD1", "NSW1", "VIC1", "SA1", "TAS1"]:
         sub = pivot[pivot["network_region"] == region].sort_values("interval")
         fig.add_trace(
             go.Scatter(
@@ -118,7 +119,7 @@ def fig1_1_qld_renewable_share() -> None:
 
     fig.update_layout(
         template=TEMPLATE,
-        title="Renewable Generation Share: QLD vs NSW",
+        title="Renewable Generation Share: QLD vs NEM Peers",
         yaxis_title="Renewable Share (%)",
         xaxis_title="",
         hovermode="x unified",
@@ -187,30 +188,48 @@ def fig1_3_qld_negative_prices() -> None:
     # Filter only negative prices
     neg_df = df[df["price"] < 0].copy()
     
-    # Count frequency per month. The interval is 1h, so count = hours.
-    neg_df["month"] = neg_df["interval"].dt.to_period("M").dt.to_timestamp()
-    monthly_counts = neg_df.groupby("month").size().reset_index(name="hours")
+    # Calculate frequency and magnitude per day.
+    neg_df["day"] = neg_df["interval"].dt.to_period("D").dt.to_timestamp()
+    daily_stats = neg_df.groupby("day").agg(
+        hours=("interval", "count"),
+        avg_price=("price", "mean"),
+        min_price=("price", "min")
+    ).reset_index()
 
-    fig = go.Figure()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    
     fig.add_trace(
         go.Bar(
-            x=monthly_counts["month"],
-            y=monthly_counts["hours"],
+            x=daily_stats["day"],
+            y=daily_stats["hours"],
             marker_color="#e74c3c",
             name="Negative Price Hours"
-        )
+        ),
+        secondary_y=False,
+    )
+    
+    fig.add_trace(
+        go.Scatter(
+            x=daily_stats["day"],
+            y=daily_stats["min_price"],
+            mode="lines",
+            line=dict(color="#3498db"),
+            name="Min Price ($/MWh)"
+        ),
+        secondary_y=True,
     )
 
     fig.update_layout(
         template=TEMPLATE,
-        title="QLD Negative Spot-Price Frequency",
-        yaxis_title="Hours below $0/MWh",
+        title="QLD Daily Negative Spot-Price Frequency & Magnitude",
         xaxis_title="",
         hovermode="x unified",
         margin=dict(b=110),
     )
-    fig.update_xaxes(tickformat="%Y-%m")
-    add_source_footer(fig, "Count of hourly spot prices < $0/MWh")
+    fig.update_yaxes(title_text="Hours below $0/MWh", secondary_y=False)
+    fig.update_yaxes(title_text="Price ($/MWh)", secondary_y=True)
+    fig.update_xaxes(tickformat="%Y-%m-%d")
+    add_source_footer(fig, "Count of hourly spot prices < $0/MWh & Min price per day")
     save(fig, "fig1_3_qld_negative_prices.html", "fig1_3_qld_negative_prices.png")
 
 

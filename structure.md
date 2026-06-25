@@ -8,15 +8,15 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
 * **1. NEM Grid & Queensland Solar**
   * 1.1 Queensland Renewable Energy Development `[Completed]`
     * *Focuses on QLD's specific energy mix and capacity pipeline, showing recent acceleration and convergence with peer states rather than stagnation. Includes the following diagrams:*
-      * **Fig 1: QLD Renewable Share vs Peers** `[Completed]`: A line chart showing QLD converging with NSW.
+      * **Fig 1: QLD Renewable Share vs Peers** `[Published]`: A line chart showing QLD converging with NSW, now updated to include all other NEM states for broader comparison.
         * *Source*: OpenElectricity `/network/fueltech/mix`
         * *Aggregation*: Monthly renewable vs non-renewable generation ratio
       * **Fig 2: QLD Fuel Mix Evolution** `[Completed]`: A stacked area chart showing generation by fuel type.
         * *Source*: OpenElectricity `/network/fueltech/mix`
         * *Aggregation*: Monthly generation sum per fuel tech over the last 24 months
-      * **Fig 3: QLD Negative Spot-Price Frequency** `[Completed]`: Bar chart of monthly negative price hours.
+      * **Fig 3: QLD Negative Spot-Price Frequency & Magnitude** `[Published]`: Chart of daily negative price occurrences, potentially measuring the magnitude of the price drop.
         * *Source*: OpenElectricity `/network/pricing`
-        * *Aggregation*: Hourly spot prices, counting total hours per month below $0/MWh
+        * *Aggregation*: Daily spot prices, counting frequency and measuring magnitude below $0/MWh
   * 1.2 National Electricity Market (NEM) Grid Analysis `[Completed]`
     * *Analyzes the broader NEM grid. Includes the following diagrams:*
       * **Fig 1: NEM Real-time Generation Mix** `[Completed]`: A 7-day 30-minute interval stacked area chart showing live generation by fuel type.
@@ -31,6 +31,14 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
       * **Fig 4: Coal Retirement Timeline** `[Completed]`: A Gantt chart mapping out the operating lifespan and planned closure dates for NEM coal units.
         * *Source*: OpenElectricity `/facilities`
         * *Aggregation*: Commenced and expected closure dates to map operating lifespans
+  * 1.3 Infrastructure & Storage Mapping `[Planned]`
+    * *Geospatial analysis of energy infrastructure across Australia. Includes:*
+      * **Fig 1: Current BESS Locations (Australia-wide)** `[Planned]`: A map visualization of existing Battery Energy Storage Systems (BESS) locations across Australia.
+        * *Source*: Web scraping / Custom dataset
+        * *Aggregation*: Geospatial coordinates and capacity data
+      * **Fig 2: Existing Datacentre Locations** `[Planned]`: A map showing locations of major datacentres to overlay with energy storage and generation.
+        * *Source*: External dataset / Web scraping
+        * *Aggregation*: Geospatial coordinates
 * **2. Electricity Trading Market Volatility**
   * > **Dashboard note:** Figures 2.1, 2.2, and 2.3 are all grouped under a single `2.1` chapter in `config.py` (Electricity trading market).
   * 2.1 Spot Market (Power Supply) `[Completed]`
@@ -48,6 +56,11 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
       * **Fig 3: Contingency FCAS Market Value Breakdown**: Stacked bar chart comparing the value of Fast (6s), Slow (60s), and Delayed (5m) responses.
         * *Source*: NEMOSIS (AEMO MMS Data)
         * *Aggregation*: Total market value derived from price × volume over the reporting period
+  * 2.4 Weather & Market Price Correlation `[Planned]`
+    * *Analyzes how weather trends impact energy consumption and market prices to inform trading strategies (buy/sell timing).*
+      * **Fig 4: Weather Trends & Market Price Impact**: Overlay chart comparing weather variables against spot prices and energy demand.
+        * *Source*: BOM / OpenElectricity
+        * *Aggregation*: Daily/Hourly weather data correlated with price and consumption metrics
 
 
 ### Main Dashboard Layout
@@ -106,23 +119,9 @@ To power the dashboard above, the data ingestion and chart generation pipeline i
 
 ---
 
-## 3. Technical Migration Tasks
+## 3. Architectural Notes
 
-If moving away from Streamlit to a true native HTML/JS/CSS app:
-* **Initialize Vite/React web application** `[Not Started]`
-  * *Sets up a fast, modern frontend framework to host the dashboard.*
-* **Set up premium Vanilla CSS design system** `[Not Started]`
-  * *Implements the strict dark mode UI, glassmorphism, and micro-animations to create a premium "research terminal" feel.*
-* **Convert Python HTML chart exports to JSON data exports** `[Not Started]`
-  * *Changes the Python pipeline to output raw JSON data instead of static HTML files, allowing the frontend to control rendering.*
-* **Implement native frontend charting** `[Not Started]`
-  * *Uses a JavaScript library (like Recharts or Plotly.js) to draw the charts natively in the browser using the JSON data.*
-
----
-
-## 4. Architectural Notes
-
-### 4.1 Data Resolution and the 7-Day Window
+### 3.1 Data Resolution and the 7-Day Window
 The dashboard's real-time charts specifically pull data over a **7-day rolling window**. The primary reason for this constraint is to ensure the ingestion of **5-minute interval data**.
 
 * **NEM Market Mechanics:** As of October 1, 2021, the Australian Energy Market Operator (AEMO) transitioned the National Electricity Market (NEM) to a **Five Minute Settlement (5MS)** rule, matching the physical 5-minute dispatch process.
