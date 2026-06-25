@@ -6,6 +6,7 @@ from datetime import datetime
 from html import escape
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 import streamlit as st
 
@@ -114,71 +115,61 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
         )
         if figures and "selected_figure" not in st.session_state:
             st.session_state.selected_figure = figures[0]["key"]
+        requested_figure = st.query_params.get("figure")
+        valid_figure_keys = {entry["key"] for entry in figures}
+        if requested_figure in valid_figure_keys:
+            st.session_state.selected_figure = requested_figure
 
         for chapter in CHAPTERS:
             status = chapter.get("status", "planned")
-            if status == "done" and chapter.get("figures"):
+            chapter_keys = {
+                figure_key(chapter, figure)
+                for figure in chapter.get("figures", [])
+            }
+            is_current_chapter = st.session_state.get("selected_figure") in chapter_keys
+            chapter_label = f"Chapter {chapter['id']} · {chapter['title']}"
+
+            with st.expander(chapter_label, expanded=is_current_chapter):
+                if status == "done" and chapter.get("figures"):
+                    for figure in chapter["figures"]:
+                        key = figure_key(chapter, figure)
+                        fig_status = figure.get("status", "published")
+                        if fig_status == "unpublished":
+                            st.markdown(
+                                f"""
+                                <div class="artifact-card" style="opacity: 0.5;">
+                                    <div class="artifact-title"><span class="artifact-dot dot-planned"></span>{escape(figure.get("sidebar_title", figure["title"]).upper())}</div>
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            continue
+
+                        label = figure.get("sidebar_title", figure["title"]).upper()
+                        active = st.session_state.get("selected_figure") == key
+                        active_class = " active" if active else ""
+                        st.markdown(
+                            f"""
+                            <a class="artifact-card{active_class}" href="?figure={quote(key)}" target="_self">
+                                <div class="artifact-title"><span class="artifact-dot dot-published"></span>{escape(label)}</div>
+                            </a>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    continue
+
+                status_label = "in progress" if status == "wip" else "planned"
                 st.markdown(
-                    f'<div class="chapter-strip">Chapter {escape(chapter["id"])} · {escape(chapter["title"])}</div>',
+                    f"""
+                    <div class="roadmap-card">
+                        <div class="artifact-number">{escape(chapter["id"])}</div>
+                        <div class="artifact-title">{escape(chapter["title"]).upper()}</div>
+                        <div class="artifact-status">{status_label}</div>
+                        <div class="roadmap-subtitle">{escape(chapter.get("subtitle", ""))}</div>
+                    </div>
+                    """,
                     unsafe_allow_html=True,
                 )
-                for figure in chapter["figures"]:
-                    key = figure_key(chapter, figure)
-                    fig_status = figure.get("status", "published")
-                    if fig_status == "unpublished":
-                        st.markdown(
-                            f"""
-                            <div class="artifact-card" style="opacity: 0.5;">
-                                <div class="artifact-title">{escape(figure.get("sidebar_title", figure["title"]).upper())}</div>
-                                <div class="artifact-status">status: unpublished</div>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                        continue
-
-                    label = f"{figure.get('sidebar_title', figure['title']).upper()}\nstatus: published"
-                    active = st.session_state.get("selected_figure") == key
-                    if active:
-                        st.markdown(
-                            f"""
-                            <div class="artifact-card active">
-                                <div class="artifact-title">{escape(figure.get("sidebar_title", figure["title"]).upper())}</div>
-                                <div class="artifact-status published">status: published</div>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    elif st.button(label, key=f"nav_{key}", use_container_width=True):
-                        st.session_state.selected_figure = key
-                        st.rerun()
-                continue
-
-            status_label = "in progress" if status == "wip" else "planned"
-            st.markdown(
-                f"""
-                <div class="roadmap-card">
-                    <div class="artifact-number">{escape(chapter["id"])}</div>
-                    <div class="artifact-title">{escape(chapter["title"]).upper()}</div>
-                    <div class="artifact-status">{status_label}</div>
-                    <div class="roadmap-subtitle">{escape(chapter.get("subtitle", ""))}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        total_figures = sum(len(ch.get("figures", [])) for ch in CHAPTERS if ch.get("status") == "done")
-        st.markdown(
-            f"""
-            <div class="sidebar-footer">
-                <div class="sidebar-footer-label">operational scope</div>
-                <div class="sidebar-footer-row"><span>NEM regions</span><span>5</span></div>
-                <div class="sidebar-footer-row"><span>Published figures</span><span>{total_figures}</span></div>
-                <div class="sidebar-footer-row"><span>Mode</span><span>research</span></div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
 
 def render_standard_metrics(metrics: list[dict[str, str]]) -> None:

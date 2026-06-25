@@ -52,7 +52,6 @@ def inject_styles() -> None:
             pointer-events: none;
         }
 
-        div[data-testid="stToolbar"],
         div[data-testid="stDecoration"],
         div[data-testid="stStatusWidget"],
         div[data-testid="stDeployButton"],
@@ -63,8 +62,58 @@ def inject_styles() -> None:
             height: 0 !important;
         }
 
-        div[data-testid="stSidebarCollapseButton"] {
+        div[data-testid="stToolbar"] {
+            display: block !important;
+            visibility: visible !important;
+            height: 0 !important;
+            pointer-events: none !important;
+        }
+
+        div[data-testid="stToolbar"] button:not([data-testid="stExpandSidebarButton"]) {
+            display: none !important;
+        }
+
+        button[data-testid="stExpandSidebarButton"] {
+            display: none !important;
+        }
+
+        body:has(section[data-testid="stSidebar"][aria-expanded="false"])
+        button[data-testid="stExpandSidebarButton"] {
             display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1000;
+            width: 30px;
+            height: 30px;
+            min-height: 30px;
+            padding: 0;
+            border: 0.5px solid var(--line);
+            border-radius: 4px;
+            background: var(--panel);
+            color: var(--muted);
+            box-shadow: none;
+            pointer-events: auto !important;
+        }
+
+        body:has(section[data-testid="stSidebar"][aria-expanded="false"])
+        button[data-testid="stExpandSidebarButton"]:hover {
+            border-color: var(--line-strong);
+            background: var(--panel-2);
+            color: var(--ivory);
+        }
+
+        div[data-testid="stSidebarCollapseButton"],
+        div[data-testid="collapsedControl"] {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        div[data-testid="stSidebarCollapseButton"] {
             position: absolute;
             top: 20px;
             right: 14px;
@@ -72,7 +121,7 @@ def inject_styles() -> None:
         }
 
         div[data-testid="stSidebarCollapseButton"] button,
-        header[data-testid="stHeader"] button {
+        div[data-testid="collapsedControl"] button {
             width: 30px;
             height: 30px;
             min-height: 30px;
@@ -83,16 +132,18 @@ def inject_styles() -> None:
             color: var(--muted);
             box-shadow: none;
             pointer-events: auto;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         div[data-testid="stSidebarCollapseButton"] button:hover,
-        header[data-testid="stHeader"] button:hover {
+        div[data-testid="collapsedControl"] button:hover {
             border-color: var(--line-strong);
             background: var(--panel-2);
             color: var(--ivory);
         }
 
-        header[data-testid="stHeader"] button {
+        div[data-testid="collapsedControl"] {
             position: fixed;
             top: 14px;
             left: 14px;
@@ -162,18 +213,65 @@ def inject_styles() -> None:
             text-transform: uppercase;
         }
 
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] {
+            margin-top: 8px;
+            border: 0;
+            border-top: 0.5px solid var(--line);
+            border-radius: 0;
+            background: transparent;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] details {
+            border: 0;
+            background: transparent;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+            min-height: 0;
+            padding: 8px 4px 6px;
+            border: 0 !important;
+            outline: 0 !important;
+            background: transparent !important;
+            color: var(--faint);
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 9px;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0.035em;
+            box-shadow: none !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] summary:hover {
+            color: var(--ivory);
+            background: rgba(255,255,255,0.025) !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] summary p {
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+            padding: 0;
+        }
+
         .artifact-card,
         .roadmap-card {
-            margin: 7px 0;
-            padding: 10px 11px;
-            border: 0.5px solid var(--line);
-            background: #0B1117;
-            border-radius: 8px;
+            display: block;
+            margin: 3px 0;
+            padding: 7px 9px;
+            border: 0;
+            border-bottom: 0.5px solid var(--line);
+            background: transparent;
+            border-radius: 0;
+            color: inherit;
+            text-decoration: none;
         }
 
         .artifact-card.active {
-            border-color: rgba(102,183,200,0.46);
-            background: #101B23;
+            border-left: 2px solid var(--wind);
+            border-bottom-color: var(--line);
+            background: rgba(102,183,200,0.07);
         }
 
         .artifact-number {
@@ -185,18 +283,44 @@ def inject_styles() -> None:
         }
 
         .artifact-title {
-            margin-top: 6px;
+            margin-top: 2px;
             font-size: 13px;
             line-height: 1.25;
             color: var(--ivory);
             font-weight: 500;
         }
 
+        .artifact-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+            border: 0;
+            box-shadow: none;
+        }
+
+        .artifact-dot.dot-published { background: #00D9A3; }
+        .artifact-dot.dot-draft     { background: #FAC775; }
+        .artifact-dot.dot-planned   { background: rgba(255,255,255,0.2); }
+
+        .artifact-card:hover,
+        .artifact-card:hover .artifact-title {
+            text-decoration: none;
+        }
+
         .artifact-status {
-            margin-top: 8px;
-            font-size: 11px;
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 5px;
+            border: 0.5px solid currentColor;
+            border-radius: 999px;
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 8px;
             line-height: 1.2;
             color: var(--warning);
+            opacity: 0.72;
         }
 
         .artifact-status.published {
@@ -216,23 +340,24 @@ def inject_styles() -> None:
 
         section[data-testid="stSidebar"] div[data-testid="stButton"] button {
             width: 100%;
-            min-height: 68px;
+            min-height: 52px;
             justify-content: flex-start;
-            padding: 10px 11px;
-            border: 0.5px solid var(--line);
-            border-radius: 8px;
-            background: #0B1117;
+            padding: 7px 9px;
+            border: 0;
+            border-bottom: 0.5px solid var(--line);
+            border-radius: 0;
+            background: transparent;
             color: var(--muted);
             font-size: 12px;
-            line-height: 1.45;
+            line-height: 1.35;
             text-align: left;
             white-space: pre-line;
             box-shadow: none;
         }
 
         section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
-            border-color: rgba(102,183,200,0.36);
-            background: #101820;
+            border-bottom-color: rgba(102,183,200,0.36);
+            background: rgba(102,183,200,0.05);
             color: var(--ivory);
             box-shadow: none;
         }
