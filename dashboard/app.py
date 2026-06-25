@@ -472,7 +472,8 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
 
     st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
     if html_path and html_path.exists():
-        st.iframe(html_path, height=560)
+        iframe_height = figure.get("height", 560)
+        st.iframe(html_path, height=iframe_height)
     else:
         missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))
         st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)

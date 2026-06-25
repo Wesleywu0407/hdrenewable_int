@@ -53,7 +53,7 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
       * **Fig 3: Contingency FCAS Market Value Breakdown**: Stacked bar chart comparing the value of Fast (6s), Slow (60s), and Delayed (5m) responses.
         * *Source*: NEMOSIS (AEMO MMS Data)
         * *Aggregation*: Total market value derived from price × volume over the reporting period
-  * 2.4 Weather & Market Price Correlation `[Planned]`
+  * 2.2 Weather & Market Price Correlation `[Published]`
     * *Analyzes how weather trends impact energy consumption and market prices to inform trading strategies (buy/sell timing).*
       * **Fig 4: Weather Trends & Market Price Impact**: Overlay chart comparing weather variables against spot prices and energy demand.
         * *Source*: BOM / OpenElectricity

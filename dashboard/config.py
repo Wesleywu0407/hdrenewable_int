@@ -305,4 +305,34 @@ CHAPTERS = [
         ],
     },
 
+    {
+        "id": "2.2",
+        "title": "Weather & Market Price Correlation",
+        "subtitle": "Environmental Influence on Target Metrics",
+        "status": "done",
+        "source": "Open-Meteo API / OpenElectricity API",
+        "figures": [
+            {
+                "id": "fig2_4",
+                "number": 1,
+                "title": "Weather & Market Price Correlation",
+                "sidebar_title": "WEATHER & SPOT PRICE",
+                "subtitle": "Temperature, Demand, and Solar Irradiance Impact",
+                "html_path": "outputs/figures/fig2_4_weather_correlation.html",
+                "png_path": "",
+                "source": "Open-Meteo & OpenElectricity API",
+                "height": 950,
+                "metrics": [
+                    {"label": "Data window", "value": "Available history", "note": "Merged hourly data"},
+                    {"label": "Weather points", "value": "Temp / Solar / Wind"}
+                ],
+                "takeaway": (
+                    "Extreme weather directly drives spot price volatility and demand surges."
+                ),
+                "description": (
+                    "This interactive chart provides a time-series view of hourly temperature against spot prices and demand, as well as a scatter plot comparing solar irradiance with market prices. It reveals how high midday solar correlates with negative prices, and how extreme temperatures trigger price spikes.\n\nData is based off scripts/09_fetch_weather_data.py and charted by scripts/10_generate_weather_charts.py."
+                ),
+            }
+        ]
+    }
 ]
