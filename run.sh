@@ -12,19 +12,23 @@ GENERATE=false
 DASHBOARD=false
 ALL=true
 
+INFRA=false
+
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --fetch) FETCH=true; ALL=false ;;
         --generate) GENERATE=true; ALL=false ;;
         --dashboard) DASHBOARD=true; ALL=false ;;
+        --infrastructure) INFRA=true; ALL=false ;;
         --help|-h)
             echo "Usage: ./run.sh [options]"
             echo "Options:"
-            echo "  --fetch       Fetch raw datasets from OpenElectricity API"
-            echo "  --generate    Generate interactive HTML & PNG charts"
-            echo "  --dashboard   Start the Streamlit dashboard"
-            echo "  -h, --help    Show this help message"
+            echo "  --fetch           Fetch raw datasets from OpenElectricity API"
+            echo "  --generate        Generate interactive HTML & PNG charts"
+            echo "  --dashboard       Start the Streamlit dashboard"
+            echo "  --infrastructure  Fetch infrastructure data & regenerate map only"
+            echo "  -h, --help        Show this help message"
             echo ""
             echo "If no options are provided, the script runs the complete pipeline (fetch -> generate -> dashboard)."
             exit 0
@@ -74,6 +78,7 @@ if [ "$FETCH" = true ]; then
     python scripts/01_fetch_nem_data.py
     python scripts/03_fetch_qld_data.py
     python scripts/05_fetch_trading_data.py
+    python scripts/07_fetch_infrastructure_data.py
 fi
 
 # Execute Generate phase
@@ -84,7 +89,20 @@ if [ "$GENERATE" = true ]; then
     python scripts/02_generate_charts.py
     python scripts/04_generate_qld_charts.py
     python scripts/06_generate_trading_charts.py
+    python scripts/08_generate_infrastructure_charts.py
 
+fi
+
+# Execute Infrastructure-only phase
+if [ "$INFRA" = true ]; then
+    echo "=========================================="
+    echo "Fetching & generating infrastructure map..."
+    echo "=========================================="
+    if [ -f ".env" ]; then
+        export $(grep -v '^#' .env | xargs) 2>/dev/null || true
+    fi
+    python scripts/07_fetch_infrastructure_data.py
+    python scripts/08_generate_infrastructure_charts.py
 fi
 
 # Execute Dashboard phase

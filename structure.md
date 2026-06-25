@@ -31,14 +31,11 @@ Here is the structural outline for the Streamlit Dashboard and the underlying da
       * **Fig 4: Coal Retirement Timeline** `[Completed]`: A Gantt chart mapping out the operating lifespan and planned closure dates for NEM coal units.
         * *Source*: OpenElectricity `/facilities`
         * *Aggregation*: Commenced and expected closure dates to map operating lifespans
-  * 1.3 Infrastructure & Storage Mapping `[Planned]`
+  * 1.3 Infrastructure & Storage Mapping `[Completed]`
     * *Geospatial analysis of energy infrastructure across Australia. Includes:*
-      * **Fig 1: Current BESS Locations (Australia-wide)** `[Planned]`: A map visualization of existing Battery Energy Storage Systems (BESS) locations across Australia.
-        * *Source*: Web scraping / Custom dataset
-        * *Aggregation*: Geospatial coordinates and capacity data
-      * **Fig 2: Existing Datacentre Locations** `[Planned]`: A map showing locations of major datacentres to overlay with energy storage and generation.
-        * *Source*: External dataset / Web scraping
-        * *Aggregation*: Geospatial coordinates
+      * **Fig 1: BESS & Data Centre Infrastructure Map** `[Published]`: A combined interactive map overlaying Battery Energy Storage System (BESS) locations and major Data Centre sites across Australia.
+        * *Source*: OpenElectricity API (battery units) · Wikipedia (energy storage project list) · Baxtel · Datacentermap.com · Curated public project records
+        * *Aggregation*: Geospatial coordinates and capacity data, BESS markers sized by registered MW
 * **2. Electricity Trading Market Volatility**
   * > **Dashboard note:** Figures 2.1, 2.2, and 2.3 are all grouped under a single `2.1` chapter in `config.py` (Electricity trading market).
   * 2.1 Spot Market (Power Supply) `[Completed]`
@@ -110,6 +107,12 @@ To power the dashboard above, the data ingestion and chart generation pipeline i
   * *Pulls QLD-specific facility capacity, historical additions, and spot price data into CSV files.*
 * `scripts/04_generate_qld_charts.py` `[Completed]`
   * *Converts the fetched QLD CSV data into standalone, interactive Plotly HTML charts.*
+* `scripts/07_fetch_infrastructure_data.py` `[Completed]`
+  * *Fetches geospatial data for Australian BESS sites (from OpenElectricity API + Wikipedia) and major Data Centres (from Baxtel, Datacentermap.com, and curated records) into CSV files.*
+* `scripts/08_generate_infrastructure_charts.py` `[Completed]`
+  * *Renders an interactive Plotly Scattermapbox overlaying BESS and Datacentre locations across Australia, saved as fig1_4_infrastructure_map.html.*
+* `scripts/run_infrastructure_scrape.sh` `[Completed]`
+  * *Standalone shell script to re-run only the Chapter 1.3 data ingestion and map generation pipeline independently.*
 
 ### Chapter 2: Electricity Trading Market Volatility
 * `scripts/05_fetch_trading_data.py` `[Completed]`

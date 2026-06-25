@@ -178,6 +178,53 @@ CHAPTERS = [
         ],
     },
     {
+        "id": "1.3",
+        "title": "Infrastructure & Storage Mapping",
+        "subtitle": "Geospatial Analysis of Australian Energy Infrastructure",
+        "status": "done",
+        "source": "OpenElectricity API · Wikipedia (Battery_storage_power_station) · nextdc.com · airtrunk.com · Equinix (Nominatim/OSM)",
+        "figures": [
+            {
+                "id": "fig1_4",
+                "number": 1,
+                "title": "Australian Infrastructure Map: BESS & Data Centres",
+                "sidebar_title": "INFRASTRUCTURE MAP",
+                "subtitle": "Battery Energy Storage Systems & Major Data Centre Locations",
+                "html_path": "outputs/figures/fig1_4_infrastructure_map.html",
+                "png_path": "outputs/figures/png/fig1_4_infrastructure_map.png",
+                "source": "OpenElectricity API · Wikipedia · nextdc.com · airtrunk.com · Equinix/OSM",
+                "metrics": [
+                    {"label": "BESS Sites", "value": "91", "note": "Australia-wide, all NEM states"},
+                    {"label": "Data Centres", "value": "42", "note": "NextDC, Equinix, AirTrunk, AWS, Google, Microsoft"},
+                    {"label": "Coverage", "value": "National", "note": "All NEM regions + WA"},
+                ],
+                "takeaway": (
+                    "Australia's BESS pipeline is geographically concentrated in NSW, VIC and SA "
+                    "— precisely where coal retirements are most imminent. Data centres cluster "
+                    "in the same eastern seaboard corridors, creating strong co-location "
+                    "opportunities for on-site firming and dispatchable renewable supply."
+                ),
+                "description": (
+                    "This interactive map overlays the locations of Battery Energy Storage Systems (BESS) "
+                    "and major Data Centres across Australia. BESS markers are sized proportionally to "
+                    "registered capacity (MW), revealing the scale hierarchy from large grid-scale "
+                    "installations like Hornsdale and Victorian Big Battery down to smaller utility projects. "
+                    "Data centre markers identify major hyperscaler and colocation operators "
+                    "(NextDC, Equinix, AirTrunk, AWS, Microsoft, Google).\n\n"
+                    "**BESS data sources:**\n"
+                    "• OpenElectricity API (openelectricity.org.au) — live registered battery units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
+                    "• Wikipedia — Battery_storage_power_station article wikitables (operating, under construction & planned Australian projects)\n"
+                    "• Coordinates geocoded live via Nominatim / OpenStreetMap where not embedded in source data\n\n"
+                    "**Data centre sources:**\n"
+                    "• nextdc.com — facility pages scraped for all 14 operating Australian sites (S1–S6, M1–M3, B1–B2, P1–P2, C1, A1, SC1)\n"
+                    "• airtrunk.com — facility pages scraped for SYD1, SYD2, SYD3, MEL1, MEL2\n"
+                    "• Equinix — 13 Australian sites (SY1–SY6, ME1–ME3, BR1, PE1, AD1, CA1) geocoded via Nominatim/OSM using publicly listed suburb locations\n"
+                    "• Cloud provider regions (AWS, Google Cloud, Microsoft Azure, Oracle Cloud) geocoded via Nominatim/OSM"
+                ),
+            },
+        ],
+    },
+    {
         "id": "2.1",
         "title": "Electricity trading market",
         "subtitle": "Electricity Trading Market Volatility",
