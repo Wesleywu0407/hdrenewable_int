@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from html import escape
 from pathlib import Path
+import re
 from typing import Any
 from urllib.parse import quote
 
@@ -20,6 +21,42 @@ except ImportError:
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
+
+CARD_COLOR_PALETTE = {
+    "fossil": "#8B6F47",
+    "wind": "#1F8A5C",
+    "solar": "#F5A623",
+    "storage": "#5B8DEF",
+    "market": "#6B5BD9",
+}
+
+CARD_CATEGORY_RULES = [
+    ("coal", "fossil"),
+    ("retired units", "fossil"),
+    ("operating units", "fossil"),
+    ("retiring by", "fossil"),
+    ("gas", "fossil"),
+    ("solar", "solar"),
+    ("price volatility", "solar"),
+    ("wind", "wind"),
+    ("renewables", "wind"),
+    ("renewable", "wind"),
+    ("hydro", "wind"),
+    ("bess", "storage"),
+    ("battery", "storage"),
+    ("fcas", "storage"),
+    ("regulation", "storage"),
+    ("contingency", "storage"),
+    ("data centres", "market"),
+    ("data centre", "market"),
+    ("data window", "market"),
+    ("weather points", "market"),
+    ("spot price", "market"),
+    ("price heatmap", "market"),
+    ("comparison", "market"),
+]
+
+DEFAULT_CATEGORY = "market"
 
 
 def get_last_updated() -> datetime:
@@ -80,6 +117,17 @@ def render_downloads(figure: dict[str, Any]) -> None:
             st.button("HTML", disabled=True, use_container_width=True)
 
 
+def metric_category(label: str) -> str:
+    normalized_label = label.lower()
+    for keyword, category in CARD_CATEGORY_RULES:
+        if " " in keyword and keyword in normalized_label:
+            return category
+        if " " not in keyword and re.search(rf"\b{re.escape(keyword)}\b", normalized_label):
+            return category
+    print(f"[dashboard] KPI card category fallback: {label!r} -> {DEFAULT_CATEGORY}")
+    return DEFAULT_CATEGORY
+
+
 def render_header(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
     chapter = entry["chapter"]
@@ -103,12 +151,13 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
     with st.sidebar:
         st.markdown(
             """
-            <div class="sidebar-brand">
-                <div class="sidebar-mark">HDRE</div>
-                <div>
-                    <div class="sidebar-title">FIELD INDEX</div>
-                    <div class="sidebar-caption">Australia NEM research atlas</div>
-                </div>
+            <div class="hdre-branding">
+                <a href="/" target="_self" class="hdre-wordmark-link">
+                    <div class="hdre-wordmark">HDRE</div>
+                </a>
+                <div class="hdre-divider"></div>
+                <div class="hdre-label">FIELD INDEX</div>
+                <div class="hdre-subtitle">Australia NEM research atlas</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -119,6 +168,8 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
         valid_figure_keys = {entry["key"] for entry in figures}
         if requested_figure in valid_figure_keys:
             st.session_state.selected_figure = requested_figure
+        elif figures and not requested_figure:
+            st.session_state.selected_figure = figures[0]["key"]
 
         for chapter in CHAPTERS:
             status = chapter.get("status", "planned")
@@ -175,10 +226,11 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
 def render_standard_metrics(metrics: list[dict[str, str]]) -> None:
     columns = st.columns(max(1, min(3, len(metrics))), gap="small")
     for col, metric in zip(columns, metrics):
+        category = metric_category(metric["label"])
         with col:
             st.markdown(
                 f"""
-                <div class="instrument-tile compact">
+                <div class="instrument-tile compact kpi-card kpi-card--{category}">
                     <div class="instrument-label">{escape(metric["label"])}</div>
                     <div class="instrument-value">{escape(metric["value"])}</div>
                 </div>

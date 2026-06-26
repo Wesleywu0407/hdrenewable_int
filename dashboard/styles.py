@@ -10,6 +10,9 @@ def inject_styles() -> None:
     st.markdown(
         """
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
         :root {
             --ink: #090D12;
             --navy: #0D141B;
@@ -41,7 +44,7 @@ def inject_styles() -> None:
         }
 
         .stApp {
-            background: var(--ink);
+            background: #0D1612;
         }
 
         header[data-testid="stHeader"] {
@@ -90,19 +93,19 @@ def inject_styles() -> None:
             height: 30px;
             min-height: 30px;
             padding: 0;
-            border: 0.5px solid var(--line);
-            border-radius: 4px;
-            background: var(--panel);
-            color: var(--muted);
-            box-shadow: none;
+            border: none !important;
+            border-radius: 6px;
+            background: transparent !important;
+            background-color: transparent !important;
+            color: #FFFFFF !important;
+            box-shadow: none !important;
             pointer-events: auto !important;
         }
 
         body:has(section[data-testid="stSidebar"][aria-expanded="false"])
         button[data-testid="stExpandSidebarButton"]:hover {
-            border-color: var(--line-strong);
-            background: var(--panel-2);
-            color: var(--ivory);
+            background-color: rgba(255, 255, 255, 0.06) !important;
+            color: #FFFFFF !important;
         }
 
         div[data-testid="stSidebarCollapseButton"],
@@ -126,11 +129,12 @@ def inject_styles() -> None:
             height: 30px;
             min-height: 30px;
             padding: 0;
-            border: 0.5px solid var(--line);
-            border-radius: 4px;
-            background: var(--panel);
-            color: var(--muted);
-            box-shadow: none;
+            border: none !important;
+            border-radius: 6px;
+            background: transparent !important;
+            background-color: transparent !important;
+            color: #FFFFFF !important;
+            box-shadow: none !important;
             pointer-events: auto;
             visibility: visible !important;
             opacity: 1 !important;
@@ -138,9 +142,60 @@ def inject_styles() -> None:
 
         div[data-testid="stSidebarCollapseButton"] button:hover,
         div[data-testid="collapsedControl"] button:hover {
-            border-color: var(--line-strong);
-            background: var(--panel-2);
-            color: var(--ivory);
+            background-color: rgba(255, 255, 255, 0.06) !important;
+            color: #FFFFFF !important;
+        }
+
+        div[data-testid="stSidebarCollapseButton"] button svg,
+        div[data-testid="collapsedControl"] button svg,
+        button[data-testid="stExpandSidebarButton"] svg,
+        button[data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"],
+        button[kind="header"][data-testid="baseButton-headerNoPadding"] svg,
+        button[kind="headerNoPadding"] [data-testid="stIconMaterial"],
+        [data-testid="stSidebarCollapsedControl"] button svg {
+            color: #FFFFFF !important;
+            fill: #FFFFFF !important;
+            opacity: 1 !important;
+        }
+
+        /* Floating expand button (visible when sidebar is collapsed) */
+        [data-testid="stSidebarCollapsedControl"],
+        [data-testid="collapsedControl"],
+        button[data-testid="stSidebarCollapsedControl"],
+        button[data-testid="stExpandSidebarButton"],
+        button[kind="headerNoPadding"] {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        [data-testid="stSidebarCollapsedControl"] button,
+        [data-testid="collapsedControl"] button {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        [data-testid="stSidebarCollapsedControl"] svg,
+        [data-testid="collapsedControl"] svg,
+        [data-testid="stSidebarCollapsedControl"] button svg,
+        [data-testid="collapsedControl"] button svg,
+        button[data-testid="stExpandSidebarButton"] svg,
+        button[data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] {
+            color: #FFFFFF !important;
+            fill: #FFFFFF !important;
+            opacity: 1 !important;
+        }
+
+        [data-testid="stSidebarCollapsedControl"]:hover,
+        [data-testid="collapsedControl"]:hover,
+        [data-testid="stSidebarCollapsedControl"] button:hover,
+        [data-testid="collapsedControl"] button:hover,
+        button[data-testid="stExpandSidebarButton"]:hover {
+            background-color: rgba(255, 255, 255, 0.06) !important;
+            border-radius: 6px !important;
         }
 
         div[data-testid="collapsedControl"] {
@@ -159,48 +214,117 @@ def inject_styles() -> None:
         section[data-testid="stSidebar"] {
             width: 310px !important;
             min-width: 310px !important;
-            background: var(--navy);
-            border-right: 0.5px solid var(--line);
+            background-color: #070E0C !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
 
         section[data-testid="stSidebar"] > div {
             padding: 20px 14px 22px;
-            background: var(--navy);
+            background-color: #070E0C !important;
         }
 
-        .sidebar-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 2px 4px 18px;
-            margin-bottom: 12px;
-            border-bottom: 0.5px solid var(--line);
+        /* Pull sidebar content to the top — reduce excessive top padding */
+        section[data-testid="stSidebar"] > div:first-child,
+        section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+            padding-top: 24px !important;
+            margin-top: 0 !important;
         }
 
-        .sidebar-mark {
-            display: grid;
-            place-items: center;
-            width: 44px;
-            height: 44px;
-            border: 0.5px solid var(--line-strong);
-            background: #0A1016;
-            color: var(--ivory);
-            font-size: 12px;
-            font-weight: 500;
+        section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
+            display: block !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
         }
 
-        .sidebar-title {
-            font-size: 12px;
-            line-height: 1.2;
-            text-transform: uppercase;
-            color: var(--ivory);
-            font-weight: 500;
+        section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
         }
 
-        .sidebar-caption {
-            margin-top: 3px;
+        section[data-testid="stSidebar"] [data-testid="stVerticalBlock"]:first-child {
+            padding-top: 0 !important;
+            gap: 0 !important;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+            gap: 0 !important;
+        }
+
+        .hdre-branding {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        section.main,
+        div[data-testid="stAppViewContainer"] > section.main {
+            background-color: #0D1612 !important;
+        }
+
+        /* HDRE branding block */
+        .hdre-branding {
+            padding: 20px 16px 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .hdre-wordmark-link {
+            display: inline-block;
+            text-decoration: none !important;
+            border-bottom: none !important;
+            cursor: pointer;
+        }
+
+        .hdre-wordmark-link:hover,
+        .hdre-wordmark-link:active,
+        .hdre-wordmark-link:visited,
+        .hdre-wordmark-link:focus {
+            text-decoration: none !important;
+            border-bottom: none !important;
+        }
+
+        .hdre-wordmark {
+            font-family: 'Fraunces', Georgia, serif !important;
+            font-size: 28px !important;
+            font-weight: 500 !important;
+            color: #00D9A3 !important;
+            letter-spacing: 0.02em !important;
+            line-height: 1 !important;
+            transition: color 0.15s ease;
+            text-decoration: none !important;
+            border-bottom: none !important;
+            pointer-events: none;
+        }
+
+        .hdre-wordmark-link:hover .hdre-wordmark,
+        .hdre-wordmark-link:focus .hdre-wordmark,
+        .hdre-branding:hover .hdre-wordmark {
+            color: #F5F5F0 !important;
+        }
+
+        .hdre-divider {
+            width: 60px;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.12);
+            margin: 6px 0 8px 0;
+        }
+
+        .hdre-label {
+            font-family: 'Inter', system-ui, sans-serif;
             font-size: 11px;
-            color: var(--faint);
+            font-weight: 500;
+            color: #6B7570;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hdre-subtitle {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 400;
+            color: #B8BDB9;
+            margin-top: 2px;
         }
 
         .chapter-strip {
@@ -214,7 +338,8 @@ def inject_styles() -> None:
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] {
-            margin-top: 8px;
+            margin-top: 10px;
+            margin-bottom: 28px !important;
             border: 0;
             border-top: 0.5px solid var(--line);
             border-radius: 0;
@@ -222,33 +347,92 @@ def inject_styles() -> None:
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] details {
+            margin-bottom: 0 !important;
             border: 0;
             background: transparent;
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+            position: relative;
             min-height: 0;
-            padding: 8px 4px 6px;
+            padding: 9px 6px 9px;
             border: 0 !important;
+            border-radius: 4px;
             outline: 0 !important;
             background: transparent !important;
-            color: var(--faint);
+            color: var(--faint) !important;
             font-family: "SFMono-Regular", Consolas, monospace;
             font-size: 9px;
             line-height: 1.4;
             text-transform: uppercase;
             letter-spacing: 0.035em;
             box-shadow: none !important;
+            cursor: pointer;
+            transition: color 140ms ease, background-color 140ms ease, padding-left 140ms ease;
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] summary:hover {
-            color: var(--ivory);
-            background: rgba(255,255,255,0.025) !important;
+            color: #F5F5F0 !important;
+            background-color: rgba(0, 217, 163, 0.04) !important;
+            padding-left: 9px;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] details[open] > summary {
+            color: var(--muted) !important;
+            background: rgba(255,255,255,0.018) !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] details[open] > summary::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 9px;
+            bottom: 7px;
+            width: 1px;
+            background: rgba(102,183,200,0.62);
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] summary p {
             font-size: inherit;
             line-height: inherit;
+            color: inherit !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] summary > span {
+            color: inherit !important;
+            background: transparent !important;
+            transition: color 140ms ease;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] details[open] > summary > span,
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] summary:hover > span {
+            color: inherit !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stExpander"] summary svg {
+            color: inherit !important;
+            transition: color 140ms ease;
+        }
+
+        /* Chapter expand/collapse chevron arrow */
+        section[data-testid="stSidebar"] [data-testid="stExpander"] summary svg,
+        section[data-testid="stSidebar"] details > summary svg,
+        section[data-testid="stSidebar"] [data-testid="stExpander"] summary [data-testid="stIconMaterial"],
+        section[data-testid="stSidebar"] details > summary [data-testid="stIconMaterial"],
+        section[data-testid="stSidebar"] .chapter-toggle svg {
+            color: #6B7570 !important;
+            fill: #6B7570 !important;
+            opacity: 1 !important;
+            transition: color 0.15s ease, fill 0.15s ease;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stExpander"] summary:hover svg,
+        section[data-testid="stSidebar"] details > summary:hover svg,
+        section[data-testid="stSidebar"] [data-testid="stExpander"] summary:hover [data-testid="stIconMaterial"],
+        section[data-testid="stSidebar"] details > summary:hover [data-testid="stIconMaterial"],
+        section[data-testid="stSidebar"] .chapter-toggle:hover svg {
+            color: #00D9A3 !important;
+            fill: #00D9A3 !important;
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
@@ -258,14 +442,17 @@ def inject_styles() -> None:
         .artifact-card,
         .roadmap-card {
             display: block;
+            position: relative;
             margin: 3px 0;
-            padding: 7px 9px;
+            padding: 6px 9px 6px 11px;
             border: 0;
             border-bottom: 0.5px solid var(--line);
             background: transparent;
-            border-radius: 0;
+            border-radius: 4px;
             color: inherit;
             text-decoration: none;
+            cursor: pointer;
+            transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
         }
 
         .artifact-card.active {
@@ -298,7 +485,9 @@ def inject_styles() -> None:
             margin-right: 8px;
             vertical-align: middle;
             border: 0;
+            opacity: 0.45;
             box-shadow: none;
+            transition: opacity 0.15s ease, box-shadow 0.15s ease;
         }
 
         .artifact-dot.dot-published { background: #00D9A3; }
@@ -308,6 +497,26 @@ def inject_styles() -> None:
         .artifact-card:hover,
         .artifact-card:hover .artifact-title {
             text-decoration: none;
+        }
+
+        .artifact-card:hover {
+            border-bottom-color: rgba(102,183,200,0.34);
+            background-color: rgba(0, 217, 163, 0.06) !important;
+            color: #F5F5F0 !important;
+        }
+
+        .artifact-card:hover .artifact-dot {
+            opacity: 0.75 !important;
+        }
+
+        .artifact-card.active .artifact-dot {
+            opacity: 1 !important;
+            box-shadow: 0 0 0 6px rgba(0, 217, 163, 0.25) !important;
+        }
+
+        .artifact-card:hover .artifact-title,
+        .artifact-card.active .artifact-title {
+            color: #F5EFD9;
         }
 
         .artifact-status {
@@ -441,12 +650,29 @@ def inject_styles() -> None:
             font-weight: 500;
         }
 
+        .hero-title,
+        .main-title,
+        div[data-testid="stMarkdownContainer"] h1,
+        section.main h1 {
+            color: #F5F5F0 !important;
+            opacity: 1 !important;
+            font-weight: 500 !important;
+            font-family: 'Fraunces', Georgia, serif !important;
+            font-size: 26px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 24px !important;
+        }
+
         .main-subtitle {
-            margin-top: 10px;
+            margin-top: -4px !important;
+            margin-bottom: 12px !important;
             max-width: 980px;
-            font-size: 14px;
+            font-size: 13px !important;
             line-height: 1.5;
-            color: var(--muted);
+            color: #6B7570 !important;
+            font-weight: 400 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
         }
 
         div[data-testid="stDownloadButton"] button,
@@ -486,6 +712,10 @@ def inject_styles() -> None:
             background: var(--panel);
         }
 
+        .chart-module:empty {
+            display: none !important;
+        }
+
         .hero-module {
             padding: 8px 8px 0;
             background: #0A1015;
@@ -520,6 +750,21 @@ def inject_styles() -> None:
             min-height: 86px;
         }
 
+        /* KPI card color-tag system — 3px left bar indicates energy category */
+        .kpi-card {
+            --kpi-padding-left: 12px;
+            border-left: 3px solid transparent;
+            padding-left: calc(var(--kpi-padding-left, 20px) + 3px) !important;
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+        }
+
+        .kpi-card--fossil  { border-left-color: #8B6F47 !important; }
+        .kpi-card--wind    { border-left-color: #1F8A5C !important; }
+        .kpi-card--solar   { border-left-color: #F5A623 !important; }
+        .kpi-card--storage { border-left-color: #5B8DEF !important; }
+        .kpi-card--market  { border-left-color: #6B5BD9 !important; }
+
         .instrument-label {
             font-size: 11px;
             line-height: 1.2;
@@ -534,6 +779,16 @@ def inject_styles() -> None:
             line-height: 1;
             color: var(--ivory);
             font-weight: 500;
+        }
+
+        /* KPI card value — use monospace for that data-terminal feel */
+        .kpi-card .instrument-value,
+        .kpi-card .kpi-value,
+        .kpi-card [data-testid="metric-value"],
+        .kpi-value {
+            font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace !important;
+            font-feature-settings: 'tnum' on, 'lnum' on !important;
+            letter-spacing: -0.01em !important;
         }
 
         .instrument-value span {
