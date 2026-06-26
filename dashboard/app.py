@@ -198,14 +198,17 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
 
                         label = figure.get("sidebar_title", figure["title"]).upper()
                         active = st.session_state.get("selected_figure") == key
-                        active_class = " active" if active else ""
-                        st.markdown(
-                            f"""
-                            <a class="artifact-card{active_class}" href="?figure={quote(key)}" target="_self">
-                                <div class="artifact-title"><span class="artifact-dot dot-published"></span>{escape(label)}</div>
-                            </a>
-                            """,
-                            unsafe_allow_html=True,
+                        
+                        def set_fig(k=key):
+                            st.session_state.selected_figure = k
+                            st.query_params["figure"] = k
+
+                        st.button(
+                            label,
+                            key=f"sidebar_btn_{key}",
+                            on_click=set_fig,
+                            use_container_width=True,
+                            type="primary" if active else "secondary"
                         )
                     continue
 

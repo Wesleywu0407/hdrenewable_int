@@ -548,27 +548,65 @@ def inject_styles() -> None:
         }
 
         section[data-testid="stSidebar"] div[data-testid="stButton"] button {
-            width: 100%;
-            min-height: 52px;
-            justify-content: flex-start;
-            padding: 7px 9px;
+            display: block;
+            position: relative;
+            margin: 3px 0;
+            padding: 6px 9px 6px 11px;
             border: 0;
             border-bottom: 0.5px solid var(--line);
-            border-radius: 0;
             background: transparent;
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.35;
+            border-radius: 4px;
+            color: var(--ivory);
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.25;
             text-align: left;
-            white-space: pre-line;
+            width: 100%;
+            min-height: auto;
+            justify-content: flex-start;
             box-shadow: none;
+            transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stButton"] button p {
+            font-size: 13px;
+            font-weight: 500;
         }
 
         section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
-            border-bottom-color: rgba(102,183,200,0.36);
-            background: rgba(102,183,200,0.05);
-            color: var(--ivory);
+            border-bottom-color: rgba(102,183,200,0.34);
+            background-color: rgba(0, 217, 163, 0.06) !important;
+            color: #F5F5F0 !important;
             box-shadow: none;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"] {
+            border-left: 2px solid var(--wind);
+            border-bottom-color: var(--line);
+            background: rgba(102,183,200,0.07);
+            color: #F5EFD9;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stButton"] button::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+            background: #00D9A3;
+            opacity: 0.45;
+            transition: opacity 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover::before {
+            opacity: 0.75 !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"]::before {
+            opacity: 1 !important;
+            box-shadow: 0 0 0 6px rgba(0, 217, 163, 0.25) !important;
         }
 
         .sidebar-footer {
