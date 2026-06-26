@@ -13,10 +13,12 @@ DASHBOARD=false
 ALL=true
 
 INFRA=false
+CLEAN=false
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --clean) CLEAN=true; ALL=false ;;
         --fetch) FETCH=true; ALL=false ;;
         --generate) GENERATE=true; ALL=false ;;
         --dashboard) DASHBOARD=true; ALL=false ;;
@@ -24,6 +26,7 @@ while [[ "$#" -gt 0 ]]; do
         --help|-h)
             echo "Usage: ./run.sh [options]"
             echo "Options:"
+            echo "  --clean           Clean the cache (removes nemosis_cache and non-master data/raw/ files)"
             echo "  --fetch           Fetch raw datasets from OpenElectricity API"
             echo "  --generate        Generate interactive HTML & PNG charts"
             echo "  --dashboard       Start the Streamlit dashboard"
@@ -43,6 +46,11 @@ if [ "$ALL" = true ]; then
     FETCH=true
     GENERATE=true
     DASHBOARD=true
+fi
+
+# Execute Clean phase
+if [ "$CLEAN" = true ]; then
+    ./clean.sh
 fi
 
 # Ensure virtual environment exists
