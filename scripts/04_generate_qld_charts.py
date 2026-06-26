@@ -141,6 +141,8 @@ def fig1_2_qld_fuel_mix() -> None:
         return
 
     df = pd.read_csv(path, parse_dates=["interval"])
+    df = df[df["fueltech_group"] != "battery"]
+    df["fueltech_group"] = df["fueltech_group"].replace("battery_discharging", "battery")
     df = df[df["fueltech_group"].isin(GEN_GROUPS)].copy()
     df["value"] = df["value"].clip(lower=0)
     groups = order_groups(sorted(df["fueltech_group"].unique()))
@@ -149,19 +151,17 @@ def fig1_2_qld_fuel_mix() -> None:
     for g in groups:
         sub = df[df["fueltech_group"] == g].sort_values("interval")
         fig.add_trace(
-            go.Scatter(
+            go.Bar(
                 x=sub["interval"],
                 y=sub["value"],
                 name=g,
-                mode="lines",
-                stackgroup="one",
-                line=dict(width=0.5, color=FUEL_COLORS.get(g, "#999")),
-                fillcolor=FUEL_COLORS.get(g, "#999"),
+                marker_color=FUEL_COLORS.get(g, "#999"),
             )
         )
 
     fig.update_layout(
         template=TEMPLATE,
+        barmode="stack",
         title="QLD Generation Mix Evolution (Last 24 Months)",
         yaxis_title="Energy (MWh)",
         xaxis_title="",
