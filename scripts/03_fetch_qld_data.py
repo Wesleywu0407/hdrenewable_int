@@ -213,9 +213,13 @@ def save_and_merge(path: Path, df: pd.DataFrame) -> pd.DataFrame:
         # Use combine_first to prevent NaNs in new data from overwriting valid old data
         if "interval" in df.columns:
             # Need to handle potential duplicate intervals in df before setting index
-            df = df.drop_duplicates(subset=["interval"], keep="last")
-            df_old = df_old.drop_duplicates(subset=["interval"], keep="last")
-            df = df.set_index("interval").combine_first(df_old.set_index("interval")).reset_index()
+            subset_cols = ["interval"]
+            for extra_col in ["network_region", "fueltech_group", "fueltech", "unit_code"]:
+                if extra_col in df.columns:
+                    subset_cols.append(extra_col)
+            df = df.drop_duplicates(subset=subset_cols, keep="last")
+            df_old = df_old.drop_duplicates(subset=subset_cols, keep="last")
+            df = df.set_index(subset_cols).combine_first(df_old.set_index(subset_cols)).reset_index()
             df = df.sort_values("interval")
         elif "month" in df.columns:
             # Need to handle potential duplicate intervals in df before setting index

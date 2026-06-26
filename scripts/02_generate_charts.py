@@ -177,10 +177,29 @@ def fig1_realtime() -> None:
         hovermode="x unified",
         legend_title="Fuel group",
         margin=dict(b=110),
+        height=600,
     )
     fig.update_yaxes(title_text="Power (MW)", secondary_y=False)
+    last_date = price_df["date"].max()
+    first_date = price_df["date"].min()
+    
     fig.update_yaxes(title_text="Price (AUD/MWh)", secondary_y=True)
-    fig.update_xaxes(tickformat="%m-%d %H:%M")
+    fig.update_xaxes(
+        tickformat="%m-%d %H:%M",
+        range=[(last_date - pd.Timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')],
+        rangeslider=dict(
+            visible=True,
+            range=[first_date.strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')]
+        ),
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1d", step="day", stepmode="backward"),
+                dict(count=3, label="3d", step="day", stepmode="backward"),
+                dict(count=7, label="1w", step="day", stepmode="backward"),
+                dict(step="all", label="All")
+            ])
+        )
+    )
     add_source_footer(fig, "Generation-only (battery charging & pumps excluded)")
     save(fig, "fig1_nem_realtime_mix.html")
 
