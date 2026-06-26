@@ -266,7 +266,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
         st.components.v1.html(
             html_path.read_text(encoding="utf-8"),
             height=iframe_height,
-            scrolling=False,
+            scrolling=figure.get("scrolling", False),
         )
     else:
         missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))

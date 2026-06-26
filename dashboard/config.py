@@ -160,6 +160,8 @@ CHAPTERS = [
                 "subtitle": "NEM Coal Unit Operating & Retirement Timeline",
                 "html_path": "outputs/figures/fig4_coal_retirement_timeline.html",
                 "png_path": "outputs/figures/png/fig4_coal_retirement_timeline.png",
+                "height": 600,
+                "scrolling": True,
                 "source": "OpenElectricity API",
                 "metrics": [
                     {"label": "Retired units", "value": "43", "note": "as of last data refresh"},

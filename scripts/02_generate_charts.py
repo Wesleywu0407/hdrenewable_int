@@ -294,7 +294,7 @@ def fig4_coal_timeline() -> None:
         color_discrete_map={"operating": "#5dade2", "retired": "#c0392b"},
         hover_data={"region": True, "capacity_mw": True, "fueltech": True},
     )
-    fig.update_yaxes(autorange="reversed", title="")
+    fig.update_yaxes(autorange="reversed", title="", dtick=1)
     fig.update_layout(
         template=TEMPLATE,
         title=english_title(
@@ -302,8 +302,8 @@ def fig4_coal_timeline() -> None:
         ),
         xaxis_title="",
         legend_title="Status",
-        height=max(500, 18 * len(df)),
-        margin=dict(b=110, l=180),
+        height=max(500, 25 * len(df)),
+        margin=dict(t=50, b=110, l=250),
     )
     fig.update_xaxes(tickformat="%Y")
     add_source_footer(fig, "End date for operating units = expected closure date")
