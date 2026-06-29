@@ -362,8 +362,8 @@ def inject_styles() -> None:
             background: transparent !important;
             color: var(--faint) !important;
             font-family: "SFMono-Regular", Consolas, monospace;
-            font-size: 9px;
-            line-height: 1.4;
+            font-size: 12px;
+            line-height: 1.35;
             text-transform: uppercase;
             letter-spacing: 0.035em;
             box-shadow: none !important;
@@ -396,6 +396,9 @@ def inject_styles() -> None:
             font-size: inherit;
             line-height: inherit;
             color: inherit !important;
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: anywhere;
         }
 
         section[data-testid="stSidebar"] div[data-testid="stExpander"] summary > span {

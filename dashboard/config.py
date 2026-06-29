@@ -337,5 +337,104 @@ CHAPTERS = [
                 ),
             }
         ]
+    },
+    {
+        "id": "3",
+        "title": "IMPACT OF AI DATA CENTER POWER DEMAND ON THE POWER GRID",
+        "subtitle": "AI 資料中心用電需求對電網之衝擊",
+        "status": "done",
+        "source": "HDRE Research",
+        "figures": [
+            {
+                "id": "fig3_1",
+                "number": 1,
+                "type": "outline",
+                "title": "3. Impact of AI Data Center Power Demand on the Power Grid",
+                "sidebar_title": "RESEARCH OUTLINE",
+                "subtitle": "AI 資料中心用電需求對電網之衝擊",
+                "html_path": "",
+                "png_path": "",
+                "source": "HDRE Research",
+                "metrics": [],
+                "takeaway": "",
+                "description": (
+                    "<div class='outline-container' style='border-top: 1px solid var(--line); padding-top: 24px; margin-top: 16px;'>"
+                    "  <div class='outline-section' style='margin-bottom: 28px;'>"
+                    "    <h3 style='color: var(--ivory); font-family: Inter, sans-serif; font-size: 18px; font-weight: 500; margin-bottom: 12px;'>3.1 Global and Local Market Analysis</h3>"
+                    "  </div>"
+                    "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
+                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.1 Global Data Center Development Assessment: Australia vs. International Benchmarks, Government Initiatives, Regulatory Constraints, Policy Subsidies, Key Market Players, and Strategic Opportunities for HDRE</h4>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>數據中心全球發展評估：澳洲與國際對比、政府計畫、法規限制、政策補貼、市場關鍵參與者及 HDRE 的發展機會</p>"
+                    "  </div>"
+                    "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
+                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.2 Projections of Power Consumption Growth and Green Energy Deficits, and Potential Business Opportunities for HDRE</h4>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>用電成長與綠電需求缺口推估及 HDRE 的潛在商機</p>"
+                    "  </div>"
+                    "</div>"
+                ),
+            },
+            {
+                "id": "ch3_fig1",
+                "number": 2,
+                "title": "Global Data Centre Capacity — Australia in Context",
+                "sidebar_title": "GLOBAL COMPARISON",
+                "subtitle": "Global comparison of installed data centre capacity and growth rates",
+                "html_path": "outputs/figures/ch3_fig1_international_comparison.html",
+                "png_path": "",
+                "source": "AEMO / HDRE Research",
+                "metrics": [
+                    {"label": "Australia Capacity", "value": "1.3 GW"},
+                    {"label": "APAC Growth Leader", "value": "25.1%"}
+                ],
+                "takeaway": "Australia ranks 6th globally at 1.3 GW, but leads Asia-Pacific in growth rate at 25.1%/yr — the fastest expansion trajectory in the region. NSW alone has 11.4 GW in the planning pipeline.",
+                "description": "This chart compares Australia's data centre capacity against international benchmarks, highlighting its rapid growth rate within the Asia-Pacific region."
+            },
+            {
+                "id": "ch3_fig2",
+                "number": 3,
+                "title": "AI Data Centre Power Demand Forecast",
+                "sidebar_title": "DEMAND FORECAST",
+                "subtitle": "AEMO 2026 ISP · Three scenarios · 2025–2050",
+                "html_path": "outputs/figures/ch3_fig2_demand_forecast.html",
+                "png_path": "",
+                "source": "AEMO 2026 ISP",
+                "metrics": [
+                    {"label": "2030 Step Change", "value": "8.1 TWh"},
+                    {"label": "NEM share 2050", "value": "11%"}
+                ],
+                "takeaway": "Under AEMO's Step Change scenario, data centre demand rises from 3.9 TWh (2025) to 8.1 TWh by 2030, reaching 33.3 TWh by 2050 — equivalent to roughly 11% of total NEM generation.",
+                "description": "Projections of data centre power consumption in Australia across AEMO's ISP progressive, step, and green export scenarios."
+            },
+            {
+                "id": "ch3_fig3",
+                "number": 4,
+                "title": "Green Energy Supply vs Data Centre Demand",
+                "sidebar_title": "GREEN ENERGY GAP",
+                "subtitle": "Renewable supply gap analysis · HDRE opportunity zone",
+                "html_path": "outputs/figures/ch3_fig3_renewable_gap.html",
+                "png_path": "",
+                "source": "HDRE Research",
+                "metrics": [
+                    {"label": "Supply Gap 2035", "value": "55%"}
+                ],
+                "takeaway": "Tech giants (Microsoft, Google, OpenAI) have committed to 100% renewable power, but available renewable supply will cover only ~45% of projected DC demand by 2035, creating a structural green energy deficit — HDRE's primary market opportunity.",
+                "description": "Analysis of the supply deficit between available renewable energy generation and data centre load demands."
+            },
+            {
+                "id": "ch3_fig4",
+                "number": 5,
+                "title": "DC Pipeline vs Renewable Readiness by State",
+                "sidebar_title": "STATE BREAKDOWN",
+                "subtitle": "NEM states compared · MW pipeline vs renewable share %",
+                "html_path": "outputs/figures/ch3_fig4_state_breakdown.html",
+                "png_path": "",
+                "source": "AEMO / HDRE Research",
+                "metrics": [
+                    {"label": "NSW Pipeline", "value": "12,050 MW"}
+                ],
+                "takeaway": "NSW dominates with 11.4 GW in the pipeline but only 38% renewable share — the largest mismatch in the NEM. QLD has low pipeline (980 MW) but rich solar resources, representing an early-mover opportunity for HDRE.",
+                "description": "State-by-state comparison of operational and planned data centre capacity pipeline against local renewable energy share."
+            }
+        ],
     }
 ]

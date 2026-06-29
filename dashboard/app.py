@@ -133,6 +133,9 @@ def render_header(entry: dict[str, Any]) -> None:
     chapter = entry["chapter"]
     # Determine the source label: prefer figure-level, then chapter-level, then fallback
     source_label = figure.get("source") or chapter.get("source") or "AEMO / OpenElectricity"
+    system_state_html = ""
+    if figure.get("type") != "outline":
+        system_state_html = f'<div class="system-state">published artifact · fig {figure["number"]:02d}</div>'
     st.markdown(
         f"""
         <div class="topbar">
@@ -140,7 +143,7 @@ def render_header(entry: dict[str, Any]) -> None:
                 <div class="terminal-label">HDRE NEM research terminal</div>
                 <div class="terminal-meta">{escape(source_label)} · Updated {UPDATED_DATE:%d %b %Y} · Chapter {escape(chapter["id"])}</div>
             </div>
-            <div class="system-state">published artifact · fig {figure["number"]:02d}</div>
+            {system_state_html}
         </div>
         """,
         unsafe_allow_html=True,
@@ -245,6 +248,18 @@ def render_standard_metrics(metrics: list[dict[str, str]]) -> None:
 def render_standard_figure(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
     chapter = entry["chapter"]
+
+    if figure.get("type") == "outline":
+        st.markdown(
+            f"""
+            <h1 class="main-title" style="margin-bottom: 8px !important;">{escape(figure["title"])}</h1>
+            <div class="main-subtitle" style="font-size: 16px !important; color: var(--muted) !important; margin-bottom: 24px !important;">{escape(figure["subtitle"])}</div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown(figure.get("description", ""), unsafe_allow_html=True)
+        return
+
     html_path = project_path(figure.get("html_path"))
 
     title_col, download_col = st.columns([5, 1.2], vertical_alignment="top")
@@ -260,18 +275,19 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     with download_col:
         render_downloads(figure)
 
-    st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
-    if html_path and html_path.exists():
-        iframe_height = figure.get("height", 560)
-        st.components.v1.html(
-            html_path.read_text(encoding="utf-8"),
-            height=iframe_height,
-            scrolling=figure.get("scrolling", False),
-        )
-    else:
-        missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))
-        st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    if figure.get("html_path"):
+        st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
+        if html_path and html_path.exists():
+            iframe_height = figure.get("height", 560)
+            st.components.v1.html(
+                html_path.read_text(encoding="utf-8"),
+                height=iframe_height,
+                scrolling=figure.get("scrolling", False),
+            )
+        else:
+            missing = escape(str(html_path.relative_to(PROJECT_ROOT) if html_path else "No HTML path configured"))
+            st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     render_standard_metrics(figure.get("metrics", []))
     
