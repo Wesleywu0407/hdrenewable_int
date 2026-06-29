@@ -125,8 +125,8 @@ def fig2_demand_forecast():
 
     # Key annotation
     fig.add_annotation(
-        x=2030, y=8.1,
-        text='2030: 8.1 TWh<br>= ~4% of NEM',
+        x=2030, y=12,
+        text='2030: 12 TWh<br>= 6% of NEM',
         showarrow=True,
         arrowhead=2,
         arrowcolor=ACCENT,
