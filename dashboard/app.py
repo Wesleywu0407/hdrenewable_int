@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from datetime import datetime
 from html import escape
+import json
 from pathlib import Path
 import re
+import subprocess
 from typing import Any
 from urllib.parse import quote
 
@@ -23,6 +25,77 @@ except ImportError:
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
+REFRESH_STATUS_DIR = PROJECT_ROOT / "runtime" / "refresh"
+LOG_DIR = PROJECT_ROOT / "logs"
+CH3_STATUS_PATH = PROJECT_ROOT / "runtime" / "ch3" / "last_run_status.json"
+CH3_LOG_PATH = PROJECT_ROOT / "logs" / "ch3_refresh_log.txt"
+
+REFRESH_REGISTRY = {
+    "1.1::*": {
+        "scope_label": "Queensland renewables",
+        "button_label": "Update This Analysis",
+        "command": ["bash", "scripts/run_qld_scrape.sh"],
+        "status_path": REFRESH_STATUS_DIR / "chapter_1_1_status.json",
+        "log_path": LOG_DIR / "chapter_1_1_refresh.log",
+        "expected_outputs": [
+            "outputs/figures/fig1_1_qld_renewable_share.html",
+            "outputs/figures/fig1_2_qld_fuel_mix.html",
+            "outputs/figures/fig1_3_qld_negative_prices.html",
+        ],
+    },
+    "1.3::fig1_4": {
+        "scope_label": "Infrastructure & Storage Mapping",
+        "button_label": "Update This Analysis",
+        "command": ["bash", "scripts/run_infrastructure_scrape.sh"],
+        "status_path": REFRESH_STATUS_DIR / "chapter_1_3_status.json",
+        "log_path": LOG_DIR / "chapter_1_3_refresh.log",
+        "expected_outputs": [
+            "data/raw/bess_locations.csv",
+            "data/raw/datacentre_locations.csv",
+            "outputs/figures/fig1_4_infrastructure_map.html",
+        ],
+    },
+    "2.1::*": {
+        "scope_label": "Electricity trading market",
+        "button_label": "Update This Analysis",
+        "command": ["bash", "scripts/run_trading_scrape.sh"],
+        "status_path": REFRESH_STATUS_DIR / "chapter_2_1_status.json",
+        "log_path": LOG_DIR / "chapter_2_1_refresh.log",
+        "expected_outputs": [
+            "outputs/figures/fig2_1_spot_heatmap.html",
+            "outputs/figures/fig2_2_fcas_regulation.html",
+            "outputs/figures/fig2_3_fcas_contingency.html",
+        ],
+    },
+    "2.2::fig2_4": {
+        "scope_label": "Weather & Market Price Correlation",
+        "button_label": "Update This Analysis",
+        "command": ["bash", "scripts/run_weather_scrape.sh"],
+        "status_path": REFRESH_STATUS_DIR / "chapter_2_2_status.json",
+        "log_path": LOG_DIR / "chapter_2_2_refresh.log",
+        "expected_outputs": [
+            "data/raw/weather_price_correlation.csv",
+            "outputs/figures/fig2_4_weather_correlation.html",
+        ],
+    },
+    "3::*": {
+        "scope_label": "AI Data Center Power Demand",
+        "button_label": "Refresh Market Signals",
+        "command": ["python", "scripts/10_ch3_refresh_pipeline.py"],
+        "status_path": CH3_STATUS_PATH,
+        "log_path": CH3_LOG_PATH,
+        "expected_outputs": [
+            "runtime/ch3/latest_policy_news.json",
+            "runtime/ch3/last_run_status.json",
+            "logs/ch3_refresh_log.txt",
+        ],
+        "status_labels": {
+            "success": "Signals Ready",
+            "missing": "Not Refreshed Yet",
+        },
+        "time_label": "Last refreshed:",
+    },
+}
 
 CARD_COLOR_PALETTE = {
     "fossil": "#8B6F47",
@@ -546,6 +619,192 @@ def render_header(entry: dict[str, Any]) -> None:
     )
 
 
+def refresh_config_for_entry(entry: dict[str, Any]) -> dict[str, Any] | None:
+    exact_key = figure_key(entry["chapter"], entry["figure"])
+    if exact_key in REFRESH_REGISTRY:
+        return REFRESH_REGISTRY[exact_key]
+    return REFRESH_REGISTRY.get(f"{entry['chapter'].get('id')}::*")
+
+
+def read_refresh_status(config: dict[str, Any]) -> dict[str, Any] | None:
+    status_path = config["status_path"]
+    if not status_path.exists():
+        return None
+    try:
+        return json.loads(status_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {
+            "status": "failed",
+            "last_updated": None,
+            "last_error": "Unable to read refresh status.",
+        }
+
+
+def format_refresh_time(value: str | None) -> str:
+    if not value:
+        return "Not available"
+    try:
+        parsed = datetime.fromisoformat(value)
+        local_time = parsed.astimezone()
+    except ValueError:
+        return value
+    return local_time.strftime("%d %b %Y · %H:%M")
+
+
+def write_refresh_status(config: dict[str, Any], payload: dict[str, Any]) -> None:
+    status_path = config["status_path"]
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def write_refresh_log(config: dict[str, Any], lines: list[str]) -> None:
+    log_path = config["log_path"]
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def run_registered_refresh(config: dict[str, Any]) -> tuple[bool, str]:
+    start_time = datetime.now().astimezone().isoformat()
+    result = subprocess.run(
+        config["command"],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=180,
+        check=False,
+    )
+    end_time = datetime.now().astimezone().isoformat()
+
+    if config["status_path"] != CH3_STATUS_PATH:
+        status_payload = {
+            "status": "success" if result.returncode == 0 else "failed",
+            "last_updated": end_time,
+            "scope_label": config["scope_label"],
+            "command": config["command"],
+            "expected_outputs": config["expected_outputs"],
+            "last_error": None if result.returncode == 0 else (result.stderr or result.stdout or "Refresh failed.").strip(),
+        }
+        write_refresh_status(config, status_payload)
+        write_refresh_log(
+            config,
+            [
+                f"scope: {config['scope_label']}",
+                f"start_time: {start_time}",
+                f"end_time: {end_time}",
+                f"command: {' '.join(config['command'])}",
+                f"status: {status_payload['status']}",
+                "expected_outputs:",
+                *(f"- {path}" for path in config["expected_outputs"]),
+                "",
+                "stdout:",
+                result.stdout.strip() or "(empty)",
+                "",
+                "stderr:",
+                result.stderr.strip() or "(empty)",
+            ],
+        )
+
+    if result.returncode == 0:
+        return True, "Analysis updated."
+    return False, (result.stderr or result.stdout or "Refresh failed.").strip()
+
+
+def render_refresh_control(entry: dict[str, Any]) -> None:
+    config = refresh_config_for_entry(entry)
+    if not config:
+        return
+
+    status = read_refresh_status(config)
+    raw_status = status.get("status") if status else None
+    labels = config.get("status_labels", {})
+    if raw_status == "success":
+        pill_text = labels.get("success", "Ready")
+        pill_color = "#00c9a7"
+    elif raw_status == "failed":
+        pill_text = "Refresh Failed"
+        pill_color = "#e34948"
+    else:
+        pill_text = labels.get("missing", "Not Updated")
+        pill_color = "#898781"
+
+    time_label = config.get("time_label", "Last updated:")
+    last_updated_text = format_refresh_time(status.get("last_updated") if status else None)
+
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) {
+            align-items: center;
+            margin: 0 0 10px;
+            padding: 6px 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            background: rgba(8,14,12,0.42);
+            min-height: 0 !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) [data-testid="stVerticalBlock"] {
+            gap: 0 !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) button {
+            border-color: rgba(0, 201, 167, 0.34) !important;
+            color: #D9FFF7 !important;
+            background: rgba(0, 201, 167, 0.08) !important;
+            min-height: 32px !important;
+            padding: 4px 12px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) button:hover {
+            border-color: rgba(0, 201, 167, 0.62) !important;
+            background: rgba(0, 201, 167, 0.13) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    status_col, button_col, log_col = st.columns([0.62, 0.18, 0.20], gap="small")
+    with status_col:
+        st.markdown(
+            f"""
+            <div class="analysis-refresh-status" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 32px;">
+                <span style="
+                    color: {pill_color};
+                    border: 1px solid color-mix(in srgb, {pill_color} 56%, transparent);
+                    background: color-mix(in srgb, {pill_color} 10%, transparent);
+                    border-radius: 999px;
+                    padding: 4px 9px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    letter-spacing: 0.04em;
+                    text-transform: uppercase;
+                ">{pill_text}</span>
+                <span style="color: #A7AEA9; font-size: 12px;">
+                    <span style="color: #7E8782;">{escape(time_label)}</span> {escape(last_updated_text)}
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with button_col:
+        if st.button(config["button_label"], use_container_width=False):
+            with st.spinner(f"Updating {config['scope_label']}..."):
+                ok, message = run_registered_refresh(config)
+            if ok:
+                st.cache_data.clear()
+                st.success(message)
+                st.rerun()
+            else:
+                st.error(f"Refresh failed: {message}")
+
+    with log_col:
+        with st.popover("Run Details", use_container_width=False):
+            log_path = config["log_path"]
+            if log_path.exists():
+                st.code(log_path.read_text(encoding="utf-8"), language="text")
+            else:
+                st.caption("No refresh log available yet.")
+
+
 def render_sidebar(figures: list[dict[str, Any]]) -> None:
     with st.sidebar:
         st.markdown(
@@ -762,6 +1021,7 @@ def main() -> None:
         return
 
     render_header(entry)
+    render_refresh_control(entry)
     render_standard_figure(entry)
 
 
