@@ -9,6 +9,8 @@ import re
 from typing import Any
 from urllib.parse import quote
 
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
 
 try:
@@ -115,6 +117,400 @@ def render_downloads(figure: dict[str, Any]) -> None:
             st.download_button("HTML", html_path.read_bytes(), html_path.name, "text/html", use_container_width=True)
         else:
             st.button("HTML", disabled=True, use_container_width=True)
+
+
+def ch3_global_comparison_html(html: str) -> str:
+    """Apply the Chapter 3 Figure 02 display-only Plotly redesign."""
+    overlay_script = """
+    <script>
+    (function () {
+        const regionColors = {
+            "United States": "#2a78d6",
+            "Canada": "#2a78d6",
+            "Germany": "#1baf7a",
+            "United Kingdom": "#1baf7a",
+            "Netherlands": "#1baf7a",
+            "China": "#eda100",
+            "Japan": "#eda100",
+            "India": "#eda100",
+            "Singapore": "#eda100",
+            "Australia": "#00c9a7"
+        };
+        const growthRates = {
+            "United States": 12.8,
+            "China": 18.4,
+            "Germany": 12.1,
+            "United Kingdom": 14.3,
+            "Canada": 11.9,
+            "Netherlands": 15.7,
+            "Japan": 13.2,
+            "India": 22.4,
+            "Australia": 25.1,
+            "Singapore": 10.6
+        };
+        const legendItems = [
+            ["North America", "#2a78d6"],
+            ["Europe", "#1baf7a"],
+            ["Asia-Pacific", "#eda100"],
+            ["Australia (APAC growth leader)", "#00c9a7"]
+        ];
+
+        function redesign() {
+            const graph = document.querySelector(".plotly-graph-div");
+            if (!graph || !window.Plotly || !graph.data || !graph.data.length) {
+                window.setTimeout(redesign, 80);
+                return;
+            }
+
+            const barTrace = Object.assign({}, graph.data[0]);
+            const countries = barTrace.y || [];
+            const growthPoints = countries.map((country) => ({
+                country: country,
+                growthRate: growthRates[country]
+            }));
+            barTrace.marker = Object.assign({}, barTrace.marker, {
+                color: countries.map((country) => regionColors[country] || "rgba(255,255,255,0.15)")
+            });
+            barTrace.showlegend = false;
+
+            const growthTrace = {
+                type: "scatter",
+                mode: "markers",
+                x: growthPoints.map((point) => point.growthRate),
+                y: growthPoints.map((point) => point.country),
+                xaxis: "x2",
+                yaxis: "y",
+                name: "Growth rate (%/yr)",
+                hovertemplate: "<b>%{y}</b><br>Growth rate: %{x:.1f}%/yr<extra></extra>",
+                marker: {
+                    symbol: "diamond",
+                    size: 9,
+                    color: countries.map((country) => country === "Australia" ? "#00c9a7" : "rgba(255,255,255,0.5)"),
+                    line: { color: "rgba(5,12,10,0.85)", width: 1 }
+                },
+                showlegend: false
+            };
+
+            const legendTraces = legendItems.map(([name, color]) => ({
+                type: "scatter",
+                mode: "markers",
+                x: [null],
+                y: [null],
+                name: name,
+                marker: { color: color, size: 10, symbol: "square" },
+                hoverinfo: "skip",
+                showlegend: true
+            }));
+
+            const layout = Object.assign({}, graph.layout, {
+                bargap: 0.5,
+                showlegend: true,
+                legend: Object.assign({}, graph.layout.legend, {
+                    orientation: "h",
+                    x: 0,
+                    y: 1.18,
+                    xanchor: "left",
+                    yanchor: "bottom"
+                }),
+                xaxis2: {
+                    title: { text: "Growth rate (%/yr)", font: { color: "#B8BDB9", size: 12 } },
+                    overlaying: "x",
+                    side: "top",
+                    range: [5, 32],
+                    tickfont: { color: "#6B7570", size: 11 },
+                    gridcolor: "rgba(255,255,255,0.04)",
+                    zeroline: false,
+                    showline: true,
+                    linecolor: "rgba(255,255,255,0.12)"
+                }
+            });
+
+            if (layout.annotations && layout.annotations.length) {
+                layout.annotations = layout.annotations.map((annotation) => (
+                    annotation.y === "Australia"
+                        ? Object.assign({}, annotation, {
+                            x: growthRates["Australia"],
+                            xref: "x2",
+                            y: "Australia",
+                            yref: "y",
+                            arrowcolor: "#00c9a7",
+                            font: Object.assign({}, annotation.font, { color: "#00c9a7" })
+                        })
+                        : annotation
+                ));
+            }
+
+            Plotly.react(graph, [barTrace, growthTrace].concat(legendTraces), layout, {
+                displayModeBar: false,
+                responsive: true
+            });
+        }
+
+        redesign();
+    }());
+    </script>
+    """
+    return html.replace("</body>", f"{overlay_script}</body>") if "</body>" in html else f"{html}{overlay_script}"
+
+
+def ch3_renewable_gap_html(html: str) -> str:
+    """Apply the Chapter 3 Figure 04 display-only Plotly redesign."""
+    overlay_script = """
+    <script>
+    (function () {
+        const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2040, 2045, 2050];
+        const dcDemand = [4.0, 5.2, 6.5, 7.8, 9.0, 12.0, 13.5, 15.5, 18.0, 21.0, 24.0, 28.0, 31.0, 34.5];
+        const renewSupply = [2.0, 2.3, 2.7, 3.1, 3.6, 4.2, 5.0, 5.9, 7.0, 8.4, 10.0, 14.5, 19.0, 22.5];
+        const gaps = dcDemand.map((demand, index) => demand - renewSupply[index]);
+        const gapPct = gaps.map((gap, index) => Math.round((gap / dcDemand[index]) * 100));
+        const hoverData = years.map((year, index) => [
+            dcDemand[index],
+            renewSupply[index],
+            gaps[index],
+            gapPct[index]
+        ]);
+
+        function redesign() {
+            const graph = document.querySelector(".plotly-graph-div");
+            if (!graph || !window.Plotly) {
+                window.setTimeout(redesign, 80);
+                return;
+            }
+
+            const renewTrace = {
+                type: "scatter",
+                mode: "lines",
+                name: "Available Renewable Supply",
+                x: years,
+                y: renewSupply,
+                customdata: hoverData,
+                line: { color: "#1baf7a", width: 2.5, shape: "spline" },
+                marker: { color: "#1baf7a" },
+                hovertemplate: "Renewable Supply: %{y:.1f} TWh<extra></extra>"
+            };
+            const gapTrace = {
+                type: "scatter",
+                mode: "lines",
+                name: "HDRE Opportunity Zone",
+                x: years,
+                y: dcDemand,
+                customdata: hoverData,
+                fill: "tonexty",
+                fillcolor: "rgba(227,73,72,0.12)",
+                line: { color: "#e34948", width: 1.5, dash: "dot", shape: "spline" },
+                hoverinfo: "skip"
+            };
+            const demandTrace = {
+                type: "scatter",
+                mode: "lines",
+                name: "Total DC Demand",
+                x: years,
+                y: dcDemand,
+                customdata: hoverData,
+                fill: "tonexty",
+                fillcolor: "rgba(227,73,72,0.12)",
+                line: { color: "#e34948", width: 2.5, shape: "spline" },
+                marker: { color: "#e34948" },
+                hovertemplate: "DC Demand: %{y:.1f} TWh<br>Gap: %{customdata[2]:.1f} TWh (%{customdata[3]}% unmet)<extra></extra>"
+            };
+
+            const layout = Object.assign({}, graph.layout, {
+                annotations: [
+                    {
+                        x: 2030,
+                        y: 12,
+                        text: "2030: 12 TWh<br>= 6% of NEM",
+                        showarrow: true,
+                        arrowhead: 2,
+                        arrowcolor: "#e34948",
+                        font: { color: "#e34948", size: 10 }
+                    },
+                    {
+                        x: 2035,
+                        y: 17,
+                        text: "Gap: 55% unmet",
+                        showarrow: true,
+                        arrowhead: 2,
+                        arrowcolor: "#e34948",
+                        font: { color: "#e34948", size: 10 }
+                    },
+                    {
+                        x: 2042,
+                        y: 22,
+                        text: "HDRE Opportunity Zone",
+                        showarrow: false,
+                        font: { color: "#e34948", size: 11 }
+                    }
+                ],
+                xaxis: Object.assign({}, graph.layout.xaxis, {
+                    range: [2025, 2050],
+                    showgrid: false,
+                    zeroline: false,
+                    title: { text: "Year", font: { color: "#B8BDB9", size: 12 } },
+                    tickfont: { color: "#6B7570", size: 11 },
+                    linecolor: "rgba(255,255,255,0.12)"
+                }),
+                yaxis: Object.assign({}, graph.layout.yaxis, {
+                    range: [0, 40],
+                    title: { text: "Energy (TWh)", font: { color: "#B8BDB9", size: 12 } },
+                    tickfont: { color: "#6B7570", size: 11 },
+                    gridcolor: "rgba(255,255,255,0.06)",
+                    zerolinecolor: "rgba(255,255,255,0.12)",
+                    linecolor: "rgba(255,255,255,0.12)"
+                }),
+                legend: Object.assign({}, graph.layout.legend, {
+                    orientation: "h",
+                    yanchor: "bottom",
+                    y: 1.02,
+                    xanchor: "left",
+                    x: 0
+                }),
+                height: 500,
+                hovermode: "x unified"
+            });
+
+            Plotly.react(graph, [renewTrace, demandTrace, gapTrace], layout, {
+                displayModeBar: false,
+                responsive: true
+            });
+        }
+
+        redesign();
+    }());
+    </script>
+    """
+    return html.replace("</body>", f"{overlay_script}</body>") if "</body>" in html else f"{html}{overlay_script}"
+
+
+def ch3_state_breakdown_html(html: str) -> str:
+    """Render the Chapter 3 Figure 05 dashboard-only two-panel redesign."""
+    states = ["NSW", "VIC", "QLD", "SA", "TAS"]
+    pipeline = [11400, 9400, 800, 350, 50]
+    renewable = [38, 45, 32, 80, 99]
+    colors = ["#2a78d6", "#1baf7a", "#eda100", "#7f77dd", "#888780"]
+    statuses = [
+        "Largest pipeline · low green match",
+        "Strong pipeline · growing renewables",
+        "Low pipeline · early mover opportunity",
+        "High renewables · small pipeline",
+        "Near 100% renewables · minimal DC",
+    ]
+    states_sorted = ["TAS", "SA", "VIC", "NSW", "QLD"]
+    renew_sorted = [99, 80, 45, 38, 32]
+    colors_sorted = ["#888780", "#7f77dd", "#1baf7a", "#2a78d6", "#eda100"]
+
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        column_widths=[0.58, 0.42],
+        horizontal_spacing=0.16,
+        subplot_titles=("Planned pipeline by state", "Renewable share by state"),
+    )
+    fig.add_trace(
+        go.Bar(
+            x=states,
+            y=pipeline,
+            marker=dict(
+                color=colors,
+                line=dict(color="rgba(255,255,255,0.30)", width=1),
+            ),
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Pipeline: %{y:,.0f} MW<br>"
+                "Renewable: %{customdata[0]}%<br>"
+                "%{customdata[1]}"
+                "<extra></extra>"
+            ),
+            customdata=list(zip(renewable, statuses)),
+        ),
+        row=1,
+        col=1,
+    )
+    fig.add_trace(
+        go.Bar(
+            x=renew_sorted,
+            y=states_sorted,
+            orientation="h",
+            marker=dict(
+                color=colors_sorted,
+                line=dict(color="rgba(255,255,255,0.30)", width=1),
+            ),
+            text=[f"{value}%" for value in renew_sorted],
+            textposition="outside",
+            textfont=dict(color="#ffffff", size=12),
+            hovertemplate="<b>%{y}</b><br>Renewable share: %{x}%<extra></extra>",
+            cliponaxis=False,
+        ),
+        row=1,
+        col=2,
+    )
+    fig.update_layout(
+        height=430,
+        showlegend=False,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#898781", family="Inter, system-ui, sans-serif", size=12),
+        margin=dict(l=60, r=28, t=44, b=52),
+        hovermode="closest",
+        hoverlabel=dict(
+            bgcolor="#1e2433",
+            bordercolor="#00c9a7",
+            font=dict(color="#ffffff", size=13),
+        ),
+    )
+    fig.update_xaxes(
+        title_text="NEM State",
+        showgrid=False,
+        zeroline=False,
+        linecolor="rgba(255,255,255,0.12)",
+        tickfont=dict(color="#898781"),
+        row=1,
+        col=1,
+    )
+    fig.update_yaxes(
+        title_text="Capacity (MW)",
+        tickformat="~s",
+        gridcolor="rgba(255,255,255,0.06)",
+        zeroline=False,
+        linecolor="rgba(255,255,255,0.12)",
+        tickfont=dict(color="#898781"),
+        row=1,
+        col=1,
+    )
+    fig.update_xaxes(
+        title_text="Renewable share (%)",
+        range=[0, 110],
+        showgrid=False,
+        zeroline=False,
+        linecolor="rgba(255,255,255,0.12)",
+        tickfont=dict(color="#898781"),
+        row=1,
+        col=2,
+    )
+    fig.update_yaxes(
+        autorange="reversed",
+        gridcolor="rgba(255,255,255,0.06)",
+        zeroline=False,
+        linecolor="rgba(255,255,255,0.12)",
+        tickfont=dict(color="#898781"),
+        row=1,
+        col=2,
+    )
+    fig.update_annotations(font=dict(color="#B8BDB9", size=12))
+    return fig.to_html(include_plotlyjs="cdn", full_html=False, config={"displayModeBar": False, "responsive": True})
+
+
+def figure_html(entry: dict[str, Any], html_path: Path) -> str:
+    html = html_path.read_text(encoding="utf-8")
+    chapter = entry["chapter"]
+    figure = entry["figure"]
+    if chapter.get("id") == "3" and figure.get("id") == "ch3_fig1":
+        return ch3_global_comparison_html(html)
+    if chapter.get("id") == "3" and figure.get("id") == "ch3_fig3":
+        return ch3_renewable_gap_html(html)
+    if chapter.get("id") == "3" and figure.get("id") == "ch3_fig4":
+        return ch3_state_breakdown_html(html)
+    return html
 
 
 def metric_category(label: str) -> str:
@@ -229,7 +625,52 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                 )
 
 
-def render_standard_metrics(metrics: list[dict[str, str]]) -> None:
+def render_standard_metrics(metrics: list[dict[str, str]], entry: dict[str, Any] | None = None) -> None:
+    if entry and entry["chapter"].get("id") == "3" and entry["figure"].get("id") == "ch3_fig4":
+        state_cards = [
+            ("NSW", "#2a78d6", "11,400 MW", "38% renewable", "Largest pipeline"),
+            ("VIC", "#1baf7a", "9,400 MW", "45% renewable", "Growing renewables"),
+            ("QLD", "#eda100", "800 MW", "32% renewable", "Early mover opp."),
+            ("SA", "#7f77dd", "350 MW", "80% renewable", "High renewables"),
+            ("TAS", "#888780", "50 MW", "99% renewable", "Near 100% green"),
+        ]
+        columns = st.columns(5, gap="small")
+        st.markdown(
+            """
+            <style>
+            .ch3-state-card {
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 6px;
+                padding: 12px 12px 11px;
+                min-height: 112px;
+                transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+            }
+            .ch3-state-card:hover {
+                transform: translateY(-4px);
+                border-color: var(--state-color);
+                box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        for col, (state, color, capacity, renewable_text, note) in zip(columns, state_cards):
+            with col:
+                st.markdown(
+                    f"""
+                    <div class="ch3-state-card" style="
+                        --state-color: {color};
+                        background: color-mix(in srgb, {color} 12%, rgba(8,14,12,0.72));
+                    ">
+                        <div style="color: {color}; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">{state}</div>
+                        <div style="color: #F5F5F0; font-size: 19px; font-weight: 700; margin-top: 8px;">{capacity}</div>
+                        <div style="color: #A7AEA9; font-size: 12px; margin-top: 5px;">{renewable_text}</div>
+                        <div style="color: #7E8782; font-size: 11px; line-height: 1.3; margin-top: 8px;">{note}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+        return
     columns = st.columns(max(1, min(3, len(metrics))), gap="small")
     for col, metric in zip(columns, metrics):
         category = metric_category(metric["label"])
@@ -280,7 +721,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
         if html_path and html_path.exists():
             iframe_height = figure.get("height", 560)
             st.components.v1.html(
-                html_path.read_text(encoding="utf-8"),
+                figure_html(entry, html_path),
                 height=iframe_height,
                 scrolling=figure.get("scrolling", False),
             )
@@ -289,7 +730,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    render_standard_metrics(figure.get("metrics", []))
+    render_standard_metrics(figure.get("metrics", []), entry)
     
     takeaway = figure.get("takeaway", "")
     description = figure.get("description", "")
