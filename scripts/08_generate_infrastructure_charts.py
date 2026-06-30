@@ -100,9 +100,9 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             bess_existing = bess_valid[existing_mask]
             bess_proposed = bess_valid[~existing_mask]
 
-            for subset_df, color, name_label, border_color in [
-                (bess_existing, BESS_COLOR, "🔋 Existing BESS Sites", BESS_COLOR_BORDER),
-                (bess_proposed, "#9b59b6", "🏗️ Proposed BESS Sites", "#5e3370")
+            for subset_df, color, name_label, border_color, lg in [
+                (bess_existing, BESS_COLOR, "🔋 Existing BESS Sites", BESS_COLOR_BORDER, "bess_existing"),
+                (bess_proposed, "#9b59b6", "🏗️ Proposed BESS Sites", "#5e3370", "bess_proposed")
             ]:
                 if subset_df.empty:
                     continue
@@ -138,7 +138,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         text=subset_df["name"].tolist(),
                         hoverinfo="skip",
                         showlegend=False,
-                        legendgroup="bess",
+                        legendgroup=lg,
                     )
                 )
                 # Fill trace
@@ -155,7 +155,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         text=hover_texts,
                         hovertemplate="%{text}<extra></extra>",
                         name=name_label,
-                        legendgroup="bess",
+                        legendgroup=lg,
                     )
                 )
                 print(f"  [map] added {len(subset_df)} {name_label.strip('🔋🏗️ ')} markers")
@@ -199,7 +199,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         text=solar_existing["name"].tolist(),
                         hoverinfo="skip",
                         showlegend=False,
-                        legendgroup="solar",
+                        legendgroup="solar_existing",
                     )
                 )
                 # Fill trace
@@ -216,7 +216,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         text=hover_texts,
                         hovertemplate="%{text}<extra></extra>",
                         name="☀️ Existing Solar Panels",
-                        legendgroup="solar",
+                        legendgroup="solar_existing",
                     )
                 )
                 print(f"  [map] added {len(solar_existing)} Existing Solar markers")
@@ -252,7 +252,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         text=solar_proposed["name"].tolist(),
                         hoverinfo="skip",
                         showlegend=False,
-                        legendgroup="solar",
+                        legendgroup="solar_proposed",
                     )
                 )
                 # Fill trace
@@ -269,7 +269,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         text=hover_texts,
                         hovertemplate="%{text}<extra></extra>",
                         name="🏗️ Proposed Solar Panels",
-                        legendgroup="solar",
+                        legendgroup="solar_proposed",
                     )
                 )
                 print(f"  [map] added {len(solar_proposed)} Proposed Solar markers")

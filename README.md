@@ -1,8 +1,19 @@
 # HDRE Australia NEM Grid Research Dashboard
 
-## Quick Start (Run instantly with cached data)
+## Prerequisites
 
-To start the Streamlit dashboard immediately using pre-cached datasets:
+If you are setting this up on a fresh computer, ensure you have the following installed:
+- **Python 3** (with `pip` and `venv` or `virtualenv` available)
+  - *Ubuntu/Debian:* `sudo apt update && sudo apt install python3-pip python3-venv`
+  - *macOS:* `brew install python` (includes pip and venv)
+  - *Windows:* Download from [python.org](https://www.python.org/downloads/) (ensure "Add Python to PATH" is checked during setup)
+- **Bash** (macOS/Linux terminal, or Git Bash / WSL on Windows)
+
+## Quick Start
+
+> **Important:** On a first-time run, you **cannot** use pre-cached datasets as they are not included in the repository. You must run the **Complete Pipeline** first (see below) to generate the initial data.
+
+If you have already run the pipeline and have cached data, you can start the Streamlit dashboard immediately:
 ```bash
 ./run.sh --dashboard
 ```

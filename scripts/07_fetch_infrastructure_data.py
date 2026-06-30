@@ -292,7 +292,7 @@ def fetch_bess_wikipedia() -> pd.DataFrame:
 
             # Infer state from location string
             state = _infer_state(location_text)
-            if state == "WA":
+            if state in ("WA", "NT"):
                 continue
 
             rows.append({
@@ -375,25 +375,20 @@ def geocode_bess(df: pd.DataFrame) -> pd.DataFrame:
 # BESS: Merge OE API + Wikipedia
 # --------------------------------------------------------------------------- #
 
-def merge_bess(oe_df: pd.DataFrame, wiki_df: pd.DataFrame) -> pd.DataFrame:
-    """Merge OE API and Wikipedia BESS data, dedup on name."""
+def merge_bess(frames_list: list[pd.DataFrame]) -> pd.DataFrame:
+    """Merge BESS data from all sources, dedup on name."""
     frames = []
     seen_lower: set[str] = set()
 
-    # Wikipedia first (has actual coordinates embedded)
-    if not wiki_df.empty:
-        for _, row in wiki_df.iterrows():
-            frames.append(row.to_dict())
-            seen_lower.add(row["name"].lower())
-
-    # OE API - add facilities not already in Wikipedia
-    if not oe_df.empty:
-        for _, row in oe_df.iterrows():
-            n = row["name"].lower()
+    for df in frames_list:
+        if df.empty:
+            continue
+        for _, row in df.iterrows():
+            n = str(row["name"]).lower()
             if n not in seen_lower:
                 d = row.to_dict()
                 d["location_text"] = d.get("location_text", "")
-                d["energy_mwh"] = None
+                d["energy_mwh"] = d.get("energy_mwh", None)
                 frames.append(d)
                 seen_lower.add(n)
 
@@ -401,7 +396,6 @@ def merge_bess(oe_df: pd.DataFrame, wiki_df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
 
     df = pd.DataFrame(frames)
-    # Ensure required columns
     for col in ["lat", "lon", "capacity_mw", "state", "status", "source"]:
         if col not in df.columns:
             df[col] = None
@@ -507,17 +501,19 @@ def geocode_solar(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def fetch_solar() -> pd.DataFrame:
-    """Combine API and geocoded data for solar farms."""
+def fetch_solar(aemo_solar: pd.DataFrame) -> pd.DataFrame:
+    """Combine API, AEMO, OSM, and Wikipedia data for solar farms."""
     oe_df = fetch_solar_openelectricity()
     wiki_df = fetch_solar_wikipedia()
+    osm_solar = fetch_osm_infrastructure("solar")
     
-    # Merge (simple concat if wiki_df is empty)
-    if not wiki_df.empty:
-        solar_df = pd.concat([oe_df, wiki_df], ignore_index=True).drop_duplicates(subset=["name"])
-    else:
-        solar_df = oe_df
+    frames = [f for f in [oe_df, wiki_df, aemo_solar, osm_solar] if not f.empty]
+    
+    if not frames:
+        return pd.DataFrame()
         
+    solar_df = pd.concat(frames, ignore_index=True).drop_duplicates(subset=["name"])
+    
     if not solar_df.empty:
         solar_df = geocode_solar(solar_df)
     return solar_df
@@ -729,7 +725,7 @@ def fetch_baxtel() -> pd.DataFrame:
     soup = BeautifulSoup(resp.text, "lxml")
     rows = []
     AU_CITIES = {"sydney", "melbourne", "brisbane", "adelaide",
-                 "canberra", "darwin", "hobart", "gold coast", "sunshine coast"}
+                 "canberra", "hobart", "gold coast", "sunshine coast"}
 
     for tag in soup.find_all(["h2", "h3", "h4", "a"]):
         t = tag.get_text(strip=True)
@@ -875,6 +871,245 @@ def fetch_cloud_providers() -> pd.DataFrame:
     return df
 
 
+
+# --------------------------------------------------------------------------- #
+# AEMO Generation Information
+# --------------------------------------------------------------------------- #
+
+def fetch_aemo_generation() -> tuple[pd.DataFrame, pd.DataFrame]:
+    print("  [AEMO] Fetching AEMO Generation Information...")
+    bess_rows = []
+    solar_rows = []
+    
+    try:
+        url = "https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/nem-forecasting-and-planning/forecasting-and-planning-data/generation-information"
+        resp = SESSION.get(url, timeout=15)
+        excel_url = None
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.content, "lxml")
+            for a in soup.find_all("a", href=True):
+                if a["href"].endswith(".xlsx") and "generation" in a["href"].lower():
+                    excel_url = a["href"]
+                    break
+                    
+        if not excel_url:
+            print("  [AEMO] Could not scrape AEMO URL (blocked or not found). Skipping.")
+            return pd.DataFrame(), pd.DataFrame()
+            
+        if not excel_url.startswith("http"):
+            excel_url = "https://aemo.com.au" + excel_url
+            
+        file_resp = SESSION.get(excel_url, timeout=30)
+        file_resp.raise_for_status()
+        
+        import io
+        df_dict = pd.read_excel(io.BytesIO(file_resp.content), sheet_name=None)
+        
+        for sheet, df in df_dict.items():
+            sheet_lower = sheet.lower()
+            is_bess = "batter" in sheet_lower or "storage" in sheet_lower
+            is_solar = "solar" in sheet_lower
+            
+            if not is_bess and not is_solar:
+                continue
+                
+            df.columns = [str(c).lower().strip() for c in df.columns]
+            
+            name_col = next((c for c in df.columns if "station name" in c or "project name" in c), None)
+            status_col = next((c for c in df.columns if "status" in c), None)
+            state_col = next((c for c in df.columns if "region" in c or "state" in c), None)
+            capacity_col = next((c for c in df.columns if "capacity" in c and "mw" in c), None)
+            if not capacity_col:
+                 capacity_col = next((c for c in df.columns if "capacity" in c), None)
+            
+            if not name_col:
+                continue
+                
+            for _, row in df.iterrows():
+                name = row.get(name_col)
+                if pd.isna(name) or not str(name).strip():
+                    continue
+                
+                state = row.get(state_col, "")
+                if isinstance(state, str):
+                    state = state.replace("1", "").strip()
+                
+                status = str(row.get(status_col, "Unknown")).strip()
+                
+                cap = row.get(capacity_col)
+                try:
+                    cap_mw = float(cap)
+                except (ValueError, TypeError):
+                    cap_mw = None
+                    
+                entry = {
+                    "name": str(name).strip(),
+                    "state": state,
+                    "capacity_mw": cap_mw,
+                    "status": status,
+                    "lat": None,
+                    "lon": None,
+                    "source": "AEMO Generation Information"
+                }
+                
+                if is_bess:
+                    bess_rows.append(entry)
+                elif is_solar:
+                    solar_rows.append(entry)
+                    
+    except Exception as e:
+        print(f"  [AEMO] Error: {e}")
+        
+    return pd.DataFrame(bess_rows), pd.DataFrame(solar_rows)
+
+# --------------------------------------------------------------------------- #
+# OpenStreetMap Infrastructure (Overpass)
+# --------------------------------------------------------------------------- #
+
+def fetch_osm_infrastructure(plant_source: str) -> pd.DataFrame:
+    print(f"  [OSM] Fetching {plant_source} from Overpass API...")
+    query = f"""
+    [out:json][timeout:25];
+    (
+      node["power"="plant"]["plant:source"="{plant_source}"](-44.0, 112.0, -10.0, 154.0);
+      way["power"="plant"]["plant:source"="{plant_source}"](-44.0, 112.0, -10.0, 154.0);
+      relation["power"="plant"]["plant:source"="{plant_source}"](-44.0, 112.0, -10.0, 154.0);
+    );
+    out center;
+    """
+    rows = []
+    try:
+        resp = SESSION.get(
+            "https://overpass-api.de/api/interpreter",
+            params={"data": query},
+            headers={"User-Agent": "hdre-energy-research/1.0"},
+            timeout=30
+        )
+        if resp.status_code == 200:
+            data = resp.json().get("elements", [])
+            for el in data:
+                tags = el.get("tags", {})
+                lat = el.get("lat") or (el.get("center", {}).get("lat"))
+                lon = el.get("lon") or (el.get("center", {}).get("lon"))
+                name = tags.get("name")
+                if not name or not lat or not lon:
+                    continue
+                capacity = tags.get("plant:output:electricity") or tags.get("capacity")
+                try:
+                    capacity_mw = float(re.sub(r"[^\d.]", "", str(capacity))) if capacity else None
+                except (ValueError, TypeError):
+                    capacity_mw = None
+                
+                rows.append({
+                    "name": name,
+                    "state": _infer_state(tags.get("addr:state", "") + " " + tags.get("addr:city", "")),
+                    "capacity_mw": capacity_mw,
+                    "status": "operating",
+                    "lat": float(lat),
+                    "lon": float(lon),
+                    "source": "OpenStreetMap Overpass API"
+                })
+    except Exception as e:
+        print(f"  [OSM] Failed to fetch {plant_source}: {e}")
+    
+    return pd.DataFrame(rows)
+
+# --------------------------------------------------------------------------- #
+# Additional Datacentre Scrapers (Datacentermap, CDC, Macquarie)
+# --------------------------------------------------------------------------- #
+
+def fetch_datacentermap() -> pd.DataFrame:
+    print("    [Datacentermap] Fetching Australia DCs...")
+    rows = []
+    try:
+        url = "https://www.datacentermap.com/australia/"
+        resp = SESSION.get(url, timeout=15)
+        if resp.status_code != 200:
+            print(f"      HTTP {resp.status_code}")
+            return pd.DataFrame()
+            
+        soup = BeautifulSoup(resp.content, "lxml")
+        dc_links = []
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if href.startswith("/australia/") and href.count("/") >= 3:
+                dc_links.append((href, a.get_text(strip=True)))
+                
+        for href, text in set(dc_links):
+            parts = href.strip("/").split("/")
+            if len(parts) >= 3:
+                city = parts[1].title()
+                name = text
+                if not name or len(name) < 3:
+                    continue
+                coords = geocode(f"{name}, {city}, Australia")
+                if coords:
+                    rows.append({
+                        "name": name,
+                        "provider": _infer_provider(name),
+                        "city": city,
+                        "address": "",
+                        "lat": coords[0],
+                        "lon": coords[1],
+                        "source": "datacentermap.com"
+                    })
+    except Exception as e:
+        print(f"      [Datacentermap] Error: {e}")
+        
+    return pd.DataFrame(rows)
+
+def fetch_cdc() -> pd.DataFrame:
+    print("    [CDC] Fetching CDC locations...")
+    suburbs = [
+        ("CDC Eastern Creek", "Eastern Creek, Sydney"),
+        ("CDC Fyshwick", "Fyshwick, Canberra"),
+        ("CDC Hume", "Hume, Canberra"),
+        ("CDC Brooklyn", "Brooklyn, Melbourne"),
+    ]
+    rows = []
+    for name, suburb in suburbs:
+        coords = geocode(f"{suburb}, Australia")
+        if not coords:
+            coords = geocode(f"{name} Australia")
+        if coords:
+            rows.append({
+                "name": name,
+                "provider": "CDC Data Centres",
+                "city": suburb,
+                "address": "",
+                "lat": coords[0],
+                "lon": coords[1],
+                "source": "cdc.com (Nominatim/OSM)"
+            })
+    return pd.DataFrame(rows)
+
+def fetch_macquarie() -> pd.DataFrame:
+    print("    [Macquarie] Fetching Macquarie Data Centres locations...")
+    suburbs = [
+        ("Macquarie IC1", "Sydney"),
+        ("Macquarie IC2", "Sydney"),
+        ("Macquarie IC3", "Sydney"),
+        ("Macquarie IC4", "Canberra"),
+        ("Macquarie IC5", "Canberra"),
+    ]
+    rows = []
+    for name, suburb in suburbs:
+        coords = geocode(f"Macquarie Data Centre {name} {suburb} Australia")
+        if not coords:
+            coords = geocode(f"{name} {suburb} Australia")
+        if coords:
+            rows.append({
+                "name": name,
+                "provider": "Macquarie Data Centres",
+                "city": suburb,
+                "address": "",
+                "lat": coords[0],
+                "lon": coords[1],
+                "source": "macquariedatacentres.com"
+            })
+    return pd.DataFrame(rows)
+
+
 # --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
@@ -892,9 +1127,13 @@ def main() -> int:
     # -- BESS --------------------------------------------------------------- #
     print("\n[1/3] Fetching BESS locations...")
 
+    aemo_bess, aemo_solar = fetch_aemo_generation()
     oe_df = fetch_bess_openelectricity()
     wiki_df = fetch_bess_wikipedia()
-    bess_df = merge_bess(oe_df, wiki_df)
+    osm_bess = fetch_osm_infrastructure("battery")
+    
+    # Pass wiki first so coordinates are favored, then others
+    bess_df = merge_bess([wiki_df, oe_df, aemo_bess, osm_bess])
 
     if not official_bess.empty:
         bess_df = pd.concat([official_bess, bess_df], ignore_index=True)
@@ -910,7 +1149,9 @@ def main() -> int:
     before = len(bess_df)
     bess_df = bess_df.dropna(subset=["lat", "lon"])
     bess_df = bess_df[bess_df["lat"].between(-44, -10) & bess_df["lon"].between(129, 154)]
-    bess_df = bess_df[bess_df["state"].str.upper() != "WA"]
+    # Exclude NT by geography (north of -26 and west of 138)
+    bess_df = bess_df[~((bess_df["lon"] < 138.0) & (bess_df["lat"] > -26.0))]
+    bess_df = bess_df[~bess_df["state"].str.upper().isin(["WA", "NT"])]
     
     # Deduplicate with normalized name
     bess_df["name_norm"] = bess_df["name"].apply(lambda x: re.sub(r'[^a-z0-9]', '', re.sub(r'\b(battery|solar farm|solar project|solar power station|solar park|bess|stage \d)\b', '', str(x).lower())))
@@ -935,6 +1176,9 @@ def main() -> int:
     dc_frames.append(fetch_baxtel())
     dc_frames.append(fetch_equinix())
     dc_frames.append(fetch_cloud_providers())
+    dc_frames.append(fetch_datacentermap())
+    dc_frames.append(fetch_cdc())
+    dc_frames.append(fetch_macquarie())
 
     dc_all = [f for f in dc_frames if not f.empty]
     if not dc_all:
@@ -944,6 +1188,14 @@ def main() -> int:
     dc_df = pd.concat(dc_all, ignore_index=True)
     dc_df = dc_df.dropna(subset=["lat", "lon"])
     dc_df = dc_df[dc_df["lat"].between(-44, -10) & dc_df["lon"].between(129, 154)]
+    # Exclude NT by geography (north of -26 and west of 138)
+    dc_df = dc_df[~((dc_df["lon"] < 138.0) & (dc_df["lat"] > -26.0))]
+    
+    # Exclude non-NEM states (WA, NT) from datacentres
+    if "state" not in dc_df.columns:
+        dc_df["state"] = dc_df["city"].apply(lambda c: _infer_state(str(c) + " Australia"))
+    dc_df = dc_df[~dc_df["state"].str.upper().isin(["WA", "NT"])]
+    
     dc_df = dc_df.drop_duplicates(subset=["name"]).reset_index(drop=True)
 
     dc_path = RAW_DIR / "datacentre_locations.csv"
@@ -954,7 +1206,7 @@ def main() -> int:
 
     # -- Solar -------------------------------------------------------------- #
     print("\n[3/3] Fetching Solar locations...")
-    solar_df = fetch_solar()
+    solar_df = fetch_solar(aemo_solar)
     if not official_solar.empty:
         solar_df = pd.concat([official_solar, solar_df], ignore_index=True)
         
@@ -964,7 +1216,9 @@ def main() -> int:
         before = len(solar_df)
         solar_df = solar_df.dropna(subset=["lat", "lon"])
         solar_df = solar_df[solar_df["lat"].between(-44, -10) & solar_df["lon"].between(129, 154)]
-        solar_df = solar_df[solar_df["state"].str.upper() != "WA"]
+        # Exclude NT by geography (north of -26 and west of 138)
+        solar_df = solar_df[~((solar_df["lon"] < 138.0) & (solar_df["lat"] > -26.0))]
+        solar_df = solar_df[~solar_df["state"].str.upper().isin(["WA", "NT"])]
         
         # Deduplicate with normalized name
         solar_df["name_norm"] = solar_df["name"].apply(lambda x: re.sub(r'[^a-z0-9]', '', re.sub(r'\b(battery|solar farm|solar project|solar power station|solar park|bess|stage \d)\b', '', str(x).lower())))

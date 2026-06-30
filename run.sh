@@ -68,7 +68,7 @@ source .venv/bin/activate
 
 # Ensure requirements are installed
 echo "Checking and verifying dependencies..."
-pip install openelectricity[analysis] pandas plotly python-dotenv jupyter pyarrow kaleido "streamlit>=1.32" nemosis --quiet
+pip install openelectricity[analysis] pandas plotly python-dotenv jupyter pyarrow kaleido openpyxl "streamlit>=1.32" nemosis --quiet
 
 # Execute Fetch phase
 if [ "$FETCH" = true ]; then
