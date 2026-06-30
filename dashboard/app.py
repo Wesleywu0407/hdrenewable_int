@@ -135,6 +135,7 @@ CARD_CATEGORY_RULES = [
     ("spot price", "market"),
     ("price heatmap", "market"),
     ("comparison", "market"),
+    ("coverage", "market"),
 ]
 
 DEFAULT_CATEGORY = "market"
@@ -210,14 +211,14 @@ def render_downloads(figure: dict[str, Any]) -> None:
     cols = st.columns(2, gap="small")
     with cols[0]:
         if png_path and png_path.exists():
-            st.download_button("PNG", png_path.read_bytes(), png_path.name, "image/png", use_container_width=True)
+            st.download_button("PNG", png_path.read_bytes(), png_path.name, "image/png", width="stretch")
         else:
-            st.button("PNG", disabled=True, use_container_width=True)
+            st.button("PNG", disabled=True, width="stretch")
     with cols[1]:
         if html_path and html_path.exists():
-            st.download_button("HTML", html_path.read_bytes(), html_path.name, "text/html", use_container_width=True)
+            st.download_button("HTML", html_path.read_bytes(), html_path.name, "text/html", width="stretch")
         else:
-            st.button("HTML", disabled=True, use_container_width=True)
+            st.button("HTML", disabled=True, width="stretch")
 
 
 def render_html(html: str) -> None:
@@ -1249,7 +1250,7 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
 
     with button_col:
         st.markdown('<div class="refresh-primary-action">', unsafe_allow_html=True)
-        if "pyodide" not in sys.modules and st.button(config["button_label"], use_container_width=False):
+        if "pyodide" not in sys.modules and st.button(config["button_label"], width="content"):
             with st.spinner(f"Updating {config['scope_label']}..."):
                 ok, message = run_registered_refresh(config)
             if ok:
@@ -1263,7 +1264,7 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
     with log_col:
         st.markdown('<div class="refresh-secondary-action">', unsafe_allow_html=True)
         if "pyodide" not in sys.modules:
-            with st.popover("Run details", use_container_width=False):
+            with st.popover("Run details", width="content"):
                 render_run_details(config, status)
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1328,7 +1329,7 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                             label,
                             key=f"sidebar_btn_{key}",
                             on_click=set_fig,
-                            use_container_width=True,
+                            width="stretch",
                             type="primary" if active else "secondary"
                         )
                     continue
@@ -1733,7 +1734,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             with col1:
                 st.markdown('<div style="font-size: 16px; font-weight: 500; color: #00D9A3; margin-top: 16px; margin-bottom: 8px;">Select States to Filter Metrics</div>', unsafe_allow_html=True)
             with col2:
-                if st.button("Clear", key="clear_states", use_container_width=True):
+                if st.button("Clear", key="clear_states", width="stretch"):
                     st.session_state.state_filter = []
                     
             selected_states = st.pills("Select States to Filter Metrics", states, default=states, selection_mode="multi", label_visibility="collapsed", key="state_filter")
@@ -1758,7 +1759,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             # 3. Render directly in Streamlit using the container
             with map_container:
                 st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
-                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 st.markdown('</div>', unsafe_allow_html=True)
                 
             bess_operating = bess_df[bess_df['status'].astype(str).str.lower() == 'operating']

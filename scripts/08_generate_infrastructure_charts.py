@@ -249,7 +249,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         mode="markers",
                         marker=dict(
                             size=sizes + 2,
-                            color="#b34700",
+                            color="#cc6600",
                             opacity=0.8,
                         ),
                         text=solar_proposed["name"].tolist(),
@@ -266,7 +266,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         mode="markers",
                         marker=dict(
                             size=sizes,
-                            color="#FF6600",
+                            color="#ff8833",
                             opacity=0.45,
                         ),
                         text=hover_texts,
