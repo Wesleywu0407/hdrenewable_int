@@ -60,6 +60,52 @@ SESSION.headers.update(HEADERS)
 
 
 # ─────────────────────────────────────────────────────────────────────────── #
+# Official Plant Data
+# ─────────────────────────────────────────────────────────────────────────── #
+
+def fetch_official_plant_data() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Read official plant data, extract BESS and Solar data."""
+    plant_csv = RAW_DIR / "plant_data.csv"
+    if not plant_csv.exists():
+        return pd.DataFrame(), pd.DataFrame()
+    
+    df = pd.read_csv(plant_csv)
+    
+    # Map columns
+    df = df.rename(columns={
+        "Name": "name",
+        "Capacity": "capacity_mw",
+        "Status": "status",
+        "Lat": "lat",
+        "Long": "lon"
+    })
+    
+    df["state"] = "QLD"
+    df["source"] = "treasury.qld.gov.au"
+    
+    # Map status
+    df["status"] = df["status"].astype(str).str.replace(
+        "Development approval", "Under construction", case=False
+    ).str.strip()
+    
+    # FuelType filter
+    bess_mask = (df["FuelType"].astype(str).str.lower() == "battery storage") | \
+                (df["FuelSubType"].astype(str).str.lower() == "battery storage") | \
+                (df["FuelType"].astype(str).str.lower() == "storage")
+    solar_mask = (df["FuelType"].astype(str).str.lower() == "solar")
+    
+    bess_df = df[bess_mask].copy()
+    solar_df = df[solar_mask].copy()
+    
+    cols = ["name", "state", "capacity_mw", "status", "lat", "lon", "source"]
+    # Ensure missing columns don't cause KeyError
+    save_cols_bess = [c for c in cols if c in bess_df.columns]
+    save_cols_solar = [c for c in cols if c in solar_df.columns]
+    
+    return bess_df[save_cols_bess], solar_df[save_cols_solar]
+
+
+# ─────────────────────────────────────────────────────────────────────────── #
 # Geocoding via Nominatim (OpenStreetMap)
 # ─────────────────────────────────────────────────────────────────────────── #
 
@@ -839,12 +885,20 @@ def main() -> int:
     print("Chapter 1.3 — Infrastructure Data Ingestion (live scrape only)")
     print("=" * 60)
 
+    # ── Official Plant Data ──────────────────────────────────────────────── #
+    print("\n[0/3] Reading official plant data...")
+    official_bess, official_solar = fetch_official_plant_data()
+    print(f"  found {len(official_bess)} BESS and {len(official_solar)} Solar sites in official data.")
+
     # ── BESS ─────────────────────────────────────────────────────────────── #
-    print("\n[1/2] Fetching BESS locations...")
+    print("\n[1/3] Fetching BESS locations...")
 
     oe_df = fetch_bess_openelectricity()
     wiki_df = fetch_bess_wikipedia()
     bess_df = merge_bess(oe_df, wiki_df)
+
+    if not official_bess.empty:
+        bess_df = pd.concat([official_bess, bess_df], ignore_index=True)
 
     if bess_df.empty:
         print("  ERROR: No BESS data — check API key and network.")
@@ -857,8 +911,11 @@ def main() -> int:
     before = len(bess_df)
     bess_df = bess_df.dropna(subset=["lat", "lon"])
     bess_df = bess_df[bess_df["lat"].between(-44, -10) & bess_df["lon"].between(113, 154)]
-    bess_df = bess_df.drop_duplicates(subset=["name"]).reset_index(drop=True)
-    print(f"  dropped {before - len(bess_df)} rows without valid AU coordinates.")
+    
+    # Deduplicate with normalized name
+    bess_df["name_norm"] = bess_df["name"].apply(lambda x: re.sub(r'[^a-z0-9]', '', re.sub(r'\b(battery|solar farm|solar project|solar power station|solar park|bess|stage \d)\b', '', str(x).lower())))
+    bess_df = bess_df.drop_duplicates(subset=["name_norm"], keep="first").drop(columns=["name_norm"]).reset_index(drop=True)
+    print(f"  dropped {before - len(bess_df)} rows without valid AU coordinates or duplicates.")
 
     bess_path = RAW_DIR / "bess_locations.csv"
     cols = ["name", "state", "capacity_mw", "status", "lat", "lon", "source"]
@@ -870,7 +927,7 @@ def main() -> int:
     print(f"  sources: {bess_df['source'].value_counts().to_dict()}")
 
     # ── Datacentres ──────────────────────────────────────────────────────── #
-    print("\n[2/2] Fetching Datacentre locations...")
+    print("\n[2/3] Fetching Datacentre locations...")
 
     dc_frames = []
     dc_frames.append(fetch_nextdc())
@@ -898,14 +955,20 @@ def main() -> int:
     # ── Solar ────────────────────────────────────────────────────────────── #
     print("\n[3/3] Fetching Solar locations...")
     solar_df = fetch_solar()
+    if not official_solar.empty:
+        solar_df = pd.concat([official_solar, solar_df], ignore_index=True)
+        
     if solar_df.empty:
         print("  WARNING: No solar data fetched.")
     else:
         before = len(solar_df)
         solar_df = solar_df.dropna(subset=["lat", "lon"])
         solar_df = solar_df[solar_df["lat"].between(-44, -10) & solar_df["lon"].between(113, 154)]
-        solar_df = solar_df.drop_duplicates(subset=["name"]).reset_index(drop=True)
-        print(f"  dropped {before - len(solar_df)} rows without valid AU coordinates.")
+        
+        # Deduplicate with normalized name
+        solar_df["name_norm"] = solar_df["name"].apply(lambda x: re.sub(r'[^a-z0-9]', '', re.sub(r'\b(battery|solar farm|solar project|solar power station|solar park|bess|stage \d)\b', '', str(x).lower())))
+        solar_df = solar_df.drop_duplicates(subset=["name_norm"], keep="first").drop(columns=["name_norm"]).reset_index(drop=True)
+        print(f"  dropped {before - len(solar_df)} rows without valid AU coordinates or duplicates.")
 
         solar_path = RAW_DIR / "solar_locations.csv"
         save_cols = [c for c in cols if c in solar_df.columns]

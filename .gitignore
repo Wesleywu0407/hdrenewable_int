@@ -5,6 +5,7 @@
 data/raw/*
 !data/raw/master_NEM_open_electricity.csv
 !data/raw/master_WA_SWIS_open_electricity.csv
+!data/raw/plant_data.csv
 
 # IDE / Editors
 .vscode/

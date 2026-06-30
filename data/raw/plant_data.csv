@@ -1,0 +1,278 @@
+﻿Name,FuelSubType,FuelType,Owner,YearCommissioning,Capacity,Status,Long,Lat,FuelCategory,LGA,Source,Region
+Barcaldine Gas Station,Gas,Gas,Ergon Energy Queensland,1996,37,Operating ,145.28,-23.55,Fossil,Barcaldine,"AEMO, Department of Energy and Water Supply",Central 
+Braemar,Gas,Gas,Braemar Power Project Pty Ltd,2006,564,Operating ,150.9077,-27.1099,Fossil,Western Downs,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Braemar 2,Gas,Gas,Arrow Energy,2009,519,Operating ,150.9035,-27.1146,Fossil,Western Downs,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Callide B,Coal ,Coal,CS Energy,1988,700,Operating ,150.6139,-24.3542,Fossil,Banana,"AEMO, Department of Energy and Water Supply",Central 
+Callide C,Coal ,Coal,Genuity/CS Energy,2001,844,Operating ,150.6266,-24.35,Fossil,Banana,"AEMO, Department of Energy and Water Supply",Central 
+Condamine,Gas,Gas,Queensland Gas Company,2009,144,Operating ,150.61,-26.77,Fossil,Western Downs,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Darling Downs,Gas,Gas,Origin Energy Limited,2010,644,Operating ,150.8964,-27.1166,Fossil,Western Downs,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Diamantina,Gas,Gas,APA Group,2014,242,Operating ,139.4831374,-20.7839529,Fossil,Mount Isa,https://www.apa.com.au/operations-and-projects/gas/gas-fired-power-generation/diamantina-power-station-dps,North
+German Creek,Waste Coal Mine Gas,Other,Energy Developments Limited,2006,45,Operating ,148.5424,-22.9001,Fossil,Isaac,"AEMO, Department of Energy and Water Supply","Mackay, Isaac, Whitsunday"
+Gladstone,Coal ,Coal,NRG Gladstone Operating Services,1976,1680,Operating ,151.2194,-23.8508,Fossil,Gladstone,"AEMO, Department of Energy and Water Supply",Central 
+Kogan Creek,Coal ,Coal,CS Energy,2007,744,Operating ,150.7492,-26.9164,Fossil,Western Downs,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Leichhardt,Gas,Gas,APA Group,2014,60,Operating ,139.4864475,-20.7834442,Fossil,Mount Isa,https://www.apa.com.au/operations-and-projects/gas/gas-fired-power-generation/diamantina-power-station-dps,North
+Millmerran,Coal ,Coal,Millmerran Operating Co,2003,852,Operating ,151.27,-27.88,Fossil,Toowoomba,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Moranbah North,Waste Coal Mine Gas,Other,Energy Developments Limited,2008,63.8,Operating ,148.0051,-21.9792,Fossil,Isaac,"AEMO, Department of Energy and Water Supply","Mackay, Isaac, Whitsunday"
+Mt Stuart,Gas/kerosene,Other,Origin Energy Limited,1999,423.5,Operating ,146.8501,-19.3398,Fossil,Townsville,"AEMO, Department of Energy and Water Supply",North
+Oakey,Gas,Gas,ERM Power,2000,346,Operating ,151.6816,-27.422,Fossil,Toowoomba,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Oaky Creek 1,Waste Coal Mine Gas,Gas,Energy Developments Ltd,2006,20,Operating,148.5560277,-23.0497646,Fossil,Central Highlands,https://edlenergy.com/project/oaky-creek/,Central 
+Oaky Creek 2,Waste Coal Mine Gas,Gas,Energy Developments Ltd,2016,15,Operating,148.5563588,-23.0505829,Fossil,Central Highlands,https://edlenergy.com/project/oaky-creek-2/,Central 
+Roma,Gas,Gas,Origin Energy Limited,1999,80,Operating ,148.78,-26.58,Fossil,Maranoa,"AEMO, Department of Energy and Water Supply",Darling Downs and South West
+Stanwell,Coal,Coal,Stanwell Corporation,1993,1460,Operating ,150.315,-23.5095,Fossil,Rockhampton,"AEMO, Department of Energy and Water Supply",Central 
+Tarong,Coal,Coal,Stanwell Corporation,1986,1400,Operating ,151.9141,-26.7865,Fossil,South Burnett,"AEMO, Department of Energy and Water Supply",Wide Bay Burnett
+Tarong North,Coal,Coal,Stanwell Corporation,2003,450,Operating ,151.93,-26.69,Fossil,South Burnett,"AEMO, Department of Energy and Water Supply",Wide Bay Burnett
+Thomson,Gas,Gas,APA Group,2021,24,Operating ,139.4862925,-20.7843801,Fossil,Mount Isa,https://www.apa.com.au/operations-and-projects/gas/gas-fired-power-generation/diamantina-power-station-dps,North
+Thursday Island,Diesel,Other,Ergon Energy Queensland,Unknown,9.55,Operating ,142.2206,-10.585,Fossil,Torres,https://www.ergon.com.au/network/network-management/network-infrastructure/isolated-and-remote-power-stations,Far North
+Townsville (Yabula),Gas,Gas,RATCH-Australia Townsville,2004,244,Operating ,146.6018,-19.2159,Fossil,Townsville,"AEMO, Department of Energy and Water Supply",North
+Weipa,Diesel,Other,RTA Weipa,1998,36,Operating ,141.8674,-12.6386,Fossil,Weipa Town,Facility services isolated supply,Far North
+X41,Gas,Gas,Mount Isa Mines,2007,33,Operating ,139.480302,-20.7438515,Fossil,Mount Isa,https://www.apa.com.au/operations-and-projects/gas/gas-fired-power-generation/x41-power-station,North
+Yarwun,Gas,Gas,RTA Yarwun,2010,180,Operating ,151.1289,-23.8456,Fossil,Gladstone,"AEMO, Department of Energy and Water Supply",Central 
+Swanbank E,Gas,Gas,CleanCo,2002,385,Operating ,152.8109,-27.654,Fossil,Ipswich,"AEMO, Department of Energy and Water Supply",South East
+Bargara Battery,Storage,Battery storage,EQL,2023,4,Operating ,152.4454,-24.86649,Storage,Bundaberg,"EQL, Local Network Battery Plan, Stage 1",Wide Bay Burnett
+Black River Battery,Storage,Battery storage,EQL,2023,4,Operating ,146.6529,-19.23246,Storage,Townsville,"EQL, Local Network Battery Plan, Stage 1",North
+Kleinton Battery,Storage,Battery storage,EQL,2023,4,Operating ,151.9341,-27.43178,Storage,Toowoomba,"EQL, Local Network Battery Plan, Stage 1",Darling Downs and South West
+Tanby Battery,Storage,Battery storage,EQL,2024,4,Operating ,150.73609,-23.22364,Storage,Livingstone,"EQL, Local Network Battery Plan, Stage 1",Central
+Torquay Battery,Storage,Battery storage,EQL,2024,4,Operating ,152.87692,-25.29376,Storage,Fraser Coast,"EQL, Local Network Battery Plan, Stage 1",Wide Bay Burnett
+Mundubbera Battery,Storage,Battery storage,EQL,2024,4,Operating ,151.31216,-25.57673,Storage,North Burnett,"EQL, Local Network Battery Plan, Stage 2",Wide Bay Burnett
+Rasmussen Battery,Storage,Battery storage,EQL,2024,4,Operating ,146.72013,-19.36372,Storage,Townsville,"EQL, Local Network Battery Plan, Stage 2",North
+Gladstone South Battery,Storage,Battery storage,EQL,2024,4,Operating ,151.274411,-23.88472,Storage,Gladstone,"EQL, Local Network Battery Plan, Stage 2",Central
+Torrington Battery,Storage,Battery storage,EQL,2024,4,Operating ,151.90022,-27.55635,Storage,Toowoomba,"EQL, Local Network Battery Plan, Stage 2",Darling Downs and South West
+Marian South Battery,Storage,Battery storage,EQL,2024,4,Operating ,148.9426955,-21.15186,Storage,Mackay,"EQL, Local Network Battery Plan, Stage 2","Mackay, Isaac, Whitsunday"
+Raby Bay Battery,Storage,Battery storage,EQL,2024,4,Operating ,153.25788,-27.52252,Storage,Redland,"EQL, Local Network Battery Plan, Stage 2",South East
+Howard Battery,Storage,Battery storage,EQL,2024,4,Operating ,152.57545,-25.32239,Storage,Fraser Coast,"EQL, Local Network Battery Plan, Stage 2",Wide Bay Burnett
+Kewarra Battery,Storage,Battery storage,EQL,2024,4,Operating ,145.67368,-16.78539,Storage,Cairns,"EQL, Local Network Battery Plan, Stage 2",Far North
+Gordonvale Battery,Storage,Battery storage,EQL,2024,4,Operating ,145.78539,-17.08458,Storage,Cairns,"EQL, Local Network Battery Plan, Stage 2",Far North
+Emerald Battery,Storage,Battery storage,EQL,2024,4,Operating ,148.14782,-23.53282,Storage,Central Highlands,"EQL, Local Network Battery Plan, Stage 2",Central
+Morayfield Battery,Storage,Battery storage,EQL,2024,4,Operating ,152.95933,-27.13357,Storage,Moreton Bay,"EQL, Local Network Battery Plan, Stage 2",South East
+Bribie Island Battery,Storage,Battery storage,EQL,2024,4,Operating ,153.15407,-27.06333,Storage,Moreton Bay,"EQL, Local Network Battery Plan, Stage 2",South East
+Bohle Plains Battery,Storage,Battery storage,EQL,2023,4,Operating ,146.69271,-19.29884,Storage,Townsville,"EQL, Local Network Battery Plan, Trial",North
+Agnes Water Battery,Storage,Battery storage,EQL,2025,4,Under construction,151.8971018,-24.2249173,Storage,Gladstone,"EQL, Local Network Battery Plan, Stage 3",Central
+Clinton Battery,Storage,Battery storage,EQL,2025,4,Under construction,151.2250887,-23.8588626,Storage,Gladstone,"EQL, Local Network Battery Plan, Stage 3",Central
+Cornubia Battery,Storage,Battery storage,EQL,2025,4,Under construction,153.214442,-27.6636628,Storage,Logan,"EQL, Local Network Battery Plan, Stage 3",South East
+Glenella Battery,Storage,Battery storage,EQL,2025,4,Under construction,149.1401271,-21.1078584,Storage,Mackay,"EQL, Local Network Battery Plan, Stage 3","Mackay, Isaac, Whitsunday"
+Hollywell Battery,Storage,Battery storage,EQL,2025,4,Under construction,153.3882306,-27.9063862,Storage,Gold Coast,"EQL, Local Network Battery Plan, Stage 3",South East
+Jimboomba Battery,Storage,Battery storage,EQL,2025,4,Under construction,153.0444791,-27.8089231,Storage,Logan,"EQL, Local Network Battery Plan, Stage 3",South East
+Kearneys Spring Battery,Storage,Battery storage,EQL,2025,4,Under construction,151.9374645,-27.6135043,Storage,Toowoomba,"EQL, Local Network Battery Plan, Stage 3",Darling Downs and South West
+Millchester Battery,Storage,Battery storage,EQL,2025,4,Under construction,146.2806021,-20.100987,Storage,Charters Towers,"EQL, Local Network Battery Plan, Stage 3",North
+Mooloolaba Battery,Storage,Battery storage,EQL,2025,4,Under construction,153.0693265,-26.7085938,Storage,Sunshine Coast,"EQL, Local Network Battery Plan, Stage 3",South East
+Rocky Street Battery,Storage,Battery storage,EQL,2025,4,Under construction,152.6871835,-25.5279366,Storage,Maryborough,"EQL, Local Network Battery Plan, Stage 3",Wide Bay Burnett
+Woodridge Battery,Storage,Battery storage,EQL,2025,4,Under construction,153.1182403,-27.6330326,Storage,Logan,"EQL, Local Network Battery Plan, Stage 3",South East
+Yatala Battery,Storage,Battery storage,EQL,2025,4,Under construction,153.2286491,-27.7605223,Storage,Gold Coast,"EQL, Local Network Battery Plan, Stage 3",South East
+Kareeya,Hydro,Hydro,CleanCo Queensland Ltd,Jan 1957,88,Operating,145.5784319,-17.76717187,Renewable,Cassowary Coast,,Far North
+Barron Gorge,Hydro,Hydro,CleanCo Queensland Ltd,Jan 1963,66,Operating,145.6467466,-16.85073944,Renewable,Mareeba,,Far North
+Racecourse,Bagasse,Bioenergy,Mackay Sugar Limited,Jan 1982,48.5,Operating,149.1338122,-21.16424115,Renewable,Mackay,,"Mackay, Isaac, Whitsunday"
+Wivenhoe,Storage,Pumped hydro,CleanCo Queensland Ltd,Jan 1984,570,Operating,152.6319,-27.3722,Storage,Somerset,https://cleancoqueensland.com.au/portfolio/owned-and-operated/wivenhoe-pumped-storage-hydro-power-station/,South East
+Invicta,Bagasse,Bioenergy,Wilmar Sugar,Jan 1996,50,Operating,147.1064752,-19.51722271,Renewable,Burdekin,,North
+Windy Hill,Wind,Wind,RATCH Australia Corporation,Jan 2000,12,Operating,145.5319859,-17.59255025,Renewable,Tablelands,,Far North
+Millaquin Sugar Mill,Bagasse,Bioenergy,Bundaberg Sugar Ltd,Jan 2002,5,Operating,152.35201,-24.86020064,Renewable,Bundaberg,,Wide Bay Burnett
+Mulgrave Mill,Bagasse,Bioenergy,The Mulgrave Central Mill Co Ltd,Jan 2003,9,Operating,145.7887014,-17.09326819,Renewable,Cairns,,Far North
+Pioneer,Bagasse,Bioenergy,Wilmar Sugar,Jan 2005,69,Operating,147.3306817,-19.55771467,Renewable,Burdekin,,North
+Rocky Point Sugar Mill,Bagasse,Bioenergy,Heck Group,Jan 2007,30,Operating,153.3275,-27.7343,Renewable,Gold Coast,,South East
+Gympie Coffee Manufacturing,Coffee grounds & sawdust,Bioenergy,Nestle Australia Ltd,Jan 2009,16,Operating,152.6469733,-26.18256158,Renewable,Gympie,,Wide Bay Burnett
+Swanbank Landfill,Landfill Gas,Bioenergy,Stanwell Corporation,Jan 2014,7,Operating,152.823553,-27.6573467,Renewable,Ipswich,,South East
+Barcaldine Remote Community Solar Farm,Solar ,Solar,Barcaldine Remote Community Solar Farm,Dec 2016,20,Operating,145.3189393,-23.54708784,Renewable,Barcaldine,,Central
+Sunshine Coast Solar Farm ,Solar,Solar,Sunshine Coast Council,Jul 2017,15,Operating,153.025774,-26.56009333,Renewable,Sunshine Coast,,South East
+Normanton Solar Farm,Solar,Solar,Scouller Energy,Oct 2017,5,Operating,141.0500048,-17.68096032,Renewable,Carpentaria,,Far North
+Lakeland Solar Farm,Solar,Solar,Mpower,Dec 2017,10.8,Operating,144.8621,-15.8686,Renewable,Cook,https://www.conergy.com.au/press-release/lakeland-solar-storage-project-update,Far North
+Kidston Solar Project (Stage 1),Solar,Solar,Genex Power Limited,Dec 2017,50,Operating,144.1426156,-18.88904575,Renewable,Etheridge,https://genexpower.com.au/50mw-kidston-solar-project/,Far North
+Dunblane Solar Farm,Solar,Solar,YD Projects,Feb 2018,7.2,Operating,145.2732039,-23.53877543,Renewable,Barcaldine,https://reneweconomy.com.au/new-11mw-solar-farm-sets-new-benchmarks-queensland-37843/,Central
+Longreach Solar Farm,Solar,Solar,Canadian Solar (Australia) Pty,Apr 2018,15,Operating,144.3590996,-23.44661076,Renewable,Longreach,http://longreachsolarfarm.com.au/,Central
+Clare Solar Farm,Solar,Solar,FRV Services Australia Pty Ltd,Apr 2018,110,Operating,147.2052831,-19.8399934,Renewable,Burdekin,http://www.claresolarfarm.com.au/index.php/project,North
+Sun Metals Solar Farm,Solar,Solar,Sun Metals Corporation Pty,May 2018,126,Operating,146.8745609,-19.33207226,Renewable,Townsville,https://reneweconomy.com.au/sun-metals-says-new-solar-farm-will-underpin-zinc-refinery-expansion-28753/,North
+Hamilton Solar Farm,Solar,Solar,Edify Energy,Jul 2018,57.5,Operating,147.7557304,-20.51011337,Renewable,Whitsunday,https://edifyenergy.com/project/hamilton/,"Mackay, Isaac, Whitsunday"
+Whitsunday Solar Farm,Solar,Solar,Edify Energy,Jul 2018,57.5,Operating,147.7502465,-20.49390771,Renewable,Whitsunday,https://edifyenergy.com/project/whitsunday/,"Mackay, Isaac, Whitsunday"
+Collinsville Solar Power Station,Solar,Solar,RATCH Australia Corporation,Aug 2018,42.5,Operating,147.8073376,-20.54110941,Renewable,Whitsunday,http://ratchaustralia.com/collinsville/about_collinsville.html,"Mackay, Isaac, Whitsunday"
+Mt Emerald Wind Farm,Wind,Wind,RATCH Australia Corporation,Aug 2018,180,Operating,145.385747,-17.16889733,Renewable,Mareeba,http://mtemeraldwindfarm.com.au/,Far North
+Darling Downs Solar Farm,Solar,Solar,APA Group,Sep 2018,121,Operating,150.8788432,-27.11304799,Renewable,Western Downs,https://www.apa.com.au/about-apa/our-projects/darling-downs-solar-farm/,Darling Downs and South West
+Daydream Solar Farm,Solar,Solar,Edify Energy,Sep 2018,150,Operating,147.7669373,-20.47883355,Renewable,Whitsunday,https://edifyenergy.com/project/daydream/,"Mackay, Isaac, Whitsunday"
+Baking Board Solar Farm,Solar,Solar,Eco Energy World,Sep 2018,14.7,Operating,150.5537166,-26.72121842,Renewable,Western Downs,https://reneweconomy.com.au/chinchilla-solar-farm-secures-debt-funding-go-merchant-27047/,Darling Downs and South West
+Ross River Solar Farm,Solar,Solar,Palisade,Sep 2018,128,Operating,146.7154156,-19.4261522,Renewable,Townsville,http://rossriversolarfarm.com.au/,North
+Hughenden Solar Farm,Solar,Solar,Lighthouse Infrastructure,Sep 2018,18,Operating,144.1863504,-20.85484103,Renewable,Flinders,,North
+Emerald Solar Park,Solar,Solar,Lighthouse Infrastructure,Sep 2018,72,Operating,148.1263958,-23.50804223,Renewable,Central Highlands,,Central
+Susan River Solar Farm,Solar,Solar,Atmos Renewables,Jan 2019,85,Operating,152.7416502,-25.41931799,Renewable,Fraser Coast,,Wide Bay Burnett
+Hayman Solar Farm,Solar,Solar,Edify Energy,Jan 2019,50,Operating,147.7530397,-20.48290721,Renewable,Whitsunday,https://edifyenergy.com/project/hayman/,"Mackay, Isaac, Whitsunday"
+Childers Solar Farm,Solar,Solar,Atmos Renewables,Mar 2019,56,Operating,152.4027074,-25.30518253,Renewable,Bundaberg,,Wide Bay Burnett
+Lilyvale Solar farm,Solar,Solar,FRV Services Australia Pty Ltd,Mar 2019,100,Operating,148.4278423,-23.08377572,Renewable,Central Highlands,http://www.lilyvalesolarfarm.com.au/project,Central
+Oakey Solar Farm (Stage 1),Solar,Solar,Foresight Group,Mar 2019,25,Operating,151.6474424,-27.4062701,Renewable,Toowoomba,http://oakeysolarfarm.com.au/,Darling Downs and South West
+Haughton Solar Farm (Stage 1),Solar,Solar,Pacific Blue,May 2019,100,Operating,147.049473,-19.744994,Renewable,Burdekin,http://www.pacifichydro.com.au/english/projects/construction/haughton-solar-farm/,North
+Rugby Run Solar Farm Stage 1,Solar,Solar,Adani Australia,May 2019,65,Operating,147.9297526,-22.13586379,Renewable,Isaac,http://www.adanirenewables.com.au/rugby-run/,"Mackay, Isaac, Whitsunday"
+Clermont (Phase 1),Solar,Solar,Gentari Solar Australia,Jun 2019,89,Operating,147.5792974,-22.83765986,Renewable,Isaac,http://clermontsolarfarm.com.au/ ,"Mackay, Isaac, Whitsunday"
+Coopers Gap Wind Farm,Wind,Wind,AGL Energy,Jun 2019,453,Operating,151.4181876,-26.7113224,Renewable,Western Downs,https://www.agl.com.au/about-agl/how-we-source-energy/renewable-energy/coopers-gap-wind-farm,Darling Downs and South West
+Oakey Solar Farm (Stage 2),Solar,Solar,Foresight Group,Sep 2019,55,Operating,151.6561565,-27.4092956,Renewable,Toowoomba,http://oakeysolarfarm.com.au/,Darling Downs and South West
+Yarranlea Solar Farm,Solar,Solar,Risen Energy,Jan 2020,102,Operating,151.5331238,-27.70934404,Renewable,Toowoomba,http://www.yarranleasolar.com.au/,Darling Downs and South West
+Maryrorough (Brigalow) Solar Farm,Solar,Solar,Impact Investment Group,Jun 2020,27.5,Operating,151.5456498,-27.70960574,Renewable,Toowoomba,,Darling Downs and South West
+Warwick Solar Farm,Solar,Solar,Terrain Solar/University of Queensland,Sep 2020,64,Operating,152.0716509,-28.18310757,Renewable,Southern Downs,https://www.warwicksolarfarm.com.au/,Darling Downs and South West
+Tableland Sugar Mill Stage 2,Bagasse,Bioenergy,MSF Sugar,Dec 2020,24,Operating,145.344384,-17.12028495,Renewable,Mareeba,http://www.msfsugar.com.au/2016/08/75m-green-power-station-for-tableland-mill-near-mareeba-qld/,Far North
+Middlemount solar farm,Solar,Solar,SUSI Partners,Jan 2021,26,Operating,148.7190896,-22.82347712,Renewable,Isaac,,"Mackay, Isaac, Whitsunday"
+Kennedy Energy Park (Wind),Wind,Wind,Windlab and Erusus Energy,Jul 2021,43.2,Operating,144.3704792,-20.9260537,Renewable,Flinders,https://kennedyenergypark.com.au/,North
+Kennedy Energy Park (Solar),Solar,Solar,Windlab and Erusus Energy,Jul 2021,15,Operating,144.419213,-20.87458456,Renewable,Flinders,https://kennedyenergypark.com.au/,North
+Wandoan Battery Energy Storage,Storage,Battery storage,AGL Energy / Vena Energy,Sep 2021,100,Operating,149.765884,-26.261617,Storage,Western Downs,https://reneweconomy.com.au/agl-proposes-mega-battery-next-to-coopers-gap-wind-farm-in-queensland-53354/,Darling Downs and South West
+Gangarri Solar Farm,Solar,Solar,Shell Australia,Sep 2021,120,Operating,149.7525893,-26.26881271,Renewable,Western Downs,https://www.shell.com.au/energy-and-innovation/shell-australia-new-energies/gangarri-solar-project,Darling Downs and South West
+Western Downs Green Power Hub,Solar,Solar,Neoen,Feb 2022,400,Operating,150.6775759,-26.95777251,Renewable,Western Downs,https://westerndownsgreenpowerhub.com.au/,Darling Downs and South West
+Woolooga Solar Farm,Solar,Solar,Aula Energy,May 2022,176,Operating,152.441,-26.0789,Renewable,Gympie,https://lightsourcebp.com/au/project/woolooga-solar/,Wide Bay Burnett
+Columboola Solar Farm,Solar,Solar,Hana Financial Investment,Jun 2022,162,Operating,150.3030388,-26.63287208,Renewable,Western Downs,EPBC Referral - 2017/7962,Darling Downs and South West
+Blue Grass Solar Farm,Solar,Solar,X-Elio,Aug 2022,148,Operating,150.5044313,-26.68313112,Renewable,Western Downs,https://www.x-elio.com/projects-archive/blue-grass/,Darling Downs and South West
+Kaban Green Power Hub (Wind),Wind,Wind,Neoen,Oct 2022,157,Operating,145.4030137,-17.57187118,Renewable,Tablelands,https://kabangreenpowerhub.com.au/,Far North
+Moura Solar Farm,Solar,Solar,Metlen Energy & Metals,Oct 2022,82,Operating,150.0851394,-24.5134344,Renewable,Banana,https://mourasolar.com.au/,Central
+Edenvale Solar Park,Solar,Solar,Sojitz/ENEOS,Apr 2023,146,Operating,150.5845249,-26.93648182,Renewable,Western Downs,https://edenvalesolarpark.com/,Darling Downs and South West
+Dulacca Renewable Energy Project (Wind),Wind,Wind,Octopus Australia,Apr 2023,180,Operating,149.8587083,-26.62305983,Renewable,Western Downs,https://www.dulaccawindfarm.com.au/,Darling Downs and South West
+Wandoan South Solar Project Stage 1,Solar,Solar,Vena Energy,May 2023,125,Operating,149.7725941,-26.2543316,Renewable,Western Downs,https://www.venaenergy.com.au/our-projects/,Darling Downs and South West
+Bouldercombe Battery Project,Storage,Battery storage,Genex Power Limited,Jun 2023,50,Operating,150.4888048,-23.535396,Storage,Rockhampton,,Central
+Dugald River Solar Farm (Stage 1),Solar,Solar,APA Group,Dec 2023,44,Operating,139.493521,-20.801603,Renewable,Mount Isa,https://reneweconomy.com.au/first-stage-of-mt-isa-solar-farm-gets-green-light-after-supply-deal-with-zinc-miner/,North
+Dugald River Solar Farm (Stage 2),Solar,Solar,APA Group,Dec 2023,44,Operating,139.492944,-20.817308,Renewable,Mount Isa,https://reneweconomy.com.au/mt-isa-solar-farm-to-be-biggest-outside-main-grids-after-new-contract-with-local-miner/,North
+Chinchilla Battery,Storage,Battery storage,CS Energy,Feb 2024,100,Operating,150.745426,-26.9190732,Storage,Western Downs,https://www.csenergy.com.au/what-we-do/batteries,Darling Downs and South West
+Tully Sugar Mill,Bagasse,Bioenergy,Tully Sugar Limited,Jul 2024,21.4,Operating,145.9274912,-17.93676578,Renewable,Cassowary Coast,,Far North
+Western Downs Green Power Hub (BESS 1),Storage,Battery storage,Neoen,Aug 2024,270,Operating,150.6825759,-26.95277251,Storage,Western Downs,https://westerndownsgreenpowerhub.com.au/,Darling Downs and South West
+Kingaroy Solar Farm,Solar,Solar,Metlen Energy & Metals,Sep 2024,40,Operating,151.8814318,-26.53842167,Renewable,South Burnett,https://kingaroysolarfarm.com.au/,Wide Bay Burnett
+MacIntyre Wind Farm,Wind,Wind,Acciona Energy,Oct 2024,923.4,Operating,151.62068,-28.39971662,Renewable,Goondiwindi,https://www.acciona.com.au/projects/energy/wind-power/macintyre-wind-farm/,Darling Downs and South West
+Clarke Creek Wind Farm (Stage 1),Wind,Wind,Sqadron Energy,Oct 2024,450,Operating,149.440248,-22.847723,Renewable,Livingstone,https://www.squadronenergy.com/our-projects/clarke-creek-wind-farm,Central
+Greenbank Battery,Storage,Battery storage,CS Energy,Feb 2025,200,Operating,152.954451,-27.733281,Storage,Logan,https://www.csenergy.com.au/news/cs-energy-partners-with-powerlink-on-battery-project,South East
+Aldoga Solar Farm,Solar,Solar,Acciona Energy,Mar 2025,380,Operating,151.038643,-23.80474107,Renewable,Gladstone,https://www.acciona.com.au/aldoga/,Central
+Ulinda Park Battery,Storage,Battery storage,Akaysha Energy,Jun 2025,150,Operating,150.7198963,-26.9294161,Storage,Western Downs,https://akayshaenergy.com/projects/ulinda-park-bess,Darling Downs and South West
+Tarong Battery,Storage,Battery storage,Stanwell Corporation,Jul 2025,300,Operating,151.9102955,-26.7812551,Storage,South Burnett,https://www.stanwell.com/tarong-battery-energy-storage-system,Wide Bay Burnett
+Munna Creek Solar Farm,Solar,Solar,Metlen Energy & Metals,Sep 2025,120,Operating,152.4356913,-25.87781183,Renewable,Fraser Coast,https://munnacreeksolar.com.au/,Wide Bay Burnett
+Brendale BESS,Storage,Battery storage,Akaysha Energy,Sep 2025,205,Operating,152.97338,-27.32906,Storage,Moreton Bay,https://akayshaenergy.com/projects/brendale-bess,South East
+Western Downs Green Power Hub (BESS 2),Storage,Battery storage,Neoen,Oct 2025,270,Operating,150.6875759,-26.94777251,Storage,Western Downs,https://reneweconomy.com.au/queenslands-biggest-battery-to-double-in-size-after-agl-signs-virtual-contract/,Darling Downs and South West
+Supernode Battery (stage 1),Storage,Battery storage,Quinbrook,Oct 2025,260,Operating,152.9711101,-27.3198229,Storage,Moreton Bay,https://www.quinbrook.com/quinbrook-project/supernode-bess/,South East
+Gunsynd Solar Farm,Solar,Solar,Metis Energy,Nov 2025,94,Operating,150.3431601,-28.40940301,Renewable,Goondiwindi,https://www.gunsyndsolarfarm.com.au/,Darling Downs and South West
+Broadsound Solar Farm,Solar,Solar,Iberdrola,Dec 2025,296,Operating,149.394597,-22.828889,Renewable,Isaac,,"Mackay, Isaac, Whitsunday"
+Bundaberg Solar Farm,Solar,Solar,Global Power Generation,Mar 2026,78,Operating,152.013456,-24.93756324,Renewable,Bundaberg,https://www.globalpower-generation.com/en/geographical-presence/projects-in-australia/,Wide Bay Burnett
+Swanbank Battery,Storage,Battery storage,CleanCo Queensland Ltd,Nov 2026,250,Operating,152.8145128,-27.6606073,Storage,Ipswich,https://www.stanwell.com/stanwell-battery-energy-storage-system,South East
+Farleigh Mill,Bagasse,Bioenergy,Mackay Sugar Limited,Pre 2001,13,Operating,149.0997816,-21.09873236,Renewable,Mackay,,"Mackay, Isaac, Whitsunday"
+Inkerman Mill,Bagasse,Bioenergy,Wilmar Sugar,Pre 2001,13,Operating,147.4018809,-19.64373778,Renewable,Burdekin,,North
+Isis Central Sugar Mill,Bagasse,Bioenergy,ISIS Central Sugar Mill Co Ltd,Pre 2001,25,Operating,152.2070885,-25.19428211,Renewable,Bundaberg,,Wide Bay Burnett
+Kalamia Mill,Bagasse,Bioenergy,Wilmar Sugar,Pre 2001,9,Operating,147.4153977,-19.52273497,Renewable,Burdekin,,North
+Koombooloomba,Hydro,Hydro,CleanCo Queensland Ltd,Pre 2001,7,Operating,145.6035904,-17.83154955,Renewable,Tablelands,,Far North
+Macknade Mill,Bagasse,Bioenergy,Wilmar Sugar,Pre 2001,8,Operating,146.2583357,-18.58874255,Renewable,Hinchinbrook,,North
+Marian Mill,Bagasse,Bioenergy,Mackay Sugar Limited,Pre 2001,18,Operating,148.9393106,-21.14325495,Renewable,Mackay,,"Mackay, Isaac, Whitsunday"
+Mount St John,Sewage,Other,Townsville City Council,Pre 2001,5,Operating,146.7436242,-19.25405815,Renewable,Townsville,,North
+Plane Creek Mill,Bagasse,Bioenergy,Wilmar Sugar,pre 2001,14,Operating,149.2160893,-21.42856864,Renewable,Mackay,,"Mackay, Isaac, Whitsunday"
+Proserpine Sugar Mill,Bagasse,Bioenergy,Wilmar Sugar,pre 2001,17,Operating,148.5800426,-20.39882102,Renewable,Whitsunday,,"Mackay, Isaac, Whitsunday"
+South Johnstone Sugar Mill,Bagasse,Bioenergy,The Maryborough Sugar Factory Limited,pre 2001,20,Operating,145.9911827,-17.6057782,Renewable,Cassowary Coast,,Far North
+Tableland Sugar Mill,Bagasse,Bioenergy,The Maryborough Sugar Factory Limited,pre 2001,7,Operating,145.349384,-17.11528495,Renewable,Mareeba,,Far North
+Victoria Mill,Bagasse,Bioenergy,Wilmar Sugar,pre 2001,24,Operating,146.2023608,-18.6504999,Renewable,Hinchinbrook,,North
+Gladstone A&B,Wood waste,Bioenergy,NRG Gladstone Operating Ptd,Unknown ,10,Operating,151.218864,-23.85039313,Renewable,Gladstone,,Central
+Abermain BESS,Storage,Battery storage,AGL Energy,,200,Development approval,152.775065,-27.577704,Storage,Ipswich,https://firmpower.com.au/our-projects/abermain-bess/,South East
+Aldoga BESS Stage 1,Storage,Battery storage,Acciona Energy,,400,Development approval,151.0745749,-23.8260837,Storage,Gladstone,https://community.acciona.com.au/aldoga-solar-farm-bess,Central
+Amrun Solar Farm,Solar,Solar,Rio Tinto,,12.4,Under construction,141.658,-12.94408,Renewable,Cook,https://www.aggreko.com/en-au/news/2023/auspac/build-own-operate-solar-farm-bess-weipa,Far North
+Amrun Solar Farm (BESS),Storage,Battery storage,Rio Tinto,,8.8,Under construction,141.663,-12.93908,Storage,Cook,https://www.aggreko.com/en-au/news/2023/auspac/build-own-operate-solar-farm-bess-weipa,Far North
+Aramara BESS,Storage,Battery storage,AGL Energy,,200,Development approval,152.3132965,-25.5697359,Storage,Fraser Coast,https://firmpower.com.au/our-projects/aramara-bess/,Wide Bay Burnett
+Aramara solar farm,Solar,Solar,AGL Energy,,102,Development approval,152.3292771,-25.57125645,Renewable,Fraser Coast,https://www.agl.com.au/about-agl/operations/pipeline-projects,Wide Bay Burnett
+Banana Range Wind Farm (BESS),Storage,Battery storage,EDF Renewables,,50,Development approval,150.3285855,-24.45939146,Storage,Banana,https://www.bananarangewindfarm.com.au/,Central
+Banana Range Wind Farm (Stage 1),Wind,Wind,EDF Renewables,,230,Development approval,150.33367,-24.452351,Renewable,Banana,https://www.bananarangewindfarm.com.au/,Central
+Banksia Solar Farm,Solar,Solar,Venn Arbitir Pty Ltd,,60,Development approval,152.368025,-25.242041,Renewable,Bundaberg,https://vennenergy.au/projects/,Wide Bay Burnett
+Beebo Solar Farm and BESS (BESS),Storage,Battery storage,Jinko,,400,Development approval,150.9853661,-28.6910742,Storage,Goondiwindi,LGA development application,Darling Downs and South West
+Beebo Solar Farm and BESS (Solar),Solar,Solar,Jinko,,508,Development approval,150.9615722,-28.6986419,Renewable,Goondiwindi,LGA development application,Darling Downs and South West
+Beelbee Solar Farm,Solar,Solar,APA Group,,150,Development approval,150.822693,-27.14895222,Renewable,Western Downs,http://reneweconomy.com.au/queensland-big-solar-boom-continues-another-150mw-project-approved-44598/,Darling Downs and South West
+Blackstone BESS,Storage,Battery storage,Octopus Australia,,500,Development approval,152.8095881,-27.6465364,Storage,Ipswich,https://octopusinvestments.com.au/our-projects/blackstone-battery/,South East
+Blue Grass BESS (Stage 1),Storage,Battery storage,X-Elio,,60,Under construction,150.498474,-26.6908809,Storage,Western Downs,https://www.x-elio.com/projects-archive/blue-grass-bess/,Darling Downs and South West
+Blue Grass BESS (Stage 2),Storage,Battery storage,X-Elio,,88,Financial Close,150.503474,-26.6858809,Storage,Western Downs,https://www.x-elio.com/projects-archive/blue-grass-bess/,Darling Downs and South West
+Bluewater Solar Farm,Solar,Solar,FRV Services Australia Pty Ltd,,102,Development approval,146.4926415,-19.1363076,Renewable,Townsville,,North
+Boulder Creek Wind Farm,Wind,Wind,Aula Energy/CS Energy,,228,Under construction,150.28499,-23.65958,Renewable,Rockhampton,https://www.bouldercreekwindfarm.com.au/,Central
+Brigalow Peaking Power Plant,Fossil - Natural Gas,Gas,CS Energy / APA Group,,400,Financial Close,150.7577589,-26.9180332,Fossil,Western Downs,https://www.csenergy.com.au/what-we-do/firming-and-storage/brigalow-peaking-power-plant,Darling Downs and South West
+Broadlea Solar Farm,Solar,Solar,Eco Energy World,,90,Development approval,148.322906,-21.9702118,Renewable,Isaac,LGA development application,"Mackay, Isaac, Whitsunday"
+Broadsound BESS,Storage,Battery storage,Iberdrola,,180,Under construction,149.399597,-22.823889,Storage,Isaac,https://www.iberdrola.com.au/our-assets/operating-renewable-energy-assets/broadsound-solar-farm-and-battery,"Mackay, Isaac, Whitsunday"
+Bulli Creek Solar Farm,Solar,Solar,Genex Power Limited,,775,Development approval,150.8778832,-28.02108918,Renewable,Toowoomba,https://genexpower.com.au/775mw-bulli-creek-stage-1-solar-project/,Darling Downs and South West
+Bullyard Solar Farm,Solar,Solar,European Energy,,108.8,Development approval,152.086556,-24.9410738,Renewable,Bundaberg,https://au.europeanenergy.com/bullyard-solar-farm/,Wide Bay Burnett
+Bungaban Renewable Energy Farm,Wind,Wind,Windlab,,1400,Development approval,150.364754,-25.8821,Renewable,Western Downs,https://www.bungabanrenewableenergyfarm.com.au/,Darling Downs and South West
+Burdekin Solar Farm (BESS),Storage,Battery storage,ACE Power,,500,Development approval,147.1612685,-19.87926258,Storage,Burdekin,https://acepower.com.au/burdekin/,North
+Burdekin Solar Farm (Solar),Solar,Solar,ACE Power,,108,Development approval,147.1662685,-19.87426258,Renewable,Burdekin,https://acepower.com.au/burdekin/,North
+Callide Solar Power Station Project (Solar),Solar,Solar,Edify Energy,,240,Development approval,150.5876783,-24.3534648,Renewable,Banana,https://edifyenergy.com/project/callide/,Central
+Callide Wind Farm,Wind,Wind,DP Energy,,430,Development approval,150.568291,-24.09013,Renewable,Banana,https://dpenergy.com/australia-callide-wind-farm-queensland/,Central
+Cambridge Solar Farm (Stage 1),Solar,Solar,Cambridge RE Partners,,300,Development approval,147.043396,-19.724252,Renewable,Burdekin,https://www.cambridgerepartners.com/renewable-investments,North
+Cambridge Solar Farm (Stage 2),Solar,Solar,Cambridge RE Partners,,205,Development approval,147.048396,-19.719252,Renewable,Burdekin,https://www.cambridgerepartners.com/renewable-investments,North
+Cambridge Solar Farm (Stage 3),Solar,Solar,Cambridge RE Partners,,560,Development approval,147.053396,-19.714252,Renewable,Burdekin,https://www.cambridgerepartners.com/renewable-investments,North
+Central BESS,Storage,Battery storage,ACEnergy,,500,Development approval,150.4919262,-23.5325617,Storage,Rockhampton,https://www.thecentralbess.com.au/,Central
+Central REZ Battery / Stanwell BESS,Storage,Battery storage,Stanwell Corporation,,300,Under construction,150.31592,-23.51335,Storage,Rockhampton,https://www.stanwell.com/stanwell-battery-energy-storage-system,Central
+Childers Solar Farm (BESS),Storage,Battery storage,Atmos Renewables,,25,Development approval,152.4077074,-25.30018253,Storage,Bundaberg,https://reneweconomy.com.au/elliott-green-power-to-add-batteries-and-more-australian-solar-while-still-looking-for-buyers/,Wide Bay Burnett
+Chinchilla Solar Farm,Solar,Solar,Edify Energy,,130,Development approval,150.7883625,-26.6687484,Renewable,Western Downs,EPBC Referral,Darling Downs and South West
+Chinchilla Solar Farm (BESS),Storage,Battery storage,Edify Energy,,130,Development approval,150.7933625,-26.6637484,Storage,Western Downs,EPBC Referral,Darling Downs and South West
+Clare BESS,Storage,Battery storage,FRV Services Australia Pty Ltd,,100,Development approval,147.2100634,-19.8383724,Storage,Burdekin,Approval,North
+Clarke Creek Wind Farm (Stage 2),Wind,Wind,Sqadron Energy,,400,Development approval,149.3896019,-22.74232713,Renewable,Isaac,https://www.squadronenergy.com/our-projects/clarke-creek-wind-farm-ii,"Mackay, Isaac, Whitsunday"
+Cornerstone Energy Battery,Storage,Battery storage,Cornerstone Energy Pty Ltd,,250,Development approval,150.2842708,-26.6489094,Storage,Western Downs,https://daystarenergy.com.au/,Darling Downs and South West
+Darling Downs Power Station battery,Storage,Battery storage,Origin Energy Power Limited,,500,Development approval,150.8943701,-27.1125899,Storage,Western Downs,https://www.originenergy.com.au/about/who-we-are/what-we-do/development-projects/,Darling Downs and South West
+Daystar Energy Solar Farm,Solar,Solar,Daystar Energy,,100,Development approval,150.2888816,-26.6438053,Renewable,Western Downs,https://daystarenergy.com.au/,Darling Downs and South West
+Dingo Solar Farm,Solar,Solar,OX2,,85,Development approval,149.3995471,-23.65110589,Renewable,Central Highlands,https://www.ox2.com/australia/projects/dingo-solar-farm/,Central
+Dunmore solar farm,Solar,Solar,Octopus Australia,,300,Development approval,150.8526666,-27.6354708,Renewable,Toowoomba,EPBC referral,Darling Downs and South West
+Dunmore solar farm (BESS),Storage,Battery storage,Octopus Australia,,150,Development approval,150.8472459,-27.6496076,Storage,Toowoomba,EPBC referral,Darling Downs and South West
+Eurimbula Solar Farm,Solar,Solar,Elements Green / Eurimbula ProjectCo,,280,Development approval,151.585222,-24.18838,Renewable,Gladstone,EPBC referral - 2024/09802,Central
+Eurimbula Solar Farm (BESS),Storage,Battery storage,Elements Green / Eurimbula ProjectCo,,666,Development approval,151.590222,-24.18338,Storage,Gladstone,EPBC referral - 2024/09802,Central
+Everleigh (Crossroads) Battery,Storage,Battery storage,Grupo Cobra,,100,Development approval,150.5554574,-26.8957835,Storage,Western Downs,https://everleighsolarfarm.com.au/,Darling Downs and South West
+Everleigh Solar Park,Solar,Solar,Grupo Cobra,,120,Development approval,150.5893067,-26.9474891,Renewable,Western Downs,https://everleighsolarfarm.com.au/,Darling Downs and South West
+Fraser Coast Solar Park (Solar),Solar,Solar,Fraser Coast Solar Park Pty Ltd,,350,Development approval,152.2533953,-25.6766033,Renewable,Fraser Coast,LGA development application,Wide Bay Burnett
+Ganymirra Solar Power Station (BESS),Storage,Battery storage,Edify Energy,,150,Development approval,146.8611872,-19.58411047,Storage,Townsville,https://edifyenergy.com/project/ganymirra-and-majors-creek/,North
+Ganymirra Solar Power Station (Solar),Solar,Solar,Edify Energy,,150,Development approval,146.8661872,-19.57911047,Renewable,Townsville,https://edifyenergy.com/project/ganymirra-and-majors-creek/,North
+Gawara Baya Wind Farm,Wind,Wind,Windlab,,400,Development approval,145.7283424,-18.7499318,Renewable,Charters Towers,https://www.windlab.com/our-projects/upper-burdekin-wind-farm/,North
+Gawara Baya Wind Farm (BESS),Storage,Battery storage,Windlab,,104,Development approval,145.7459555,-18.7862225,Storage,Charters Towers,https://www.windlab.com/our-projects/upper-burdekin-wind-farm/,North
+Gregory Solar Farm,Solar,Solar,Renewable Energy Developments,,215,Development approval,148.4495224,-23.13852991,Renewable,Central Highlands,,Central
+Gunsynd Solar Farm (BESS),Storage,Battery storage,Metis Energy,,20,Development approval,150.3498733,-28.401744,Storage,Goondiwindi,https://www.gunsyndsolarfarm.com.au/,Darling Downs and South West
+Gurambilbarra Energy Hub Solar,Solar,Solar,365 Fututre Energy Pty Ltd,,160,Development approval,146.727675,-19.424178,Renewable,Townsville,LGA development application,North
+Halys BESS,Storage,Battery storage,Akaysha Energy,,1120,Development approval,151.7219103,-26.7706367,Storage,South Burnett,https://akayshaenergy.com/projects/halys-bess,Wide Bay Burnett
+Harlin Solar farm (Solar),Solar,Solar,Sunshine Energy Australia,,1500,Development approval,152.4154087,-26.95060742,Renewable,Somerset,https://www.newenergydevelopment.com/projects-harlin-solar-farm,South East
+Haughton Solar Farm (stage 2) BESS,Storage,Battery storage,Pacific Blue,,200,Development approval,147.0364136,-19.74499727,Storage,Burdekin,,North
+Haughton Solar Farm (stage 2) Solar,Solar,Solar,Pacific Blue,,300,Development approval,147.0245,-19.757894,Renewable,Burdekin,https://www.pacificblue.com.au/our-energy-production/sites-in-development/haughton-stage-2,North
+Hopeland Solar Farm,Solar,Solar,Pacific Partnerships,,250,Development approval,150.7130508,-26.93618554,Renewable,Western Downs,https://www.hopelandsolar.com.au/,Darling Downs and South West
+Hopeland Solar Farm (BESS),Storage,Battery storage,Pacific Partnerships,,175,Development approval,150.7180508,-26.93118554,Storage,Western Downs,https://www.hopelandsolar.com.au/,Darling Downs and South West
+Jimbour East Solar Farm,Solar,Solar,X-Elio,,200,Development approval,151.2289131,-26.90127804,Renewable,Western Downs,,Darling Downs and South West
+Kaban Green Power Hub (BESS),Storage,Battery storage,Neoen,,100,Development approval,145.4080137,-17.56687118,Storage,Tablelands,https://kabangreenpowerhub.com.au/,Far North
+Karara BESS,Storage,Battery storage,Acciona Energy,,400,Development approval,151.5607179,-28.3007566,Storage,Goondiwindi,https://www.acciona.com.au/projects/macintyre-wind-precinct/,Darling Downs and South West
+Karrabin Solar Farm,Solar,Solar,EIWA Karrabin Solar,,43,Development approval,152.699385,-27.6022,Renewable,Ipswich,LGA development application,South East
+Kidston Pumped Storage Project,Storage,Pumped hydro,Genex Power Limited,,250,Under construction,144.1559,-18.8732,Storage,Etheridge,https://genexpower.com.au/250mw-kidston-pumped-storage-hydro-project/,Far North
+Kingaroy Wind Farm,Wind,Wind,Australian Energy Wind Farm,,57.1,Development approval,151.535588,-26.61446184,Renewable,South Burnett,,Wide Bay Burnett
+Lockyer Valley Energy Project (BESS),Storage,Battery storage,Quinbrook,,850,Development approval,152.27634,-27.5359,Storage,Lockyer Valley,https://lockyerenergy.com.au/,South East
+Lockyer Valley Energy Project (Gas),Fossil - Natural Gas,Gas,Lockyer Energy Management Pty Ltd,,117,Development approval,152.28134,-27.5309,Fossil,Lockyer Valley,https://lockyerenergy.com.au/,South East
+Lotus Creek Wind Farm,Wind,Wind,CS Energy,,285,Under construction,149.25596,-22.3593,Renewable,Isaac,https://lotuscreekwindfarm.com.au/,"Mackay, Isaac, Whitsunday"
+Lower Wonga BESS,Storage,Battery storage,Equis,,200,Development approval,152.4302,-26.09598,Storage,Gympie,https://www.equis.com.au/pin-projects/woolooga,Wide Bay Burnett
+Lower Wonga Solar Farm - BESS,Storage,Battery storage,Lightsource BP Australia,,200,Development approval,152.4425105,-26.0897283,Storage,Gympie,https://lightsourcebp.com/project/lower-wonga-solar/,Wide Bay Burnett
+Lower Wonga Solar Farm - Solar,Solar,Solar,Lightsource BP Australia,,297.5,Development approval,152.4499051,-26.0985505,Renewable,Gympie,https://lightsourcebp.com/project/lower-wonga-solar/,Wide Bay Burnett
+Majors Creek Solar Project,Solar,Solar,Edify Energy,,200,Development approval,146.8711872,-19.57411047,Renewable,Townsville,https://edifyenergy.com/project/majors-creek/,North
+Mareeba Solar Farm,Solar,Solar,ACE Power,,60,Development approval,145.4665232,-17.04705067,Renewable,Mareeba,,Far North
+Miles Renewable Project,Solar,Solar,Vena Energy,,500,Development approval,150.24249,-26.75472,Renewable,Western Downs,https://www.venaenergy.com.au/all_projects/miles-renewable-project/,Darling Downs and South West
+Miles Renewable Project (BESS),Storage,Battery storage,Vena Energy,,500,Development approval,150.242888,-26.739728,Storage,Western Downs,https://www.venaenergy.com.au/all_projects/miles-renewable-project/,Darling Downs and South West
+Mirani Solar Farm,Solar,Solar,OX2,,60,Development approval,148.8287151,-21.1485269,Renewable,Mackay,Development approval.,"Mackay, Isaac, Whitsunday"
+Moah Creek Wind farm,Wind,Wind,RES/Energy Estate,,372,Development approval,150.1792291,-23.4359681,Renewable,Rockhampton,https://www.moahcreek.com/,Central
+Moranbah Solar Farm,Solar,Solar,Grupo Cobra / Zero-E,,200,Development approval,148.2948989,-21.9720494,Renewable,Isaac,https://moranbahsolarfarm.com.au/,"Mackay, Isaac, Whitsunday"
+Moranbah Solar Farm (BESS),Storage,Battery storage,Grupo Cobra / Zero-E,,50,Development approval,148.2889422,-21.9483414,Storage,Isaac,https://moranbahsolarfarm.com.au/,"Mackay, Isaac, Whitsunday"
+Mount Fox Energy Park,Wind,Wind,Mount Fox Pty Ltd,,290,Development approval,145.885303,-18.84876,Renewable,Hinchinbrook,https://www.mtfoxenergypark.com.au/,North
+Mount Hopeful Wind Farm,Wind,Wind,Neoen,,350,Development approval,150.580375,-23.86203,Renewable,Banana,https://mounthopefulwindfarm.com.au/,Central
+Nebo BESS,Storage,Battery storage,ACE Power,,900,Development approval,148.6799974,-21.6246318,Storage,Isaac,https://acepower.com.au/nebo/,"Mackay, Isaac, Whitsunday"
+Ningi Solar Farm,Solar,Solar,Southern Pacific Sands/Aurecon,,50,Development approval,153.0576377,-27.08433674,Renewable,Moreton Bay,LGA development application,South East
+Owanyilla Solar Farm,Solar,Solar,Unknown,,40,Development approval,152.6211938,-25.6592748,Renewable,Fraser Coast,LGA development application,Wide Bay Burnett
+Pioneer BESS,Storage,Battery storage,Edify Energy,,200,Development approval,149.0098346,-21.1616597,Storage,Mackay,https://edifyenergy.com/project/pioneer-energy-storage-system/,"Mackay, Isaac, Whitsunday"
+Prairie Wind Farm,Wind,Wind,Windlab/Fortescue Future Industries,,800,Development approval,144.563922,-20.713768,Renewable,Flinders,https://www.windlab.com/our-projects,North
+Punch's Creek Renewable Project,Storage,Battery storage,Skylab Australia,,400,Development approval,151.38684,-27.960955,Storage,Toowoomba,https://www.edp.com/en/asia-pacific/australia/punchs-creek-renewable-energy-project,Darling Downs and South West
+Punch's Creek Renewable Project Stage 1,Solar,Solar,Skylab Australia,,400,Development approval,151.371481,-27.945486,Renewable,Toowoomba,https://www.edp.com/en/asia-pacific/australia/punchs-creek-renewable-energy-project,Darling Downs and South West
+Punch's Creek Renewable Project Stage 2,Solar,Solar,Skylab Australia,,400,Development approval,151.408604,-27.947625,Renewable,Toowoomba,https://skylabgroup.com.au/past-projects/punchs-creek/,Darling Downs and South West
+Raglan BESS,Storage,Battery storage,Ace Power,,500,Development approval,150.8441474,-23.7518918,Storage,Gladstone,https://acepower.com.au/raglan/,Central
+Rugby Run Solar Farm Stage 2,Solar,Solar,Adani Australia,,105,Development approval,147.9347526,-22.13086379,Renewable,Isaac,http://reneweconomy.com.au/adani-signs-ppa-rugby-run-solar-plant-wont-say-90377/,"Mackay, Isaac, Whitsunday"
+Smoky Creek & Guthrie's Gap Solar Power Station (BESS),Storage,Battery storage,Edify Energy,,600,Financial Close,150.3988362,-24.0495888,Storage,Banana,https://edifyenergy.com/project/smoky-creek-guthries-gap/,Central
+Smoky Creek & Guthrie's Gap Solar Power Station (Solar),Solar,Solar,Edify Energy,,600,Financial Close,150.4103801,-24.044004,Renewable,Banana,https://edifyenergy.com/project/smoky-creek-guthries-gap/,Central
+South Burnett BESS,Storage,Battery storage,X-Elio,,300,Development approval,151.71283,-26.754044,Storage,South Burnett,https://www.x-elio.com/projects-archive/south-burnett-bess/,Wide Bay Burnett
+Specimen Hill Wind Farm,Wind,Wind,Ark Energy,,336,Development approval,150.79288,-24.227476,Renewable,Banana,https://arkenergy.com.au/wind/specimen-hill-wind-farm/,Central
+Stony Creek Wind Farm,Wind,Wind,Greenleaf Renewables,,166,Development approval,151.8991,-25.4928,Renewable,North Burnett,https://www.stonycreekwindfarm.com.au/,Wide Bay Burnett
+Sunshine State Solar Farm,Solar,Solar,OX2,,110,Development approval,146.3698335,-19.00312676,Renewable,Townsville,https://www.ox2.com/projects/sunshine-state-solar-farm/,North
+Supernode Battery (stage 2),Storage,Battery storage,Quinbrook,,260,Under construction,152.970805,-27.3169919,Storage,Moreton Bay,https://www.quinbrook.com/quinbrook-project/supernode-bess/,South East
+Supernode Battery (stage 3),Storage,Battery storage,Quinbrook,,250,Under construction,152.9680584,-27.3187662,Storage,Moreton Bay,https://www.quinbrook.com/quinbrook-project/supernode-bess/,South East
+Susan River Solar Farm (BESS),Storage,Battery storage,Atmos Renewables,,50,Development approval,152.7466502,-25.41431799,Storage,Fraser Coast,https://www.pv-magazine-australia.com/2021/08/05/egp-confirms-expansion-with-125-mw-battery-storage-plans-approved/,Wide Bay Burnett
+Tangkam BESS,Storage,Battery storage,Atria Energy Ltd / Hanwha Energy,,100,Development approval,151.66976,-27.47694,Storage,Toowoomba,,Darling Downs and South West
+Tarong West Wind Farm,Wind,Wind,RES Australia / Innagreen,,437,Development approval,151.512797,-26.575574,Renewable,South Burnett,https://www.tarongwestwindfarm.com.au/,Wide Bay Burnett
+Teebar BESS,Storage,Battery storage,Atmos Renewables,,400,Development approval,152.2489135,-25.6935012,Storage,Fraser Coast,https://atmosrenewables.com.au/project/teebar-battery-energy-storage-system/,Wide Bay Burnett
+Theodore Solar Farm,Solar,Solar,Octopus Australia,,70,Development approval,150.1416216,-24.80377062,Renewable,Banana,,Central
+Theodore Wind Farm,Wind,Wind,RWE,,1100,Development approval,150.407579,-24.928453,Renewable,Banana,https://au.rwe.com/projects/theodore-wind-farm/,Central
+Theodore Wind Farm (BESS),Storage,Battery storage,RWE,,240,Development approval,150.3898261,-24.9216223,Storage,Banana,https://au.rwe.com/projects/theodore-wind-farm,Central
+Tuckeroo Battery,Storage,Battery storage,AGL Energy,,500,Development approval,150.7208988,-26.9189749,Storage,Western Downs,https://www.agl.com.au/about-agl/operations/queensland-battery?cidi=AGL%7CB1002548,Darling Downs and South West
+Tumuruu BESS,Storage,Battery storage,Australian Solar Enterprises,,500,Development approval,152.100476,-26.842564,Storage,South Burnett,https://tumuruusolar.com.au/,Wide Bay Burnett
+Tumuruu Solar Farm,Solar,Solar,Australian Solar Enterprises,,370,Development approval,152.104385,-26.833892,Renewable,South Burnett,https://tumuruusolar.com.au/,Wide Bay Burnett
+Upper Calliope Solar Farm,Solar,Solar,European Energy,,1100,Development approval,150.7536505,-24.0425017,Renewable,Gladstone,https://au.europeanenergy.com/upper-calliope-solar-farm/,Central
+Wambo Wind Farm,Storage,Battery storage,RE Partners/ Cubico Sustainable Investments,,50,Development approval,151.25186,-26.683,Storage,Western Downs,https://reneweconomy.com.au/big-battery-storage-map-of-australia/,Darling Downs and South West
+Wambo Wind Farm (Stage 1),Wind,Wind,Stanwell/ Cubico Sustainable Investments,,252,Under construction,151.25686,-26.678,Renewable,Western Downs,https://wambowindfarm.com.au,Darling Downs and South West
+Wambo Wind Farm (Stage 2),Wind,Wind,RE Partners/ Cubico Sustainable Investments,,254.2,Under construction,151.26186,-26.673,Renewable,Western Downs,https://wambowindfarm.com.au/#about-the-project,Darling Downs and South West
+Wandoan South Solar Project Stage 2,Solar,Solar,Vena Energy,,240,Under construction,149.8184009,-26.2602928,Renewable,Western Downs,https://www.venaenergy.com.au/our-projects/,Darling Downs and South West
+Warhook Solar Farm,Solar,Solar,Engie Renewables,,200,Development approval,150.2661987,-26.61334008,Renewable,Western Downs,,Darling Downs and South West
+Warhook Solar Farm (BESS),Storage,Battery storage,Engie Renewables,,200,Development approval,150.2711987,-26.60834008,Storage,Western Downs,,Darling Downs and South West
+Western Downs Green Power Hub (BESS 3),Storage,Battery storage,Neoen,,305,Under construction,150.6885454,-26.9521305,Storage,Western Downs,,Darling Downs and South West
+Whitestone Energy Battery,Storage,Battery storage,Whitestone Energy Pty Ltd,,250,Development approval,150.2837754,-26.6512211,Storage,Western Downs,https://daystarenergy.com.au/,Darling Downs and South West
+Wongalee Wind Farm,Wind,Wind,Windlab/Fortescue Future Industries,,1400,Development approval,144.505957,-20.56338,Renewable,Flinders,https://www.northqueenslandsuperhub.com/wongalee-wind-farm,North
+Woolooga BESS,Storage,Battery storage,Aula Energy,,200,Under construction,152.4450615,-26.0866384,Storage,Gympie,https://lightsourcebp.com/au/project/woolooga-solar/,Wide Bay Burnett
+Yabulu BESS,Storage,Battery storage,ACE Power,,200,Development approval,146.5797584,-19.2551688,Storage,Townsville,https://acepower.com.au/yabulu-bess/,North
+Yabulu Solar Farm,Solar,Solar,ACE Power,,90,Development approval,146.5902939,-19.2550284,Renewable,Townsville,https://acepower.com.au/yabulu-solar/,North
