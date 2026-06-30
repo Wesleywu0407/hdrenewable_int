@@ -30,7 +30,7 @@ DC_COLOR = "#e74c3c"            # vivid red-orange — distinct from green BESS
 DC_COLOR_BORDER = "#ffffff"     # white ring makes DCs pop over BESS markers
 
 SOURCE_FOOTER = (
-    "Source: OpenElectricity API · Wikipedia (energy storage projects) · "
+    "Source: OpenElectricity API · treasury.qld.gov.au · Wikipedia (energy storage projects) · "
     "Baxtel · Datacentermap.com · Curated public project records"
 )
 
@@ -276,7 +276,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             zoom=3.5,
         ),
         title=dict(
-            text="<b>Australian Energy Infrastructure Map</b><br>"
+            text="<b>NEM Energy Infrastructure Map</b><br>"
                  "<sup>Battery Energy Storage Systems (BESS) · Solar Farms · Major Data Centres</sup>",
             x=0.5,
             xanchor="center",

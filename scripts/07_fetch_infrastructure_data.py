@@ -149,7 +149,7 @@ def extract_dms_coords(text: str) -> tuple[float, float] | None:
     m = re.search(r"/(-?\d{1,3}\.\d+);\s*(-?\d{1,3}\.\d+)", text)
     if m:
         lat, lon = float(m.group(1)), float(m.group(2))
-        if -44 < lat < -10 and 113 < lon < 154:
+        if -44 < lat < -10 and 129 < lon < 154:
             return lat, lon
 
     # Try pattern: 33.312°S 116.292°E
@@ -157,7 +157,7 @@ def extract_dms_coords(text: str) -> tuple[float, float] | None:
     if m:
         lat = float(m.group(1)) * (-1 if m.group(2) == "S" else 1)
         lon = float(m.group(3)) * (-1 if m.group(4) == "W" else 1)
-        if -44 < lat < -10 and 113 < lon < 154:
+        if -44 < lat < -10 and 129 < lon < 154:
             return lat, lon
 
     return None
@@ -292,6 +292,8 @@ def fetch_bess_wikipedia() -> pd.DataFrame:
 
             # Infer state from location string
             state = _infer_state(location_text)
+            if state == "WA":
+                continue
 
             rows.append({
                 "name": name,
@@ -537,8 +539,6 @@ NEXTDC_PAGES = [
     ("NextDC M3", "West Footscray, Melbourne", "https://www.nextdc.com/data-centres/melbourne-data-centres/m3-melbourne"),
     ("NextDC B1", "Brisbane",                "https://www.nextdc.com/data-centres/brisbane-data-centres/b1-brisbane"),
     ("NextDC B2", "Brisbane",                "https://www.nextdc.com/data-centres/brisbane-data-centres/b2-brisbane"),
-    ("NextDC P1", "Malaga, Perth",           "https://www.nextdc.com/data-centres/perth-data-centres/p1-perth"),
-    ("NextDC P2", "Perth",                   "https://www.nextdc.com/data-centres/perth-data-centres/p2-perth"),
     ("NextDC C1", "Canberra",                "https://www.nextdc.com/data-centres/canberra-data-centres/c1-canberra"),
     ("NextDC A1", "Adelaide",                "https://www.nextdc.com/data-centres/adelaide-data-centres/a1-adelaide"),
     ("NextDC SC1", "Sunshine Coast",         "https://www.nextdc.com/data-centres/sunshine-coast-data-centres/sc1-sunshine-coast"),
@@ -607,7 +607,7 @@ def fetch_nextdc() -> pd.DataFrame:
             re.findall(r'["\'](?:lon|lng)["\']:\s*(-?\d+\.\d+)', resp.text),
         ):
             lat, lon = float(m_lat), float(m_lon)
-            if -44 < lat < -10 and 113 < lon < 154:
+            if -44 < lat < -10 and 129 < lon < 154:
                 coords = (lat, lon)
                 break
 
@@ -675,7 +675,7 @@ def fetch_airtrunk() -> pd.DataFrame:
             re.findall(r'["\'](?:lon|lng)["\']:\s*(-?\d+\.\d+)', resp.text),
         ):
             lat, lon = float(m_lat), float(m_lon)
-            if -44 < lat < -10 and 113 < lon < 154:
+            if -44 < lat < -10 and 129 < lon < 154:
                 coords = (lat, lon)
                 break
 
@@ -728,7 +728,7 @@ def fetch_baxtel() -> pd.DataFrame:
 
     soup = BeautifulSoup(resp.text, "lxml")
     rows = []
-    AU_CITIES = {"sydney", "melbourne", "brisbane", "perth", "adelaide",
+    AU_CITIES = {"sydney", "melbourne", "brisbane", "adelaide",
                  "canberra", "darwin", "hobart", "gold coast", "sunshine coast"}
 
     for tag in soup.find_all(["h2", "h3", "h4", "a"]):
@@ -801,7 +801,6 @@ EQUINIX_AU_SITES = [
     ("Equinix ME2", "Port Melbourne"),
     ("Equinix ME3", "Laverton North, Melbourne"),
     ("Equinix BR1", "Bowen Hills, Brisbane"),
-    ("Equinix PE1", "Perth"),
     ("Equinix AD1", "Adelaide"),
     ("Equinix CA1", "Canberra"),
 ]
@@ -910,7 +909,8 @@ def main() -> int:
     # Drop rows with no coordinates (can't plot them)
     before = len(bess_df)
     bess_df = bess_df.dropna(subset=["lat", "lon"])
-    bess_df = bess_df[bess_df["lat"].between(-44, -10) & bess_df["lon"].between(113, 154)]
+    bess_df = bess_df[bess_df["lat"].between(-44, -10) & bess_df["lon"].between(129, 154)]
+    bess_df = bess_df[bess_df["state"].str.upper() != "WA"]
     
     # Deduplicate with normalized name
     bess_df["name_norm"] = bess_df["name"].apply(lambda x: re.sub(r'[^a-z0-9]', '', re.sub(r'\b(battery|solar farm|solar project|solar power station|solar park|bess|stage \d)\b', '', str(x).lower())))
@@ -943,7 +943,7 @@ def main() -> int:
 
     dc_df = pd.concat(dc_all, ignore_index=True)
     dc_df = dc_df.dropna(subset=["lat", "lon"])
-    dc_df = dc_df[dc_df["lat"].between(-44, -10) & dc_df["lon"].between(113, 154)]
+    dc_df = dc_df[dc_df["lat"].between(-44, -10) & dc_df["lon"].between(129, 154)]
     dc_df = dc_df.drop_duplicates(subset=["name"]).reset_index(drop=True)
 
     dc_path = RAW_DIR / "datacentre_locations.csv"
@@ -963,7 +963,8 @@ def main() -> int:
     else:
         before = len(solar_df)
         solar_df = solar_df.dropna(subset=["lat", "lon"])
-        solar_df = solar_df[solar_df["lat"].between(-44, -10) & solar_df["lon"].between(113, 154)]
+        solar_df = solar_df[solar_df["lat"].between(-44, -10) & solar_df["lon"].between(129, 154)]
+        solar_df = solar_df[solar_df["state"].str.upper() != "WA"]
         
         # Deduplicate with normalized name
         solar_df["name_norm"] = solar_df["name"].apply(lambda x: re.sub(r'[^a-z0-9]', '', re.sub(r'\b(battery|solar farm|solar project|solar power station|solar park|bess|stage \d)\b', '', str(x).lower())))

@@ -181,25 +181,25 @@ CHAPTERS = [
     },
     {
         "id": "1.3",
-        "title": "Infrastructure & Storage Mapping",
-        "subtitle": "Geospatial Analysis of Australian Energy Infrastructure",
+        "title": "NEM Infrastructure & Storage Mapping",
+        "subtitle": "Geospatial Analysis of NEM Energy Infrastructure",
         "status": "done",
         "source": "OpenElectricity API · Wikipedia (Battery_storage_power_station) · nextdc.com · airtrunk.com · Equinix (Nominatim/OSM)",
         "figures": [
             {
                 "id": "fig1_4",
                 "number": 1,
-                "title": "Australian Infrastructure Map: BESS, Solar & Data Centres",
+                "title": "NEM Infrastructure Map: BESS, Solar & Data Centres",
                 "sidebar_title": "INFRASTRUCTURE MAP",
                 "subtitle": "Battery Energy Storage Systems, Solar Farms & Major Data Centre Locations",
                 "html_path": "outputs/figures/fig1_4_infrastructure_map.html",
                 "png_path": "outputs/figures/png/fig1_4_infrastructure_map.png",
-                "source": "OpenElectricity API · Wikipedia · nextdc.com · airtrunk.com · Equinix/OSM",
+                "source": "OpenElectricity API · Wikipedia · treasury.qld.gov.au · nextdc.com · airtrunk.com · Equinix/OSM",
                 "metrics": [
-                    {"label": "BESS Sites", "value": "91", "note": "Australia-wide, all NEM states"},
+                    {"label": "BESS Sites", "value": "91", "note": "NEM states only"},
                     {"label": "Solar Farms", "value": "136", "note": "Utility-scale"},
                     {"label": "Data Centres", "value": "42", "note": "NextDC, Equinix, AirTrunk, AWS, Google, Microsoft"},
-                    {"label": "Coverage", "value": "National", "note": "All NEM regions + WA"},
+                    {"label": "Coverage", "value": "NEM Only", "note": "All NEM regions (excludes WA / WEM)"},
                 ],
                 "takeaway": (
                     "Australia's BESS pipeline is geographically concentrated in NSW, VIC and SA "
@@ -209,19 +209,20 @@ CHAPTERS = [
                 ),
                 "description": (
                     "This interactive map overlays the locations of Existing/Proposed Battery Energy Storage Systems (BESS), "
-                    "Existing Solar Panels, and major Data Centres across Australia. BESS and solar markers are sized proportionally to "
+                    "Existing Solar Panels, and major Data Centres across the NEM (National Electricity Market). BESS and solar markers are sized proportionally to "
                     "registered capacity (MW), revealing the scale hierarchy from large grid-scale "
                     "installations like Hornsdale and Victorian Big Battery down to smaller utility projects. "
                     "Data centre markers identify major hyperscaler and colocation operators "
                     "(NextDC, Equinix, AirTrunk, AWS, Microsoft, Google).\n\n"
                     "**BESS & Solar data sources:**\n"
                     "• OpenElectricity API (openelectricity.org.au) — live registered battery and solar units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
+                    "• treasury.qld.gov.au — official Queensland government plant data\n"
                     "• Wikipedia — Battery_storage_power_station article wikitables (operating, under construction & planned Australian projects)\n"
                     "• Coordinates geocoded live via Nominatim / OpenStreetMap where not embedded in source data\n\n"
                     "**Data centre sources:**\n"
-                    "• nextdc.com — facility pages scraped for all 14 operating Australian sites (S1–S6, M1–M3, B1–B2, P1–P2, C1, A1, SC1)\n"
+                    "• nextdc.com — facility pages scraped for 12 operating Australian sites (S1–S6, M1–M3, B1–B2, C1, A1, SC1)\n"
                     "• airtrunk.com — facility pages scraped for SYD1, SYD2, SYD3, MEL1, MEL2\n"
-                    "• Equinix — 13 Australian sites (SY1–SY6, ME1–ME3, BR1, PE1, AD1, CA1) geocoded via Nominatim/OSM using publicly listed suburb locations\n"
+                    "• Equinix — 12 Australian sites (SY1–SY6, ME1–ME3, BR1, AD1, CA1) geocoded via Nominatim/OSM using publicly listed suburb locations\n"
                     "• Cloud provider regions (AWS, Google Cloud, Microsoft Azure, Oracle Cloud) geocoded via Nominatim/OSM"
                 ),
             },
