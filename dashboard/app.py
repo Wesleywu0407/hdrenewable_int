@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from html import escape
+import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ import subprocess
 from typing import Any
 from urllib.parse import quote
 
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
@@ -25,6 +27,16 @@ except ImportError:
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+# Dynamically import the map builder script
+spec = importlib.util.spec_from_file_location(
+    "infrastructure_charts", 
+    PROJECT_ROOT / "scripts" / "08_generate_infrastructure_charts.py"
+)
+infrastructure_charts = importlib.util.module_from_spec(spec)
+sys.modules["infrastructure_charts"] = infrastructure_charts
+spec.loader.exec_module(infrastructure_charts)
+
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 REFRESH_STATUS_DIR = PROJECT_ROOT / "runtime" / "refresh"
 LOG_DIR = PROJECT_ROOT / "logs"
@@ -126,6 +138,28 @@ CARD_CATEGORY_RULES = [
 ]
 
 DEFAULT_CATEGORY = "market"
+
+
+@st.cache_data
+def load_infrastructure_data():
+    bess_df = pd.read_csv(PROJECT_ROOT / "data" / "raw" / "bess_locations.csv")
+    solar_df = pd.read_csv(PROJECT_ROOT / "data" / "raw" / "solar_locations.csv")
+    dc_df = pd.read_csv(PROJECT_ROOT / "data" / "raw" / "datacentre_locations.csv")
+    
+    # Clean up state strings
+    bess_df['state'] = bess_df['state'].str.strip().str.upper()
+    solar_df['state'] = solar_df['state'].astype(str).str.strip().str.upper()
+    dc_df['state'] = dc_df['state'].astype(str).str.strip().str.upper()
+    
+    # Infer missing states in DC data based on city
+    dc_df.loc[dc_df['state'] == 'NAN', 'state'] = None
+    dc_df.loc[dc_df['state'].isna() & dc_df['city'].str.contains('Sydney', case=False, na=False), 'state'] = 'NSW'
+    dc_df.loc[dc_df['state'].isna() & dc_df['city'].str.contains('Melbourne', case=False, na=False), 'state'] = 'VIC'
+    dc_df.loc[dc_df['state'].isna() & dc_df['city'].str.contains('Brisbane', case=False, na=False), 'state'] = 'QLD'
+    dc_df.loc[dc_df['state'].isna() & dc_df['city'].str.contains('Adelaide', case=False, na=False), 'state'] = 'SA'
+    dc_df.loc[dc_df['state'].isna() & dc_df['city'].str.contains('Perth', case=False, na=False), 'state'] = 'WA'
+    
+    return bess_df, solar_df, dc_df
 
 
 def get_last_updated() -> datetime:
@@ -1674,7 +1708,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     with download_col:
         render_downloads(figure)
 
-    if figure.get("html_path"):
+    if figure.get("html_path") and figure.get("id") != "fig1_4":
         st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
         if html_path and html_path.exists():
             iframe_height = figure.get("height", 560)
@@ -1688,7 +1722,73 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             st.markdown(f'<div class="missing-file">Missing chart file: {missing}</div>', unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    render_standard_metrics(figure.get("metrics", []), entry)
+    if figure.get("id") == "fig1_4":
+        @st.fragment
+        def render_fig1_4_fragment():
+            map_container = st.container()
+            
+            states = ["NSW", "QLD", "VIC", "SA", "TAS"]
+            
+            col1, col2 = st.columns([0.88, 0.12], vertical_alignment="bottom")
+            with col1:
+                st.markdown('<div style="font-size: 16px; font-weight: 500; color: #00D9A3; margin-top: 16px; margin-bottom: 8px;">Select States to Filter Metrics</div>', unsafe_allow_html=True)
+            with col2:
+                if st.button("Clear", key="clear_states", use_container_width=True):
+                    st.session_state.state_filter = []
+                    
+            selected_states = st.pills("Select States to Filter Metrics", states, default=states, selection_mode="multi", label_visibility="collapsed", key="state_filter")
+            
+            bess_df, solar_df, dc_df = load_infrastructure_data()
+            
+            if selected_states:
+                bess_df = bess_df[bess_df['state'].isin(selected_states)]
+                solar_df = solar_df[solar_df['state'].isin(selected_states)]
+                dc_df = dc_df[dc_df['state'].isin(selected_states)]
+            else:
+                bess_df = bess_df.iloc[0:0]
+                solar_df = solar_df.iloc[0:0]
+                dc_df = dc_df.iloc[0:0]
+                
+            # 1. Build the dynamic map using the filtered dataframes
+            fig = infrastructure_charts.build_infrastructure_map(bess_df, dc_df, solar_df)
+            
+            # 2. Adjust height to match the dashboard's design
+            fig.update_layout(height=figure.get("height", 750), margin=dict(l=0, r=0, t=60, b=0))
+            
+            # 3. Render directly in Streamlit using the container
+            with map_container:
+                st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            bess_operating = bess_df[bess_df['status'].astype(str).str.lower() == 'operating']
+            bess_proposed = bess_df[~bess_df['status'].astype(str).str.lower().isin(['operating', 'retired'])]
+            
+            solar_operating = solar_df[solar_df['status'].astype(str).str.lower() == 'operating']
+            solar_proposed = solar_df[~solar_df['status'].astype(str).str.lower().isin(['operating', 'retired'])]
+            
+            if not selected_states:
+                coverage = "None"
+            elif len(selected_states) == len(states):
+                coverage = "NEM Only"
+            else:
+                coverage = ", ".join(selected_states)
+                
+            metrics = [
+                {"label": "BESS Capacity", "value": f"{bess_operating['capacity_mw'].sum():,.0f} MW"},
+                {"label": "Proposed BESS Capacity", "value": f"{bess_proposed['capacity_mw'].sum():,.0f} MW"},
+                {"label": "BESS Sites", "value": f"{len(bess_operating):,}"},
+                {"label": "Solar Capacity", "value": f"{solar_operating['capacity_mw'].sum():,.0f} MW"},
+                {"label": "Proposed Solar Capacity", "value": f"{solar_proposed['capacity_mw'].sum():,.0f} MW"},
+                {"label": "Solar Farms", "value": f"{len(solar_operating):,}"},
+                {"label": "Data Centres", "value": f"{len(dc_df):,}"},
+                {"label": "Coverage", "value": coverage}
+            ]
+            render_standard_metrics(metrics, entry)
+            
+        render_fig1_4_fragment()
+    else:
+        render_standard_metrics(figure.get("metrics", []), entry)
     
     takeaway = figure.get("takeaway", "")
     description = figure.get("description", "")

@@ -90,6 +90,9 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
     """Build a combined Plotly Scattermapbox chart of BESS, Solar + Datacentres."""
 
     fig = go.Figure()
+    
+    # Always add an empty trace to guarantee the mapbox tiles render when dataframes are empty
+    fig.add_trace(go.Scattermapbox(lat=[None], lon=[None], showlegend=False, hoverinfo="skip"))
 
     # -- BESS trace (drawn first = underneath) ------------------------------
     if not bess_df.empty:
