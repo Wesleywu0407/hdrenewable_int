@@ -33,7 +33,7 @@ CH3_LOG_PATH = PROJECT_ROOT / "logs" / "ch3_refresh_log.txt"
 REFRESH_REGISTRY = {
     "1.1::*": {
         "scope_label": "Queensland renewables",
-        "button_label": "Update This Analysis",
+        "button_label": "Update this analysis",
         "command": ["bash", "scripts/run_qld_scrape.sh"],
         "status_path": REFRESH_STATUS_DIR / "chapter_1_1_status.json",
         "log_path": LOG_DIR / "chapter_1_1_refresh.log",
@@ -45,7 +45,7 @@ REFRESH_REGISTRY = {
     },
     "1.3::fig1_4": {
         "scope_label": "Infrastructure & Storage Mapping",
-        "button_label": "Update This Analysis",
+        "button_label": "Update this analysis",
         "command": ["bash", "scripts/run_infrastructure_scrape.sh"],
         "status_path": REFRESH_STATUS_DIR / "chapter_1_3_status.json",
         "log_path": LOG_DIR / "chapter_1_3_refresh.log",
@@ -57,7 +57,7 @@ REFRESH_REGISTRY = {
     },
     "2.1::*": {
         "scope_label": "Electricity trading market",
-        "button_label": "Update This Analysis",
+        "button_label": "Update this analysis",
         "command": ["bash", "scripts/run_trading_scrape.sh"],
         "status_path": REFRESH_STATUS_DIR / "chapter_2_1_status.json",
         "log_path": LOG_DIR / "chapter_2_1_refresh.log",
@@ -69,7 +69,7 @@ REFRESH_REGISTRY = {
     },
     "2.2::fig2_4": {
         "scope_label": "Weather & Market Price Correlation",
-        "button_label": "Update This Analysis",
+        "button_label": "Update this analysis",
         "command": ["bash", "scripts/run_weather_scrape.sh"],
         "status_path": REFRESH_STATUS_DIR / "chapter_2_2_status.json",
         "log_path": LOG_DIR / "chapter_2_2_refresh.log",
@@ -80,7 +80,7 @@ REFRESH_REGISTRY = {
     },
     "3::*": {
         "scope_label": "AI Data Center Power Demand",
-        "button_label": "Refresh Market Signals",
+        "button_label": "Refresh market signals",
         "command": ["python", "scripts/10_ch3_refresh_pipeline.py"],
         "status_path": CH3_STATUS_PATH,
         "log_path": CH3_LOG_PATH,
@@ -91,6 +91,7 @@ REFRESH_REGISTRY = {
         ],
         "status_labels": {
             "success": "Signals Ready",
+            "stale": "Signals Stale",
             "missing": "Not Refreshed Yet",
         },
         "time_label": "Last refreshed:",
@@ -190,6 +191,13 @@ def render_downloads(figure: dict[str, Any]) -> None:
             st.download_button("HTML", html_path.read_bytes(), html_path.name, "text/html", use_container_width=True)
         else:
             st.button("HTML", disabled=True, use_container_width=True)
+
+
+def render_html(html: str) -> None:
+    if hasattr(st, "html"):
+        st.html(html)
+    else:
+        st.markdown(html, unsafe_allow_html=True)
 
 
 def ch3_global_comparison_html(html: str) -> str:
@@ -651,6 +659,277 @@ def format_refresh_time(value: str | None) -> str:
     return local_time.strftime("%d %b %Y · %H:%M")
 
 
+def parse_refresh_datetime(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def format_run_duration(start_time: datetime | None, end_time: datetime | None) -> str:
+    if not start_time or not end_time:
+        return "n/a"
+    seconds = max(0, int((end_time - start_time).total_seconds()))
+    if seconds < 60:
+        return f"{seconds}s"
+    minutes, remaining_seconds = divmod(seconds, 60)
+    return f"{minutes}m {remaining_seconds}s"
+
+
+def is_refresh_stale(value: str | None) -> bool:
+    parsed_time = parse_refresh_datetime(value)
+    if not parsed_time:
+        return False
+    now = datetime.now(parsed_time.tzinfo).astimezone(parsed_time.tzinfo) if parsed_time.tzinfo else datetime.now()
+    return (now - parsed_time).total_seconds() > 24 * 60 * 60
+
+
+def simplify_refresh_error(error_text: str) -> str:
+    if "HTTP Error 403: Forbidden" in error_text:
+        return "403 Forbidden"
+    if "HTTP Error 404: Not Found" in error_text:
+        return "404 Not Found"
+    if "The read operation timed out" in error_text:
+        return "Read timeout"
+    if "Connection refused" in error_text:
+        return "Connection refused"
+    return error_text[:30]
+
+
+def parse_refresh_log(raw_log: str) -> dict[str, Any]:
+    parsed: dict[str, Any] = {"sources": [], "files": []}
+    current_list: str | None = None
+    for raw_line in raw_log.splitlines():
+        line = raw_line.strip()
+        if not line:
+            current_list = None
+            continue
+        if line.endswith(":"):
+            current_list = line[:-1]
+            continue
+        if line.startswith("start_time:"):
+            parsed["start_time"] = line.split(":", 1)[1].strip()
+        elif line.startswith("end_time:"):
+            parsed["end_time"] = line.split(":", 1)[1].strip()
+        elif line.startswith("news_items_collected:"):
+            parsed["items"] = line.split(":", 1)[1].strip()
+        elif line.startswith("error:"):
+            parsed["error"] = line.split(":", 1)[1].strip()
+        elif line.startswith("status:"):
+            parsed["status"] = line.split(":", 1)[1].strip()
+        elif line.startswith("- ") and current_list == "sources_attempted":
+            source_line = line[2:]
+            source_name, _, detail = source_line.partition(": ")
+            items_text, _, error_text = detail.partition(" | error: ")
+            item_count = items_text.split(" ", 1)[0] if items_text else "0"
+            parsed["sources"].append(
+                {
+                    "name": source_name,
+                    "items": item_count,
+                    "error": error_text.strip() or None,
+                }
+            )
+        elif line.startswith("- ") and current_list in {"files_written", "expected_outputs"}:
+            parsed["files"].append(line[2:])
+    return parsed
+
+
+def render_raw_refresh_log(raw_log: str, fallback_message: str = "No refresh log available yet.") -> None:
+    if raw_log:
+        with st.expander("View raw log", expanded=False):
+            st.code(raw_log, language="text")
+    else:
+        st.caption(fallback_message)
+
+
+def render_run_details(config: dict[str, Any], status: dict[str, Any] | None) -> None:
+    log_path = config["log_path"]
+    raw_log = log_path.read_text(encoding="utf-8") if log_path.exists() else ""
+    if not status:
+        st.caption("No run details available yet.")
+        render_raw_refresh_log(raw_log)
+        return
+
+    parsed_log = parse_refresh_log(raw_log)
+    start_time = parse_refresh_datetime(parsed_log.get("start_time"))
+    end_time = parse_refresh_datetime(parsed_log.get("end_time") or status.get("last_updated"))
+    duration = format_run_duration(start_time, end_time)
+    header_time = end_time.astimezone().strftime("%d %b %Y · %H:%M") if end_time else "Not available"
+    raw_status = status.get("status") or parsed_log.get("status")
+    log_error = parsed_log.get("error")
+    is_success = raw_status == "success" and log_error in {None, "none", ""}
+    status_text = "Completed" if is_success else "Failed"
+    status_color = "#5dcaa5" if is_success else "#ec6a5e"
+    items = str(status.get("items_scraped", parsed_log.get("items", "0")))
+    sources = parsed_log.get("sources", [])
+    total_sources = len(sources)
+    successful_sources = sum(1 for source in sources if not source.get("error"))
+    sources_color = "#5dcaa5" if total_sources and successful_sources == total_sources else "#d4a857"
+    files = status.get("files_updated") or parsed_log.get("files") or status.get("expected_outputs") or config.get("expected_outputs", [])
+
+    render_html(
+        f"""
+        <style>
+        .run-summary {{
+            min-width: 360px;
+        }}
+        .run-summary-header {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 0.55rem;
+            margin-bottom: 0.75rem;
+        }}
+        .run-summary-title {{
+            color: var(--ivory);
+            font-size: 13px;
+            font-weight: 500;
+        }}
+        .run-summary-meta {{
+            color: var(--muted);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 11px;
+            white-space: nowrap;
+        }}
+        .run-kpi-grid {{
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 0.9rem;
+        }}
+        .run-kpi-card {{
+            background: var(--surface-1);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+        }}
+        .run-kpi-label,
+        .run-section-label {{
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }}
+        .run-kpi-value {{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 14px;
+            margin-top: 0.3rem;
+        }}
+        .run-section-label {{
+            margin: 0.85rem 0 0.45rem;
+        }}
+        .run-source-list {{
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }}
+        .run-source-row {{
+            display: grid;
+            grid-template-columns: 10px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-1);
+            border: 0.5px solid rgba(255,255,255,0.06);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }}
+        .run-dot {{
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--dot);
+        }}
+        .run-source-name {{
+            color: var(--ivory);
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }}
+        .run-source-status {{
+            color: var(--status);
+            font-size: 11px;
+            text-align: right;
+            white-space: nowrap;
+        }}
+        .run-file-path {{
+            color: #898781;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 11px;
+            line-height: 1.7;
+        }}
+        @media (max-width: 700px) {{
+            .run-kpi-grid {{
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }}
+            .run-summary-header {{
+                align-items: flex-start;
+                flex-direction: column;
+            }}
+        }}
+        </style>
+        <div class="run-summary">
+            <div class="run-summary-header">
+                <div class="run-summary-title">Last run summary</div>
+                <div class="run-summary-meta">{escape(header_time)} · {escape(duration)}</div>
+            </div>
+            <div class="run-kpi-grid">
+                <div class="run-kpi-card">
+                    <div class="run-kpi-label">Status</div>
+                    <div class="run-kpi-value" style="color: {status_color};">{status_text}</div>
+                </div>
+                <div class="run-kpi-card">
+                    <div class="run-kpi-label">Items</div>
+                    <div class="run-kpi-value" style="color: var(--ivory);">{escape(items)}</div>
+                </div>
+                <div class="run-kpi-card">
+                    <div class="run-kpi-label">Sources</div>
+                    <div class="run-kpi-value" style="color: {sources_color};">{successful_sources} / {total_sources}</div>
+                </div>
+                <div class="run-kpi-card">
+                    <div class="run-kpi-label">Duration</div>
+                    <div class="run-kpi-value" style="color: var(--ivory);">{escape(duration)}</div>
+                </div>
+            </div>
+        </div>
+        """
+    )
+
+    if sources:
+        source_rows = "\n".join(
+            f"""
+            <div class="run-source-row">
+                <span class="run-dot" style="--dot: {'#ec6a5e' if source.get('error') else '#5dcaa5'};"></span>
+                <span class="run-source-name">{escape(source['name'])}</span>
+                <span class="run-source-status" style="--status: {'#ec6a5e' if source.get('error') else '#5dcaa5'};">{escape(simplify_refresh_error(source['error']) if source.get('error') else f"{source['items']} items")}</span>
+            </div>
+            """
+            for source in sources
+        )
+        render_html(
+            f"""
+            <div class="run-section-label">SOURCES ATTEMPTED</div>
+            <div class="run-source-list">{source_rows}</div>
+            """
+        )
+
+    if files:
+        file_rows = "\n".join(f'<div class="run-file-path">{escape(str(path))}</div>' for path in files)
+        render_html(
+            f"""
+            <div class="run-section-label">FILES UPDATED</div>
+            {file_rows}
+            """
+        )
+
+    render_raw_refresh_log(raw_log)
+
+
 def write_refresh_status(config: dict[str, Any], payload: dict[str, Any]) -> None:
     status_path = config["status_path"]
     status_path.parent.mkdir(parents=True, exist_ok=True)
@@ -718,8 +997,12 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
     raw_status = status.get("status") if status else None
     labels = config.get("status_labels", {})
     if raw_status == "success":
-        pill_text = labels.get("success", "Ready")
-        pill_color = "#00c9a7"
+        if is_refresh_stale(status.get("end_time") or status.get("last_updated")):
+            pill_text = labels.get("stale", "Stale")
+            pill_color = "#d4a857"
+        else:
+            pill_text = labels.get("success", "Ready")
+            pill_color = "#00c9a7"
     elif raw_status == "failed":
         pill_text = "Refresh Failed"
         pill_color = "#e34948"
@@ -745,17 +1028,71 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
         div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) [data-testid="stVerticalBlock"] {
             gap: 0 !important;
         }
-        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) button {
-            border-color: rgba(0, 201, 167, 0.34) !important;
-            color: #D9FFF7 !important;
-            background: rgba(0, 201, 167, 0.08) !important;
-            min-height: 32px !important;
-            padding: 4px 12px !important;
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) .refresh-primary-action button {
+            background: rgba(0, 201, 167, 0.15) !important;
+            border: 0.5px solid rgba(0, 201, 167, 0.5) !important;
+            border-radius: 6px !important;
+            color: #5dcaa5 !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            min-height: 34px !important;
+            padding: 6px 14px !important;
             box-shadow: none !important;
         }
-        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) button:hover {
-            border-color: rgba(0, 201, 167, 0.62) !important;
-            background: rgba(0, 201, 167, 0.13) !important;
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) .refresh-primary-action button:hover {
+            background: rgba(0, 201, 167, 0.22) !important;
+            border-color: #00c9a7 !important;
+            color: #5dcaa5 !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) div[data-testid="column"]:nth-of-type(2) button {
+            background: rgba(0, 201, 167, 0.15) !important;
+            border: 0.5px solid rgba(0, 201, 167, 0.5) !important;
+            border-radius: 6px !important;
+            color: #5dcaa5 !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            min-height: 34px !important;
+            padding: 6px 14px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) div[data-testid="column"]:nth-of-type(2) button:hover {
+            background: rgba(0, 201, 167, 0.22) !important;
+            border-color: #00c9a7 !important;
+            color: #5dcaa5 !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) .refresh-secondary-action button {
+            background: transparent !important;
+            border: 0 !important;
+            color: rgba(255, 255, 255, 0.55) !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            min-height: 34px !important;
+            padding: 6px 8px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) .refresh-secondary-action button:hover {
+            background: rgba(255, 255, 255, 0.04) !important;
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) .refresh-secondary-action button svg {
+            opacity: 0.6 !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) div[data-testid="column"]:nth-of-type(3) button {
+            background: transparent !important;
+            border: 0 !important;
+            color: rgba(255, 255, 255, 0.55) !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            min-height: 34px !important;
+            padding: 6px 8px !important;
+            box-shadow: none !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) div[data-testid="column"]:nth-of-type(3) button:hover {
+            background: rgba(255, 255, 255, 0.04) !important;
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) div[data-testid="column"]:nth-of-type(3) button svg {
+            opacity: 0.6 !important;
         }
         </style>
         """,
@@ -786,6 +1123,7 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
         )
 
     with button_col:
+        st.markdown('<div class="refresh-primary-action">', unsafe_allow_html=True)
         if st.button(config["button_label"], use_container_width=False):
             with st.spinner(f"Updating {config['scope_label']}..."):
                 ok, message = run_registered_refresh(config)
@@ -795,14 +1133,13 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
                 st.rerun()
             else:
                 st.error(f"Refresh failed: {message}")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with log_col:
-        with st.popover("Run Details", use_container_width=False):
-            log_path = config["log_path"]
-            if log_path.exists():
-                st.code(log_path.read_text(encoding="utf-8"), language="text")
-            else:
-                st.caption("No refresh log available yet.")
+        st.markdown('<div class="refresh-secondary-action">', unsafe_allow_html=True)
+        with st.popover("Run details", use_container_width=False):
+            render_run_details(config, status)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_sidebar(figures: list[dict[str, Any]]) -> None:
@@ -945,11 +1282,280 @@ def render_standard_metrics(metrics: list[dict[str, str]], entry: dict[str, Any]
             )
 
 
+def render_ch3_research_outline() -> None:
+    step_cards = [
+        {
+            "href": f"?figure={quote('3::ch3_fig1')}",
+            "pair": "1",
+            "color": "#5b8def",
+            "eyebrow": "FIG 02 · Q1",
+            "title": "Global comparison",
+            "metric": "1.3 GW",
+            "label": "AU capacity · 25.1%/yr",
+        },
+        {
+            "href": f"?figure={quote('3::ch3_fig2')}",
+            "pair": "2",
+            "color": "#a78bfa",
+            "eyebrow": "FIG 03 · Q2",
+            "title": "Demand forecast",
+            "metric": "12 TWh",
+            "label": "2030 · 6% of NEM",
+        },
+        {
+            "href": f"?figure={quote('3::ch3_fig3')}",
+            "pair": "3",
+            "color": "#ec6a5e",
+            "eyebrow": "FIG 04 · Q3",
+            "title": "Green energy gap",
+            "metric": "55%",
+            "label": "2035 supply deficit",
+        },
+        {
+            "href": f"?figure={quote('3::ch3_fig4')}",
+            "pair": "4",
+            "color": "#d4a857",
+            "eyebrow": "FIG 05 · Q4",
+            "title": "State breakdown",
+            "metric": "11.4 GW",
+            "label": "NSW pipeline",
+        },
+    ]
+    step_card_html = "\n".join(
+        f"""
+        <a class="ch3-flow-card ch3-pair-{card['pair']}" href="{card['href']}" target="_self" style="--accent: {card['color']};">
+            <div class="ch3-card-eyebrow">{card['eyebrow']}</div>
+            <div class="ch3-flow-title">{card['title']}</div>
+            <div class="ch3-flow-metric" style="color: {card['color']};">{card['metric']}</div>
+            <div class="ch3-flow-label">{card['label']}</div>
+        </a>
+        """
+        for card in step_cards
+    )
+
+    render_html(
+        f"""
+        <style>
+        .ch3-outline-wrap {{
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }}
+        .ch3-outline-hero .main-title {{
+            margin-bottom: 0.65rem !important;
+        }}
+        .ch3-outline-hero p {{
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.65;
+            margin: 0;
+            max-width: 980px;
+        }}
+        .ch3-thesis-card,
+        .ch3-question-card,
+        .ch3-flow-card,
+        .ch3-source-bar {{
+            background: var(--surface-1);
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+        }}
+        .ch3-thesis-card {{
+            border-left: 3px solid #d4a857;
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+        }}
+        .ch3-section-label,
+        .ch3-thesis-label {{
+            color: #d4a857;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            margin-bottom: 0.65rem;
+        }}
+        .ch3-thesis-body {{
+            color: var(--ivory);
+            font-size: 17px;
+            line-height: 1.65;
+            max-width: 1040px;
+        }}
+        .ch3-question-grid {{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }}
+        .ch3-question-card {{
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+        }}
+        .ch3-question-title {{
+            color: var(--ivory);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.55rem;
+        }}
+        .ch3-question-card p {{
+            color: #A7AEA9;
+            font-size: 14px;
+            line-height: 1.55;
+            margin: 0;
+        }}
+        .ch3-flow-grid {{
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }}
+        .ch3-flow-card {{
+            display: block;
+            border-top: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 1rem;
+            text-decoration: none !important;
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }}
+        .ch3-flow-card:hover {{
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.045);
+        }}
+        .ch3-outline-wrap:has(.ch3-pair-1:hover) .ch3-pair-1 {{
+            border-color: #5b8def;
+            transform: translateY(-1px);
+            background: rgba(91, 141, 239, 0.06);
+        }}
+        .ch3-outline-wrap:has(.ch3-pair-2:hover) .ch3-pair-2 {{
+            border-color: #a78bfa;
+            transform: translateY(-1px);
+            background: rgba(167, 139, 250, 0.06);
+        }}
+        .ch3-outline-wrap:has(.ch3-pair-3:hover) .ch3-pair-3 {{
+            border-color: #ec6a5e;
+            transform: translateY(-1px);
+            background: rgba(236, 106, 94, 0.06);
+        }}
+        .ch3-outline-wrap:has(.ch3-pair-4:hover) .ch3-pair-4 {{
+            border-color: #d4a857;
+            transform: translateY(-1px);
+            background: rgba(212, 168, 87, 0.06);
+        }}
+        .ch3-card-eyebrow {{
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.7rem;
+        }}
+        .ch3-flow-title {{
+            color: var(--ivory);
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 0.9rem;
+        }}
+        .ch3-flow-metric {{
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 0.35rem;
+        }}
+        .ch3-flow-label {{
+            color: #898781;
+            font-size: 12px;
+            line-height: 1.35;
+        }}
+        .ch3-source-bar {{
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+        }}
+        .ch3-source-label {{
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-right: 0.15rem;
+        }}
+        .ch3-source-pill {{
+            background: rgba(255,255,255,0.04);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            color: #898781;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 11px;
+            padding: 3px 8px;
+        }}
+        @media (max-width: 900px) {{
+            .ch3-question-grid,
+            .ch3-flow-grid {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+        </style>
+        <div class="ch3-outline-wrap">
+            <section class="ch3-outline-hero">
+                <h1 class="main-title">Chapter 3 · Impact of AI data centre power demand on the power grid</h1>
+                <p>AI 資料中心用電需求對電網之衝擊 — assessing whether and where HDRE should enter the Australian green energy market over the next 5–10 years.</p>
+            </section>
+
+            <section class="ch3-thesis-card">
+                <div class="ch3-thesis-label">CENTRAL THESIS</div>
+                <div class="ch3-thesis-body">AI data centre demand in Australia will grow from 4 TWh to 34.5 TWh by 2050, but renewable supply will lag — creating a structural green energy deficit that defines HDRE's primary market opportunity.</div>
+            </section>
+
+            <section>
+                <div class="ch3-question-grid">
+                    <div class="ch3-question-card ch3-pair-1" style="--accent: #5b8def;">
+                        <div class="ch3-question-title">Q1 · Global context</div>
+                        <p>How does Australia's data centre capacity compare globally, and where is growth concentrated?</p>
+                    </div>
+                    <div class="ch3-question-card ch3-pair-2" style="--accent: #a78bfa;">
+                        <div class="ch3-question-title">Q2 · Demand trajectory</div>
+                        <p>How fast will AI power demand grow, and what share of the NEM will it consume?</p>
+                    </div>
+                    <div class="ch3-question-card ch3-pair-3" style="--accent: #ec6a5e;">
+                        <div class="ch3-question-title">Q3 · Supply gap</div>
+                        <p>Can existing renewable supply meet projected AI load — and how big is the gap?</p>
+                    </div>
+                    <div class="ch3-question-card ch3-pair-4" style="--accent: #d4a857;">
+                        <div class="ch3-question-title">Q4 · Market entry</div>
+                        <p>Which NEM state offers the best entry point — pipeline scale or green-energy readiness?</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="ch3-section-label">ANALYSIS FLOW · CLICK ANY STEP TO OPEN THE FIGURE</div>
+                <div class="ch3-flow-grid">
+                    {step_card_html}
+                </div>
+            </section>
+
+            <section class="ch3-source-bar">
+                <span class="ch3-source-label">SOURCES</span>
+                <span class="ch3-source-pill">AEMO 2026 ISP</span>
+                <span class="ch3-source-pill">Oxford Economics</span>
+                <span class="ch3-source-pill">Climate Council</span>
+                <span class="ch3-source-pill">IEA 2024</span>
+                <span class="ch3-source-pill">Baxtel / DatacenterMap</span>
+            </section>
+        </div>
+        """
+    )
+
+
 def render_standard_figure(entry: dict[str, Any]) -> None:
     figure = entry["figure"]
     chapter = entry["chapter"]
 
     if figure.get("type") == "outline":
+        if chapter.get("id") == "3" and figure.get("sidebar_title") == "RESEARCH OUTLINE":
+            render_ch3_research_outline()
+            return
         st.markdown(
             f"""
             <h1 class="main-title" style="margin-bottom: 8px !important;">{escape(figure["title"])}</h1>
