@@ -57,15 +57,15 @@ def fig1_international_comparison():
               for c in df['country']]
 
     fig = go.Figure(go.Bar(
-        x=df['capacity_gw'],
-        y=df['country'],
+        x=df['capacity_gw'].tolist(),
+        y=df['country'].tolist(),
         orientation='h',
         marker_color=colors,
         text=[f'{v:.1f} GW' for v in df['capacity_gw']],
         textposition='outside',
         textfont=dict(color=TEXT_SECONDARY, size=11),
         hovertemplate='<b>%{y}</b><br>Capacity: %{x:.1f} GW<br>Growth rate: %{customdata}%/yr<extra></extra>',
-        customdata=df['growth_rate_pct'],
+        customdata=df['growth_rate_pct'].tolist(),
     ))
 
     fig.update_layout(

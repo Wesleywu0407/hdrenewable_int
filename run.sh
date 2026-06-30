@@ -99,6 +99,7 @@ if [ "$GENERATE" = true ]; then
     python scripts/04_generate_qld_charts.py
     python scripts/06_generate_trading_charts.py
     python scripts/08_generate_infrastructure_charts.py
+    python scripts/09_generate_ch3_charts.py
     python scripts/10_generate_weather_charts.py
 fi
 

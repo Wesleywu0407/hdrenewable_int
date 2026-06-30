@@ -42,3 +42,5 @@ dashboard_export*.html
 
 nemosis_cachelogs/
 runtime/
+nemosis_cache
+logs
