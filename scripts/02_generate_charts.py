@@ -1,4 +1,4 @@
-"""Step 2 — Generate the 4 NEM analysis charts as standalone HTML.
+"""Step 2 - Generate the 4 NEM analysis charts as standalone HTML.
 
 Loads the 4 CSV datasets from data/raw/ and writes interactive Plotly
 charts to outputs/figures/. English titles, consistent fuel
@@ -89,7 +89,7 @@ def order_groups(present: list[str]) -> list[str]:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 1 — Real-time generation mix (past 7 days, 30-min)
+# Fig 1 - Real-time generation mix (past 7 days, 30-min)
 # --------------------------------------------------------------------------- #
 def fig1_realtime() -> None:
     # -- Read master wide-format CSV ---------------------------------------- #
@@ -171,7 +171,7 @@ def fig1_realtime() -> None:
     fig.update_layout(
         template=TEMPLATE,
         title=english_title(
-            "NEM Real-time Generation Mix & Price — Full Window (5-min)"
+            "NEM Real-time Generation Mix & Price - Full Window (5-min)"
         ),
         yaxis_title="Power (MW)",
         hovermode="x unified",
@@ -205,7 +205,7 @@ def fig1_realtime() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 2 — Monthly generation by fuel (available history)
+# Fig 2 - Monthly generation by fuel (available history)
 # --------------------------------------------------------------------------- #
 def fig2_annual() -> None:
     df = pd.read_csv(RAW_DIR / "nem_annual_fuel_mix.csv", parse_dates=["interval"])
@@ -242,13 +242,13 @@ def fig2_annual() -> None:
     fig.update_xaxes(tickformat="%Y-%m")
     add_source_footer(
         fig,
-        f"COMMUNITY plan: data limited to {dmin:%Y-%m}–{dmax:%Y-%m} (not full 2020–2025)",
+        f"COMMUNITY plan: data limited to {dmin:%Y-%m}-{dmax:%Y-%m} (not full 2020-2025)",
     )
     save(fig, "fig2_annual_generation_by_fuel.html")
 
 
 # --------------------------------------------------------------------------- #
-# Fig 3 — Cross-state generation mix (latest 12 months)
+# Fig 3 - Cross-state generation mix (latest 12 months)
 # --------------------------------------------------------------------------- #
 def fig3_state_comparison() -> None:
     df = pd.read_csv(RAW_DIR / "nem_state_fuel_mix.csv")
@@ -281,7 +281,7 @@ def fig3_state_comparison() -> None:
         template=TEMPLATE,
         barmode="stack",
         title=english_title(
-            "Generation Mix by State — Latest 12 Months"
+            "Generation Mix by State - Latest 12 Months"
         ),
         xaxis_title="Energy (MWh)",
         yaxis_title="",
@@ -293,7 +293,7 @@ def fig3_state_comparison() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 4 — Coal retirement timeline (Gantt)
+# Fig 4 - Coal retirement timeline (Gantt)
 # --------------------------------------------------------------------------- #
 def fig4_coal_timeline() -> None:
     df = pd.read_csv(RAW_DIR / "nem_coal_facilities.csv").copy()

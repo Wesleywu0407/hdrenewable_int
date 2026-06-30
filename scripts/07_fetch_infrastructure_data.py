@@ -1,20 +1,20 @@
-"""Chapter 1.3 Step 7 — Fetch BESS and Datacentre infrastructure data.
+"""Chapter 1.3 Step 7 - Fetch BESS and Datacentre infrastructure data.
 
 ALL data is sourced from live APIs and web scraping only.
 No hardcoded coordinates or dummy data.
 
 Sources:
   BESS:
-    1. OpenElectricity API  — registered battery units (capacity, status)
-    2. Wikipedia            — "Battery_storage_power_station" wikitable
+    1. OpenElectricity API  - registered battery units (capacity, status)
+    2. Wikipedia            - "Battery_storage_power_station" wikitable
                               (coordinates embedded as DMS/decimal in rows)
-    3. Nominatim (OSM)      — geocodes remaining facility names via API
+    3. Nominatim (OSM)      - geocodes remaining facility names via API
 
   Datacentres:
-    1. NextDC website       — nextdc.com/data-centres (individual DC pages)
-    2. AirTrunk website     — airtrunk.com/locations/ (individual DC pages)
-    3. Baxtel               — baxtel.com (directory listing)
-    4. Nominatim (OSM)      — geocodes any DC by name + city string
+    1. NextDC website       - nextdc.com/data-centres (individual DC pages)
+    2. AirTrunk website     - airtrunk.com/locations/ (individual DC pages)
+    3. Baxtel               - baxtel.com (directory listing)
+    4. Nominatim (OSM)      - geocodes any DC by name + city string
 
 Output:
     data/raw/bess_locations.csv
@@ -59,9 +59,9 @@ SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Official Plant Data
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def fetch_official_plant_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     """Read official plant data, extract BESS and Solar data."""
@@ -105,9 +105,9 @@ def fetch_official_plant_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     return bess_df[save_cols_bess], solar_df[save_cols_solar]
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Geocoding via Nominatim (OpenStreetMap)
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 _geocode_cache: dict[str, tuple[float, float] | None] = {}
 
@@ -163,9 +163,9 @@ def extract_dms_coords(text: str) -> tuple[float, float] | None:
     return None
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # BESS: OpenElectricity API
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def fetch_bess_openelectricity() -> pd.DataFrame:
     """Fetch all NEM battery units from the OpenElectricity API."""
@@ -177,7 +177,7 @@ def fetch_bess_openelectricity() -> pd.DataFrame:
 
     api_key = os.getenv("OPENELECTRICITY_API_KEY")
     if not api_key:
-        print("  [BESS/OE] No API key — skipping.")
+        print("  [BESS/OE] No API key - skipping.")
         return pd.DataFrame()
 
     rows: list[dict] = []
@@ -225,17 +225,17 @@ def fetch_bess_openelectricity() -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # BESS: Wikipedia Battery_storage_power_station
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def fetch_bess_wikipedia() -> pd.DataFrame:
     """Scrape Australian BESS entries from Wikipedia's battery storage article.
 
     The page has three wikitables:
-      Table 0 — largest operational worldwide
-      Table 1 — largest under construction / planned
-      Table 2 — further planned
+      Table 0 - largest operational worldwide
+      Table 1 - largest under construction / planned
+      Table 2 - further planned
 
     Columns: Name, Commissioning date, Energy (MWh), Power(MW),
              Duration (hours), Type, Country, Location/coords
@@ -334,9 +334,9 @@ def _infer_state(text: str) -> str:
     return ""
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # BESS: Nominatim geocoding for missing coordinates
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def geocode_bess(df: pd.DataFrame) -> pd.DataFrame:
     """Fill missing lat/lon on BESS rows via Nominatim."""
@@ -371,9 +371,9 @@ def geocode_bess(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # BESS: Merge OE API + Wikipedia
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def merge_bess(oe_df: pd.DataFrame, wiki_df: pd.DataFrame) -> pd.DataFrame:
     """Merge OE API and Wikipedia BESS data, dedup on name."""
@@ -386,7 +386,7 @@ def merge_bess(oe_df: pd.DataFrame, wiki_df: pd.DataFrame) -> pd.DataFrame:
             frames.append(row.to_dict())
             seen_lower.add(row["name"].lower())
 
-    # OE API — add facilities not already in Wikipedia
+    # OE API - add facilities not already in Wikipedia
     if not oe_df.empty:
         for _, row in oe_df.iterrows():
             n = row["name"].lower()
@@ -408,9 +408,9 @@ def merge_bess(oe_df: pd.DataFrame, wiki_df: pd.DataFrame) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Solar: OpenElectricity API and Geocoding
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def fetch_solar_openelectricity() -> pd.DataFrame:
     """Fetch all NEM solar units from the OpenElectricity API."""
@@ -422,7 +422,7 @@ def fetch_solar_openelectricity() -> pd.DataFrame:
 
     api_key = os.getenv("OPENELECTRICITY_API_KEY")
     if not api_key:
-        print("  [Solar/OE] No API key — skipping.")
+        print("  [Solar/OE] No API key - skipping.")
         return pd.DataFrame()
 
     rows: list[dict] = []
@@ -523,9 +523,9 @@ def fetch_solar() -> pd.DataFrame:
     return solar_df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Datacentres: NextDC website
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 # DC page URLs discovered dynamically from nextdc.com/data-centres listing page.
 # These slugs are confirmed by scraping the listing page href attributes.
@@ -594,7 +594,7 @@ def fetch_nextdc() -> pd.DataFrame:
         try:
             resp = SESSION.get(url, timeout=15)
             if resp.status_code != 200:
-                print(f"      HTTP {resp.status_code} — skipping")
+                print(f"      HTTP {resp.status_code} - skipping")
                 continue
         except Exception as exc:
             print(f"      error: {exc}")
@@ -636,11 +636,11 @@ def fetch_nextdc() -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Datacentres: AirTrunk website
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
-# AirTrunk AU sites — confirmed from airtrunk.com/locations/ listing page
+# AirTrunk AU sites - confirmed from airtrunk.com/locations/ listing page
 AIRTRUNK_PAGES = [
     ("AirTrunk SYD1", "Sydney West",   "https://airtrunk.com/locations/syd1/"),
     ("AirTrunk SYD2", "Sydney North",  "https://airtrunk.com/locations/syd2/"),
@@ -662,7 +662,7 @@ def fetch_airtrunk() -> pd.DataFrame:
         try:
             resp = SESSION.get(url, timeout=15)
             if resp.status_code != 200:
-                print(f"      HTTP {resp.status_code} — skipping")
+                print(f"      HTTP {resp.status_code} - skipping")
                 continue
         except Exception as exc:
             print(f"      error: {exc}")
@@ -704,9 +704,9 @@ def fetch_airtrunk() -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Datacentres: Baxtel directory
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def fetch_baxtel() -> pd.DataFrame:
     """Scrape Australian DC listings from Baxtel main listing page.
@@ -720,7 +720,7 @@ def fetch_baxtel() -> pd.DataFrame:
     try:
         resp = SESSION.get(url, timeout=15)
         if resp.status_code != 200:
-            print(f"      HTTP {resp.status_code} — skipping Baxtel")
+            print(f"      HTTP {resp.status_code} - skipping Baxtel")
             return pd.DataFrame()
     except Exception as exc:
         print(f"      error: {exc}")
@@ -783,13 +783,13 @@ def _infer_provider(name: str) -> str:
     return ""
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
-# Datacentres: Equinix — geocode known AU sites by name via Nominatim
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
+# Datacentres: Equinix - geocode known AU sites by name via Nominatim
+# --------------------------------------------------------------------------- #
 
 # Equinix AU sites with their known public suburb locations.
 # Suburb names sourced from Equinix public marketing pages and press releases.
-# Coordinates resolved live via Nominatim — nothing hardcoded.
+# Coordinates resolved live via Nominatim - nothing hardcoded.
 EQUINIX_AU_SITES = [
     ("Equinix SY1", "Alexandria, Sydney"),
     ("Equinix SY2", "Mascot, Sydney"),
@@ -810,12 +810,12 @@ def fetch_equinix() -> pd.DataFrame:
     """Geocode Equinix AU sites via Nominatim.
 
     Equinix's website blocks scraping. We geocode using the publicly
-    listed suburb for each site — resolved live by Nominatim at run time.
+    listed suburb for each site - resolved live by Nominatim at run time.
     """
     rows = []
     for name, suburb in EQUINIX_AU_SITES:
         print(f"    [Equinix] geocoding {name} ({suburb})...")
-        # Geocode by suburb — more reliable than facility code in Nominatim
+        # Geocode by suburb - more reliable than facility code in Nominatim
         coords = geocode(f"{suburb}, Australia")
         if not coords:
             coords = geocode(f"Equinix data centre {suburb} Australia")
@@ -836,9 +836,9 @@ def fetch_equinix() -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
-# Datacentres: Major cloud providers — geocode by region name
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
+# Datacentres: Major cloud providers - geocode by region name
+# --------------------------------------------------------------------------- #
 
 CLOUD_REGIONS = [
     ("AWS ap-southeast-2 (Sydney)", "AWS",       "Sydney"),
@@ -875,21 +875,21 @@ def fetch_cloud_providers() -> pd.DataFrame:
     return df
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Main
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def main() -> int:
     print("=" * 60)
-    print("Chapter 1.3 — Infrastructure Data Ingestion (live scrape only)")
+    print("Chapter 1.3 - Infrastructure Data Ingestion (live scrape only)")
     print("=" * 60)
 
-    # ── Official Plant Data ──────────────────────────────────────────────── #
+    # -- Official Plant Data ------------------------------------------------ #
     print("\n[0/3] Reading official plant data...")
     official_bess, official_solar = fetch_official_plant_data()
     print(f"  found {len(official_bess)} BESS and {len(official_solar)} Solar sites in official data.")
 
-    # ── BESS ─────────────────────────────────────────────────────────────── #
+    # -- BESS --------------------------------------------------------------- #
     print("\n[1/3] Fetching BESS locations...")
 
     oe_df = fetch_bess_openelectricity()
@@ -900,7 +900,7 @@ def main() -> int:
         bess_df = pd.concat([official_bess, bess_df], ignore_index=True)
 
     if bess_df.empty:
-        print("  ERROR: No BESS data — check API key and network.")
+        print("  ERROR: No BESS data - check API key and network.")
         return 1
 
     # Geocode missing coordinates
@@ -926,7 +926,7 @@ def main() -> int:
     print(f"  saved bess_locations.csv: {len(bess_df)} sites, {size_kb:.1f} KB")
     print(f"  sources: {bess_df['source'].value_counts().to_dict()}")
 
-    # ── Datacentres ──────────────────────────────────────────────────────── #
+    # -- Datacentres -------------------------------------------------------- #
     print("\n[2/3] Fetching Datacentre locations...")
 
     dc_frames = []
@@ -952,7 +952,7 @@ def main() -> int:
     print(f"  saved datacentre_locations.csv: {len(dc_df)} sites, {size_kb:.1f} KB")
     print(f"  sources: {dc_df['source'].value_counts().to_dict()}")
 
-    # ── Solar ────────────────────────────────────────────────────────────── #
+    # -- Solar -------------------------------------------------------------- #
     print("\n[3/3] Fetching Solar locations...")
     solar_df = fetch_solar()
     if not official_solar.empty:

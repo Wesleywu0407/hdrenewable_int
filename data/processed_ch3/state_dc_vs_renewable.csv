@@ -1,6 +1,6 @@
-state,dc_capacity_mw,dc_planned_mw,dc_total_pipeline_mw,renewable_share_pct_2025,renewable_target_pct_2030,green_energy_gap_mw,hdre_opportunity_score
-NSW,650,11400,12050,38,70,8200,5
-VIC,320,9000,9320,45,65,2800,4
-QLD,180,800,980,32,80,650,5
-SA,95,200,295,78,100,0,2
-TAS,45,50,95,99,100,0,1
+state,dc_capacity_mw,dc_planned_mw,renewable_share_pct_2025
+NSW,1500,2500,35.0
+VIC,800,1200,42.0
+QLD,250,600,28.0
+WA,150,300,38.0
+SA,50,150,75.0

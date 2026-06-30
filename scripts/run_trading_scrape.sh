@@ -6,9 +6,9 @@
 #
 # What it does:
 #   1. Activates the project virtual environment
-#   2. Runs 03_fetch_qld_data.py — refreshes QLD spot price data
-#   3. Runs 05_fetch_trading_data.py — refreshes FCAS market datasets
-#   4. Runs 06_generate_trading_charts.py — renders trading market charts
+#   2. Runs 03_fetch_qld_data.py - refreshes QLD spot price data
+#   3. Runs 05_fetch_trading_data.py - refreshes FCAS market datasets
+#   4. Runs 06_generate_trading_charts.py - renders trading market charts
 #
 # Prerequisites:
 #   - .venv or venv must exist (run ./run.sh once to create it, or python -m venv .venv)
@@ -20,7 +20,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 echo "=========================================="
-echo "Chapter 2.1 — Trading Market Data Refresh"
+echo "Chapter 2.1 - Trading Market Data Refresh"
 echo "=========================================="
 echo "Project root: $PROJECT_ROOT"
 echo ""

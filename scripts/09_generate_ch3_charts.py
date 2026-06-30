@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from pathlib import Path
 
-# ── 顏色設定（與 Dashboard 一致）──────────────────────────────
+# -- Color Settings (Consistent with Dashboard) ------------------------------
 BG = 'rgba(0,0,0,0)'
 GRID = 'rgba(255,255,255,0.06)'
 TEXT_PRIMARY = '#F5F5F0'
@@ -73,12 +73,12 @@ def fig1_international_comparison():
         showlegend=False,
     )
 
-    # Annotate Australia
+    # Annotate Australia dynamically
     au = df[df['country'] == 'Australia'].iloc[0]
     fig.add_annotation(
-        x=2.5,
+        x=au['capacity_gw'],
         y='Australia',
-        text=f"Fastest growth in APAC<br>{au['growth_rate_pct']}%/yr",
+        text=f"Strong APAC Player<br>{au['growth_rate_pct']}%/yr",
         showarrow=True,
         arrowhead=2,
         arrowcolor=ACCENT,
@@ -123,15 +123,8 @@ def fig2_demand_forecast():
         annotation_font_color=TEXT_MUTED,
     )
 
-    # Key annotation
-    fig.add_annotation(
-        x=2030, y=12,
-        text='2030: 12 TWh<br>= 6% of NEM',
-        showarrow=True,
-        arrowhead=2,
-        arrowcolor=ACCENT,
-        font=dict(color=ACCENT, size=10),
-    )
+    # Annotation for 2030 removed to avoid hardcoded artificial spike logic
+
 
     fig.update_layout(
         xaxis_title='Year',
@@ -175,19 +168,26 @@ def fig3_renewable_gap():
         mode='lines',
     ))
 
-    # Gap area
+    # Gap area (area between supply and demand)
     fig.add_trace(go.Scatter(
         x=df['year'],
-        y=df['gap_twh'],
+        y=df['step_change_twh'], # Plot up to total demand to fill the gap correctly
         name='Green Energy Gap (HDRE Opportunity)',
-        fill='tonexty',
+        fill='tonexty', # Fills from the previous trace (Available Renewable Supply)
         fillcolor='rgba(232,87,89,0.2)',
-        line=dict(color='#E85759', width=1.5, dash='dot'),
+        line=dict(color='rgba(0,0,0,0)', width=0), # Hide the line, just show fill
         mode='lines',
+        showlegend=False,
     ))
 
+    # Add a separate line for the gap value if needed, or just let the fill do the work
+    # We will just label the gap dynamically
+    gap_2032 = df.loc[df['year'] == 2032, 'step_change_twh'].values[0]
+    supply_2032 = df.loc[df['year'] == 2032, 'renewable_supply_twh'].values[0]
+    mid_y_2032 = (gap_2032 + supply_2032) / 2
+
     fig.add_annotation(
-        x=2032, y=8,
+        x=2032, y=mid_y_2032,
         text='HDRE Opportunity<br>Zone',
         showarrow=False,
         font=dict(color='#E85759', size=11),
@@ -262,7 +262,7 @@ def fig4_state_breakdown():
     return apply_dark_theme(fig, height=480)
 
 
-# ── Main: generate all figures ─────────────────────────────────
+# -- Main: generate all figures ---------------------------------
 if __name__ == '__main__':
     out = Path('outputs/figures')
     out.mkdir(parents=True, exist_ok=True)

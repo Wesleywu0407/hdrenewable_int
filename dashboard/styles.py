@@ -223,7 +223,7 @@ def inject_styles() -> None:
             background-color: #070E0C !important;
         }
 
-        /* Pull sidebar content to the top — reduce excessive top padding */
+        /* Pull sidebar content to the top - reduce excessive top padding */
         section[data-testid="stSidebar"] > div:first-child,
         section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
             padding-top: 24px !important;
@@ -791,7 +791,7 @@ def inject_styles() -> None:
             min-height: 86px;
         }
 
-        /* KPI card color-tag system — 3px left bar indicates energy category */
+        /* KPI card color-tag system - 3px left bar indicates energy category */
         .kpi-card {
             --kpi-padding-left: 12px;
             border-left: 3px solid transparent;
@@ -822,7 +822,7 @@ def inject_styles() -> None:
             font-weight: 500;
         }
 
-        /* KPI card value — use monospace for that data-terminal feel */
+        /* KPI card value - use monospace for that data-terminal feel */
         .kpi-card .instrument-value,
         .kpi-card .kpi-value,
         .kpi-card [data-testid="metric-value"],

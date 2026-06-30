@@ -1,4 +1,4 @@
-"""Chapter 1.1 Step 3 — Fetch & derive QLD-specific datasets.
+"""Chapter 1.1 Step 3 - Fetch & derive QLD-specific datasets.
 
 Reuses cached Chapter 1.2 CSV data where possible and adds QLD drill-down data:
   - qld_facilities.csv         : all QLD1 units (operating + retired)
@@ -307,7 +307,7 @@ def main() -> int:
             print("[qld_spot_prices] fetching QLD1 hourly (chunked) ...")
             sp = fetch_spot_prices(client, "QLD1", days=365)
             if sp.empty:
-                print("  WARNING: no spot price data returned — Fig 6 will be skipped.")
+                print("  WARNING: no spot price data returned - Fig 6 will be skipped.")
             else:
                 sp = save_and_merge(sp_path, sp)
                 summarize(sp_path, sp, f"({sp['interval'].min():%Y-%m-%d}..{sp['interval'].max():%Y-%m-%d})")

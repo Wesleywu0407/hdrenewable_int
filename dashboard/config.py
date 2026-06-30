@@ -32,7 +32,7 @@ CHAPTERS = [
                     "QLD is accelerating its renewable deployment and converging with its peer state NSW."
                 ),
                 "description": (
-                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels.\n\nData is based off scripts/03_fetch_qld_data.py and charted by scripts/04_generate_qld_charts.py."
+                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
                 ),
             },
             {
@@ -51,7 +51,7 @@ CHAPTERS = [
                     "The past 24 months show a steady increase in renewable penetration in Queensland's fuel mix."
                 ),
                 "description": (
-                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source.\n\nData is based off scripts/03_fetch_qld_data.py and charted by scripts/04_generate_qld_charts.py."
+                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
                 ),
             },
             {
@@ -70,7 +70,7 @@ CHAPTERS = [
                     "High instances of negative spot prices indicate excess solar generation during midday."
                 ),
                 "description": (
-                    "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power.\n\nData is based off scripts/03_fetch_qld_data.py and charted by scripts/04_generate_qld_charts.py."
+                    "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
                 ),
             }
         ],
@@ -103,7 +103,7 @@ CHAPTERS = [
                     "make storage and flexible capacity commercially attractive."
                 ),
                 "description": (
-                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
+                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
                 ),
             },
             {
@@ -126,7 +126,7 @@ CHAPTERS = [
                     "with seasonal solar peaks reshaping the monthly mix."
                 ),
                 "description": (
-                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
+                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
                 ),
             },
             {
@@ -149,7 +149,7 @@ CHAPTERS = [
                     "investment headroom in the NEM."
                 ),
                 "description": (
-                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
+                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
                 ),
             },
             {
@@ -174,7 +174,7 @@ CHAPTERS = [
                     "practical map for project development and offtake positioning."
                 ),
                 "description": (
-                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets.\n\nData is based off scripts/01_fetch_nem_data.py and charted by scripts/02_generate_charts.py."
+                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
                 ),
             },
         ],
@@ -203,7 +203,7 @@ CHAPTERS = [
                 ],
                 "takeaway": (
                     "Australia's BESS pipeline is geographically concentrated in NSW, VIC and SA "
-                    "— precisely where coal retirements are most imminent. Data centres cluster "
+                    "- precisely where coal retirements are most imminent. Data centres cluster "
                     "in the same eastern seaboard corridors, creating strong co-location "
                     "opportunities for on-site firming and dispatchable renewable supply."
                 ),
@@ -215,15 +215,16 @@ CHAPTERS = [
                     "Data centre markers identify major hyperscaler and colocation operators "
                     "(NextDC, Equinix, AirTrunk, AWS, Microsoft, Google).\n\n"
                     "**BESS & Solar data sources:**\n"
-                    "• OpenElectricity API (openelectricity.org.au) — live registered battery and solar units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
-                    "• treasury.qld.gov.au — official Queensland government plant data\n"
-                    "• Wikipedia — Battery_storage_power_station article wikitables (operating, under construction & planned Australian projects)\n"
+                    "• OpenElectricity API (openelectricity.org.au) - live registered battery and solar units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
+                    "• treasury.qld.gov.au - official Queensland government plant data\n"
+                    "• Wikipedia - Battery_storage_power_station article wikitables (operating, under construction & planned Australian projects)\n"
                     "• Coordinates geocoded live via Nominatim / OpenStreetMap where not embedded in source data\n\n"
                     "**Data centre sources:**\n"
-                    "• nextdc.com — facility pages scraped for 12 operating Australian sites (S1–S6, M1–M3, B1–B2, C1, A1, SC1)\n"
-                    "• airtrunk.com — facility pages scraped for SYD1, SYD2, SYD3, MEL1, MEL2\n"
-                    "• Equinix — 12 Australian sites (SY1–SY6, ME1–ME3, BR1, AD1, CA1) geocoded via Nominatim/OSM using publicly listed suburb locations\n"
-                    "• Cloud provider regions (AWS, Google Cloud, Microsoft Azure, Oracle Cloud) geocoded via Nominatim/OSM"
+                    "• nextdc.com - facility pages scraped for 12 operating Australian sites (S1-S6, M1-M3, B1-B2, C1, A1, SC1)\n"
+                    "• airtrunk.com - facility pages scraped for SYD1, SYD2, SYD3, MEL1, MEL2\n"
+                    "• Equinix - 12 Australian sites (SY1-SY6, ME1-ME3, BR1, AD1, CA1) geocoded via Nominatim/OSM using publicly listed suburb locations\n"
+                    "• Cloud provider regions (AWS, Google Cloud, Microsoft Azure, Oracle Cloud) geocoded via Nominatim/OSM\n\n"
+                    "Data is based off scripts/07_fetch_infrastructure_data.py and charted by scripts/08_generate_infrastructure_charts.py."
                 ),
             },
         ],
@@ -253,7 +254,7 @@ CHAPTERS = [
                     "Identifying peak pricing hours is essential for dispatchable storage and battery ROI."
                 ),
                 "description": (
-                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing).\n\nData is based off scripts/05_fetch_trading_data.py and charted by scripts/06_generate_trading_charts.py."
+                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing).\n\nData is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
                 ),
             },
             {
@@ -276,7 +277,7 @@ CHAPTERS = [
                     "This chart visualizes the market prices and cleared volumes for Regulation Frequency Control Ancillary Services (FCAS). Regulation FCAS is a service used by the grid operator to continuously correct minor deviations in grid frequency (50Hz) caused by momentary imbalances between electricity supply and demand.\n\n"
                     "- Regulation Raise\n"
                     "- Regulation Lower\n\n"
-                    "Data is based off scripts/05_fetch_trading_data.py and charted by scripts/06_generate_trading_charts.py."
+                    "Data is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
                 ),
             },
             {
@@ -303,7 +304,7 @@ CHAPTERS = [
                     "- Slow Lower: Stabilize high frequency within 60 seconds\n"
                     "- Delayed Raise: Restore frequency within 5 minutes\n"
                     "- Delayed Lower: Restore frequency within 5 minutes\n\n"
-                    "Data is based off scripts/05_fetch_trading_data.py and charted by scripts/06_generate_trading_charts.py."
+                    "Data is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
                 ),
             }
         ],
@@ -334,7 +335,7 @@ CHAPTERS = [
                     "Extreme weather directly drives spot price volatility and demand surges."
                 ),
                 "description": (
-                    "This interactive chart provides a time-series view of hourly temperature against spot prices and demand, as well as a scatter plot comparing solar irradiance with market prices. It reveals how high midday solar correlates with negative prices, and how extreme temperatures trigger price spikes.\n\nData is based off scripts/09_fetch_weather_data.py and charted by scripts/10_generate_weather_charts.py."
+                    "This interactive chart provides a time-series view of hourly temperature against spot prices and demand, as well as a scatter plot comparing solar irradiance with market prices. It reveals how high midday solar correlates with negative prices, and how extreme temperatures trigger price spikes.\n\nData is based off scripts/09_fetch_weather_data.py (which issues HTTP GET requests to the Open-Meteo API for historical weather data based on specific coordinates) and charted by scripts/10_generate_weather_charts.py."
                 ),
             }
         ]
@@ -342,9 +343,9 @@ CHAPTERS = [
     {
         "id": "3",
         "title": "IMPACT OF AI DATA CENTER POWER DEMAND ON THE POWER GRID",
-        "subtitle": "AI 資料中心用電需求對電網之衝擊",
+        "subtitle": "Impact of AI Data Center Power Demand on the Grid",
         "status": "done",
-        "source": "HDRE Research",
+        "source": "Synthetic Baseline Assumptions",
         "figures": [
             {
                 "id": "fig3_1",
@@ -352,10 +353,10 @@ CHAPTERS = [
                 "type": "outline",
                 "title": "3. Impact of AI Data Center Power Demand on the Power Grid",
                 "sidebar_title": "RESEARCH OUTLINE",
-                "subtitle": "AI 資料中心用電需求對電網之衝擊",
+                "subtitle": "Impact of AI Data Center Power Demand on the Grid",
                 "html_path": "",
                 "png_path": "",
-                "source": "HDRE Research",
+                "source": "Synthetic Baseline Assumptions",
                 "metrics": [],
                 "takeaway": "",
                 "description": (
@@ -365,11 +366,15 @@ CHAPTERS = [
                     "  </div>"
                     "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
                     "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.1 Global Data Center Development Assessment: Australia vs. International Benchmarks, Government Initiatives, Regulatory Constraints, Policy Subsidies, Key Market Players, and Strategic Opportunities for HDRE</h4>"
-                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>數據中心全球發展評估：澳洲與國際對比、政府計畫、法規限制、政策補貼、市場關鍵參與者及 HDRE 的發展機會</p>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Global Data Center Development Assessment: Australia vs. International Benchmarks, Government Initiatives, Regulatory Constraints, Policy Subsidies, Key Market Players, and HDRE's Development Opportunities</p>"
                     "  </div>"
                     "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
                     "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.2 Projections of Power Consumption Growth and Green Energy Deficits, and Potential Business Opportunities for HDRE</h4>"
-                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>用電成長與綠電需求缺口推估及 HDRE 的潛在商機</p>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Estimation of Power Growth and Green Energy Demand Gap, and HDRE's Potential Business Opportunities</p>"
+                    "  </div>"
+                    "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
+                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.3 Data Modeling Assumptions & Synthetic Baselines</h4>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Note on Methodology: Due to the lack of live forward-looking APIs, figures in this chapter use synthetic baseline modeling. Key assumptions include an exponential data center demand growth curve (from 4.0 TWh in 2025 to 34.5 TWh in 2050 based on AEMO Step Change frameworks) and fixed-capacity state pipeline estimates (e.g., NSW at 4.0 GW).</p>"
                     "  </div>"
                     "</div>"
                 ),
@@ -377,34 +382,34 @@ CHAPTERS = [
             {
                 "id": "ch3_fig1",
                 "number": 2,
-                "title": "Global Data Centre Capacity — Australia in Context",
+                "title": "Global Data Centre Capacity - Australia in Context",
                 "sidebar_title": "GLOBAL COMPARISON",
                 "subtitle": "Global comparison of installed data centre capacity and growth rates",
                 "html_path": "outputs/figures/ch3_fig1_international_comparison.html",
                 "png_path": "",
-                "source": "AEMO / HDRE Research",
+                "source": "AEMO / Synthetic Baseline Assumptions",
                 "metrics": [
-                    {"label": "Australia Capacity", "value": "1.3 GW"},
-                    {"label": "APAC Growth Leader", "value": "25.1%"}
+                    {"label": "Australia Capacity", "value": "2.8 GW"},
+                    {"label": "Australia Growth", "value": "14.5%"}
                 ],
-                "takeaway": "Australia ranks 6th globally at 1.3 GW, but leads Asia-Pacific in growth rate at 25.1%/yr — the fastest expansion trajectory in the region. NSW alone has 11.4 GW in the planning pipeline.",
-                "description": "This chart compares Australia's data centre capacity against international benchmarks, highlighting its rapid growth rate within the Asia-Pacific region."
+                "takeaway": "Australia ranks 6th globally at 2.8 GW, showing strong growth at 14.5%/yr. NSW represents a significant portion of this with a 4.0 GW pipeline.",
+                "description": "This chart compares Australia's data centre capacity against international benchmarks, highlighting its rapid growth rate within the Asia-Pacific region.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig2",
                 "number": 3,
                 "title": "AI Data Centre Power Demand Forecast",
                 "sidebar_title": "DEMAND FORECAST",
-                "subtitle": "AEMO 2026 ISP · Three scenarios · 2025–2050",
+                "subtitle": "AEMO 2026 ISP · Three scenarios · 2025-2050",
                 "html_path": "outputs/figures/ch3_fig2_demand_forecast.html",
                 "png_path": "",
                 "source": "AEMO 2026 ISP",
                 "metrics": [
-                    {"label": "2030 Step Change", "value": "8.1 TWh"},
-                    {"label": "NEM share 2050", "value": "11%"}
+                    {"label": "2030 Step Change", "value": "6.15 TWh"},
+                    {"label": "2050 Step Change", "value": "34.5 TWh"}
                 ],
-                "takeaway": "Under AEMO's Step Change scenario, data centre demand rises from 3.9 TWh (2025) to 8.1 TWh by 2030, reaching 33.3 TWh by 2050 — equivalent to roughly 11% of total NEM generation.",
-                "description": "Projections of data centre power consumption in Australia across AEMO's ISP progressive, step, and green export scenarios."
+                "takeaway": "Under the Step Change scenario, data centre demand rises from 4.0 TWh (2025) to 6.15 TWh by 2030, reaching 34.5 TWh by 2050 - representing a significant structural load.",
+                "description": "Projections of data centre power consumption in Australia across progressive, step, and green export scenarios.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig3",
@@ -414,12 +419,12 @@ CHAPTERS = [
                 "subtitle": "Renewable supply gap analysis · HDRE opportunity zone",
                 "html_path": "outputs/figures/ch3_fig3_renewable_gap.html",
                 "png_path": "",
-                "source": "HDRE Research",
+                "source": "Synthetic Baseline Assumptions",
                 "metrics": [
                     {"label": "Supply Gap 2035", "value": "55%"}
                 ],
-                "takeaway": "Tech giants (Microsoft, Google, OpenAI) have committed to 100% renewable power, but available renewable supply will cover only ~45% of projected DC demand by 2035, creating a structural green energy deficit — HDRE's primary market opportunity.",
-                "description": "Analysis of the supply deficit between available renewable energy generation and data centre load demands."
+                "takeaway": "Tech giants (Microsoft, Google, OpenAI) have committed to 100% renewable power, but available renewable supply will cover only ~45% of projected DC demand by 2035, creating a structural green energy deficit - HDRE's primary market opportunity.",
+                "description": "Analysis of the supply deficit between available renewable energy generation and data centre load demands.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig4",
@@ -429,12 +434,12 @@ CHAPTERS = [
                 "subtitle": "NEM states compared · MW pipeline vs renewable share %",
                 "html_path": "outputs/figures/ch3_fig4_state_breakdown.html",
                 "png_path": "",
-                "source": "AEMO / HDRE Research",
+                "source": "AEMO / Synthetic Baseline Assumptions",
                 "metrics": [
-                    {"label": "NSW Pipeline", "value": "12,050 MW"}
+                    {"label": "NSW Pipeline", "value": "4,000 MW"}
                 ],
-                "takeaway": "NSW dominates with 11.4 GW in the pipeline but only 38% renewable share — the largest mismatch in the NEM. QLD has low pipeline (980 MW) but rich solar resources, representing an early-mover opportunity for HDRE.",
-                "description": "State-by-state comparison of operational and planned data centre capacity pipeline against local renewable energy share."
+                "takeaway": "NSW dominates with 4.0 GW in the pipeline but only 35% renewable share - the largest mismatch in the NEM. QLD has a growing pipeline (850 MW) and 28% renewable share, representing an early-mover opportunity for HDRE.",
+                "description": "State-by-state comparison of operational and planned data centre capacity pipeline against local renewable energy share.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
             }
         ],
     }

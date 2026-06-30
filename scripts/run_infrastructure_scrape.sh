@@ -6,8 +6,8 @@
 #
 # What it does:
 #   1. Activates the project virtual environment
-#   2. Runs 07_fetch_infrastructure_data.py  — scrapes BESS & Datacentre data
-#   3. Runs 08_generate_infrastructure_charts.py — renders the Plotly map
+#   2. Runs 07_fetch_infrastructure_data.py  - scrapes BESS & Datacentre data
+#   3. Runs 08_generate_infrastructure_charts.py - renders the Plotly map
 #   4. Outputs to outputs/figures/fig1_4_infrastructure_map.html
 #
 # Prerequisites:
@@ -20,7 +20,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 echo "=========================================="
-echo "Chapter 1.3 — Infrastructure Data Refresh"
+echo "Chapter 1.3 - Infrastructure Data Refresh"
 echo "=========================================="
 echo "Project root: $PROJECT_ROOT"
 echo ""
@@ -41,7 +41,7 @@ if [ -f ".env" ]; then
 fi
 
 if [ -z "$OPENELECTRICITY_API_KEY" ]; then
-    echo "NOTE: OPENELECTRICITY_API_KEY not set — will use Wikipedia & curated data only."
+    echo "NOTE: OPENELECTRICITY_API_KEY not set - will use Wikipedia & curated data only."
 fi
 
 echo ""

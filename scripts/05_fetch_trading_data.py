@@ -1,4 +1,4 @@
-"""Step 5 — Fetch all data needed for the Trading Market Volatility charts.
+"""Step 5 - Fetch all data needed for the Trading Market Volatility charts.
 
 Pulls NEM Spot Market pricing and generates mock FCAS market volumes and pricing.
 

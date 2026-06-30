@@ -1,7 +1,7 @@
 # Secrets
 .env
 
-# Data — track master CSVs, ignore regenerable files
+# Data - track master CSVs, ignore regenerable files
 data/raw/*
 !data/raw/master_NEM_open_electricity.csv
 !data/raw/master_WA_SWIS_open_electricity.csv

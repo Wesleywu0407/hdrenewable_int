@@ -1,4 +1,4 @@
-"""Chapter 1.3 Step 8 — Generate infrastructure map charts.
+"""Chapter 1.3 Step 8 - Generate infrastructure map charts.
 
 Loads BESS and Datacentre CSV files and renders a combined Plotly
 scatter-map of Australia, saved as:
@@ -21,12 +21,12 @@ PNG_DIR = FIG_DIR / "png"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 PNG_DIR.mkdir(parents=True, exist_ok=True)
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Colours
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 BESS_COLOR = "#27ae60"          # green
 BESS_COLOR_BORDER = "#1a7a44"
-DC_COLOR = "#e74c3c"            # vivid red-orange — distinct from green BESS
+DC_COLOR = "#e74c3c"            # vivid red-orange - distinct from green BESS
 DC_COLOR_BORDER = "#ffffff"     # white ring makes DCs pop over BESS markers
 
 SOURCE_FOOTER = (
@@ -34,9 +34,9 @@ SOURCE_FOOTER = (
     "Baxtel · Datacentermap.com · Curated public project records"
 )
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Helpers
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def _status_label(status: str | None) -> str:
     """Normalise raw status string for display."""
@@ -82,16 +82,16 @@ def save_png(fig: go.Figure, name: str, width: int = 1400, height: int = 900) ->
         print(f"  [PNG] skipped ({type(exc).__name__}: {exc})")
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Chart builder
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_df: pd.DataFrame = None) -> go.Figure:
     """Build a combined Plotly Scattermapbox chart of BESS, Solar + Datacentres."""
 
     fig = go.Figure()
 
-    # ── BESS trace (drawn first = underneath) ──────────────────────────────
+    # -- BESS trace (drawn first = underneath) ------------------------------
     if not bess_df.empty:
         bess_valid = bess_df.dropna(subset=["lat", "lon"]).copy()
         if not bess_valid.empty:
@@ -160,7 +160,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                 )
                 print(f"  [map] added {len(subset_df)} {name_label.strip('🔋🏗️ ')} markers")
 
-    # ── Solar trace ────────────────────────────────────────────────────────
+    # -- Solar trace --------------------------------------------------------
     if solar_df is not None and not solar_df.empty:
         solar_valid = solar_df.dropna(subset=["lat", "lon"]).copy()
         if not solar_valid.empty:
@@ -220,7 +220,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                 )
                 print(f"  [map] added {len(solar_existing)} Existing Solar markers")
 
-    # ── Datacentre trace ───────────────────────────────────────────────────
+    # -- Datacentre trace ---------------------------------------------------
     if not dc_df.empty:
         dc_valid = dc_df.dropna(subset=["lat", "lon"]).copy()
         if not dc_valid.empty:
@@ -266,7 +266,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             )
             print(f"  [map] added {len(dc_valid)} Datacentre markers")
 
-    # ── Layout ─────────────────────────────────────────────────────────────
+    # -- Layout -------------------------------------------------------------
     fig.update_layout(
         # scattermapbox requires the `mapbox` key (not `map`)
         # and works reliably with the CDN-hosted plotly.js bundle.
@@ -318,7 +318,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             fig.add_annotation(
                 text=(
                     "<b>BESS marker size ∝ √capacity (MW)</b><br>"
-                    f"Range: {cap_data.min():,.0f} – {cap_data.max():,.0f} MW"
+                    f"Range: {cap_data.min():,.0f} - {cap_data.max():,.0f} MW"
                 ),
                 xref="paper",
                 yref="paper",
@@ -335,9 +335,9 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
     return fig
 
 
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 # Main
-# ─────────────────────────────────────────────────────────────────────────── #
+# --------------------------------------------------------------------------- #
 
 def main() -> int:
     print("Generating infrastructure map → outputs/figures/")
@@ -347,14 +347,14 @@ def main() -> int:
     solar_path = RAW_DIR / "solar_locations.csv"
 
     if not bess_path.exists():
-        print(f"WARNING: {bess_path} not found — run 07_fetch_infrastructure_data.py first.")
+        print(f"WARNING: {bess_path} not found - run 07_fetch_infrastructure_data.py first.")
         bess_df = pd.DataFrame()
     else:
         bess_df = pd.read_csv(bess_path)
         print(f"  loaded bess_locations.csv: {len(bess_df)} rows")
 
     if not dc_path.exists():
-        print(f"WARNING: {dc_path} not found — run 07_fetch_infrastructure_data.py first.")
+        print(f"WARNING: {dc_path} not found - run 07_fetch_infrastructure_data.py first.")
         dc_df = pd.DataFrame()
     else:
         dc_df = pd.read_csv(dc_path)

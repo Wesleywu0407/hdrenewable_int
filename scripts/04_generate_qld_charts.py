@@ -1,4 +1,4 @@
-"""Step 4 — Generate the QLD-specific analysis charts (Section 1.1).
+"""Step 4 - Generate the QLD-specific analysis charts (Section 1.1).
 
 Run: python scripts/04_generate_qld_charts.py
 """
@@ -76,7 +76,7 @@ def order_groups(present: list[str]) -> list[str]:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 1.1.1 — QLD Renewable Share vs Peers
+# Fig 1.1.1 - QLD Renewable Share vs Peers
 # --------------------------------------------------------------------------- #
 def fig1_1_qld_renewable_share() -> None:
     path = RAW_DIR / "nem_renewable_share.csv"
@@ -132,7 +132,7 @@ def fig1_1_qld_renewable_share() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 1.1.2 — QLD Fuel Mix Evolution
+# Fig 1.1.2 - QLD Fuel Mix Evolution
 # --------------------------------------------------------------------------- #
 def fig1_2_qld_fuel_mix() -> None:
     path = RAW_DIR / "qld_fuel_mix_24m.csv"
@@ -175,7 +175,7 @@ def fig1_2_qld_fuel_mix() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Fig 1.1.3 — QLD Negative Spot-Price Frequency
+# Fig 1.1.3 - QLD Negative Spot-Price Frequency
 # --------------------------------------------------------------------------- #
 def fig1_3_qld_negative_prices() -> None:
     path = RAW_DIR / "qld_spot_prices.csv"

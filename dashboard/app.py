@@ -233,7 +233,7 @@ def ch3_global_comparison_html(html: str) -> str:
             ["North America", "#2a78d6"],
             ["Europe", "#1baf7a"],
             ["Asia-Pacific", "#eda100"],
-            ["Australia — APAC growth leader", "#199e70"]
+            ["Australia - APAC growth leader", "#199e70"]
         ];
 
         function redesign() {
@@ -402,7 +402,7 @@ def ch3_global_comparison_html(html: str) -> str:
                         yref: "paper",
                         x: 0.018,
                         y: 0.58,
-                        text: "Australia: fastest growth in APAC at 25.1%/yr — same installed base as India (1.3 GW), but accelerating fastest",
+                        text: "Australia: fastest growth in APAC at 25.1%/yr - same installed base as India (1.3 GW), but accelerating fastest",
                         showarrow: false,
                         xanchor: "left",
                         font: { color: "#cfe9dd", size: 12 }
@@ -1598,12 +1598,12 @@ def render_ch3_research_outline() -> None:
         <div class="ch3-outline-wrap">
             <section class="ch3-outline-hero">
                 <h1 class="main-title">Chapter 3 · Impact of AI data centre power demand on the power grid</h1>
-                <p>AI 資料中心用電需求對電網之衝擊 — assessing whether and where HDRE should enter the Australian green energy market over the next 5–10 years.</p>
+                <p>Impact of AI Data Center Power Demand on the Grid - assessing whether and where HDRE should enter the Australian green energy market over the next 5-10 years.</p>
             </section>
 
             <section class="ch3-thesis-card">
                 <div class="ch3-thesis-label">CENTRAL THESIS</div>
-                <div class="ch3-thesis-body">AI data centre demand in Australia will grow from 4 TWh to 34.5 TWh by 2050, but renewable supply will lag — creating a structural green energy deficit that defines HDRE's primary market opportunity.</div>
+                <div class="ch3-thesis-body">AI data centre demand in Australia will grow from 4 TWh to 34.5 TWh by 2050, but renewable supply will lag - creating a structural green energy deficit that defines HDRE's primary market opportunity.</div>
             </section>
 
             <section>
@@ -1618,11 +1618,11 @@ def render_ch3_research_outline() -> None:
                     </div>
                     <div class="ch3-question-card ch3-pair-3" style="--accent: #ec6a5e;">
                         <div class="ch3-question-title">Q3 · Supply gap</div>
-                        <p>Can existing renewable supply meet projected AI load — and how big is the gap?</p>
+                        <p>Can existing renewable supply meet projected AI load - and how big is the gap?</p>
                     </div>
                     <div class="ch3-question-card ch3-pair-4" style="--accent: #d4a857;">
                         <div class="ch3-question-title">Q4 · Market entry</div>
-                        <p>Which NEM state offers the best entry point — pipeline scale or green-energy readiness?</p>
+                        <p>Which NEM state offers the best entry point - pipeline scale or green-energy readiness?</p>
                     </div>
                 </div>
             </section>

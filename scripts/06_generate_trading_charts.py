@@ -1,4 +1,4 @@
-"""Step 6 — Generate the 3 Trading Market Volatility charts as standalone HTML.
+"""Step 6 - Generate the 3 Trading Market Volatility charts as standalone HTML.
 
 Loads the datasets from data/raw/ and writes interactive Plotly
 charts to outputs/figures/.

@@ -6,9 +6,9 @@
 #
 # What it does:
 #   1. Activates the project virtual environment
-#   2. Runs 01_fetch_nem_data.py — refreshes shared NEM datasets
-#   3. Runs 03_fetch_qld_data.py — refreshes QLD renewables datasets
-#   4. Runs 04_generate_qld_charts.py — renders QLD renewables charts
+#   2. Runs 01_fetch_nem_data.py - refreshes shared NEM datasets
+#   3. Runs 03_fetch_qld_data.py - refreshes QLD renewables datasets
+#   4. Runs 04_generate_qld_charts.py - renders QLD renewables charts
 #
 # Prerequisites:
 #   - .venv or venv must exist (run ./run.sh once to create it, or python -m venv .venv)
@@ -20,7 +20,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 echo "=========================================="
-echo "Chapter 1.1 — QLD Renewables Data Refresh"
+echo "Chapter 1.1 - QLD Renewables Data Refresh"
 echo "=========================================="
 echo "Project root: $PROJECT_ROOT"
 echo ""

@@ -1,4 +1,4 @@
-"""Step 1 — Fetch all NEM data needed for the 4 charts.
+"""Step 1 - Fetch all NEM data needed for the 4 charts.
 
 Pulls datasets from the OpenElectricity API and caches each as CSV under
 data/raw/. If a cache file exists and is < 24h old, the API call is skipped.
@@ -81,7 +81,7 @@ FUELTECH_EMISSIONS_COLS: dict[str, str] = {
 
 # COMMUNITY plan only exposes ~the last 730 days of history, and the 1M interval
 # is capped at a 732-day range per request. We clamp long-range queries to this
-# window. NOTE: this means 2020-2023 data is NOT available on this plan — the
+# window. NOTE: this means 2020-2023 data is NOT available on this plan - the
 # 5-year deliverables (Fig 2, Fig 4) are limited to the last ~2 years.
 MAX_HISTORY_DAYS = 728
 
@@ -143,7 +143,7 @@ def timeseries_to_df(response) -> pd.DataFrame:
             labels = {k: v for k, v in labels.items() if v is not None}
             series_name = getattr(series, "name", None)
             # The network_region is encoded in series.name (e.g. "energy_NSW1|coal")
-            # rather than in the columns model — recover it when missing.
+            # rather than in the columns model - recover it when missing.
             if "network_region" not in labels:
                 region = _region_from_name(series_name)
                 if region:
@@ -308,7 +308,7 @@ def main() -> int:
     history_start = max(desired_start, plan_start)
     if history_start > desired_start:
         print(
-            f"NOTE: plan history limit — clamping long-range start from "
+            f"NOTE: plan history limit - clamping long-range start from "
             f"{desired_start:%Y-%m-%d} to {history_start:%Y-%m-%d} "
             f"(only last {MAX_HISTORY_DAYS} days available)."
         )
