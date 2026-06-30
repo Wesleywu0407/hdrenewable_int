@@ -1359,10 +1359,11 @@ def render_standard_metrics(metrics: list[dict[str, str]], entry: dict[str, Any]
                     unsafe_allow_html=True,
                 )
         return
-    columns = st.columns(max(1, min(3, len(metrics))), gap="small")
-    for col, metric in zip(columns, metrics):
+    cols_per_row = max(1, min(3, len(metrics)))
+    columns = st.columns(cols_per_row, gap="small")
+    for i, metric in enumerate(metrics):
         category = metric_category(metric["label"])
-        with col:
+        with columns[i % cols_per_row]:
             st.markdown(
                 f"""
                 <div class="instrument-tile compact kpi-card kpi-card--{category}">

@@ -166,6 +166,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
         if not solar_valid.empty:
             solar_valid["status_lower"] = solar_valid["status"].fillna("").astype(str).str.lower()
             solar_existing = solar_valid[solar_valid["status_lower"].isin(["operating", "commissioning"])]
+            solar_proposed = solar_valid[~solar_valid["status_lower"].isin(["operating", "commissioning"])]
             
             if not solar_existing.empty:
                 sizes = _capacity_to_size(solar_existing["capacity_mw"])
@@ -220,6 +221,59 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                 )
                 print(f"  [map] added {len(solar_existing)} Existing Solar markers")
 
+            if not solar_proposed.empty:
+                sizes = _capacity_to_size(solar_proposed["capacity_mw"])
+                hover_texts = []
+                for _, row in solar_proposed.iterrows():
+                    cap = row.get("capacity_mw")
+                    cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
+                    status = _status_label(row.get("status", ""))
+                    state = row.get("state", "")
+                    source = row.get("source", "")
+                    hover_texts.append(
+                        f"<b>{row['name']}</b><br>"
+                        f"Capacity: {cap_str}<br>"
+                        f"Status: {status}<br>"
+                        f"State: {state}<br>"
+                        f"<i>Source: {source}</i>"
+                    )
+
+                # Border trace
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=solar_proposed["lat"],
+                        lon=solar_proposed["lon"],
+                        mode="markers",
+                        marker=dict(
+                            size=sizes + 2,
+                            color="#b34700",
+                            opacity=0.8,
+                        ),
+                        text=solar_proposed["name"].tolist(),
+                        hoverinfo="skip",
+                        showlegend=False,
+                        legendgroup="solar",
+                    )
+                )
+                # Fill trace
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lat=solar_proposed["lat"],
+                        lon=solar_proposed["lon"],
+                        mode="markers",
+                        marker=dict(
+                            size=sizes,
+                            color="#FF6600",
+                            opacity=0.45,
+                        ),
+                        text=hover_texts,
+                        hovertemplate="%{text}<extra></extra>",
+                        name="🏗️ Proposed Solar Panels",
+                        legendgroup="solar",
+                    )
+                )
+                print(f"  [map] added {len(solar_proposed)} Proposed Solar markers")
+
     # -- Datacentre trace ---------------------------------------------------
     if not dc_df.empty:
         dc_valid = dc_df.dropna(subset=["lat", "lon"]).copy()
@@ -267,6 +321,9 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             print(f"  [map] added {len(dc_valid)} Datacentre markers")
 
     # -- Layout -------------------------------------------------------------
+    total_bess_mw = bess_df["capacity_mw"].sum() if not bess_df.empty else 0
+    total_solar_mw = solar_df["capacity_mw"].sum() if not solar_df.empty else 0
+
     fig.update_layout(
         # scattermapbox requires the `mapbox` key (not `map`)
         # and works reliably with the CDN-hosted plotly.js bundle.
@@ -331,6 +388,26 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                 borderwidth=1,
                 align="left",
             )
+
+    # Total Capacity Annotation
+    fig.add_annotation(
+        text=(
+            "<b>Total Capacity</b><br>"
+            f"BESS Sites: {total_bess_mw:,.0f} MW<br>"
+            f"Solar Farms: {total_solar_mw:,.0f} MW"
+        ),
+        xref="paper",
+        yref="paper",
+        x=0.99,
+        y=0.01,
+        xanchor="right",
+        showarrow=False,
+        font=dict(size=11, color="#1a1a2e"),
+        bgcolor="rgba(255,255,255,0.88)",
+        bordercolor="#cccccc",
+        borderwidth=1,
+        align="right",
+    )
 
     return fig
 

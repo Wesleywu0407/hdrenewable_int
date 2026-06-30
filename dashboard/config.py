@@ -197,7 +197,9 @@ CHAPTERS = [
                 "source": "OpenElectricity API · Wikipedia · treasury.qld.gov.au · nextdc.com · airtrunk.com · Equinix/OSM",
                 "metrics": [
                     {"label": "BESS Sites", "value": "91", "note": "NEM states only"},
+                    {"label": "BESS Capacity", "value": "67,336 MW", "note": "Existing & Proposed"},
                     {"label": "Solar Farms", "value": "136", "note": "Utility-scale"},
+                    {"label": "Solar Capacity", "value": "29,017 MW", "note": "Utility-scale"},
                     {"label": "Data Centres", "value": "42", "note": "NextDC, Equinix, AirTrunk, AWS, Google, Microsoft"},
                     {"label": "Coverage", "value": "NEM Only", "note": "All NEM regions (excludes WA / WEM)"},
                 ],
