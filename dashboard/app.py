@@ -28,8 +28,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 REFRESH_STATUS_DIR = PROJECT_ROOT / "runtime" / "refresh"
 LOG_DIR = PROJECT_ROOT / "logs"
-CH3_STATUS_PATH = PROJECT_ROOT / "runtime" / "ch3" / "last_run_status.json"
-CH3_LOG_PATH = PROJECT_ROOT / "logs" / "ch3_refresh_log.txt"
 
 REFRESH_REGISTRY = {
     "1.1::*": {
@@ -42,6 +40,18 @@ REFRESH_REGISTRY = {
             "outputs/figures/fig1_1_qld_renewable_share.html",
             "outputs/figures/fig1_2_qld_fuel_mix.html",
             "outputs/figures/fig1_3_qld_negative_prices.html",
+        ],
+    },
+    "1.2::*": {
+        "scope_label": "National Electricity Market grid analysis",
+        "button_label": "Update this analysis",
+        "command": ["bash", "scripts/run_nem_scrape.sh"],
+        "status_path": REFRESH_STATUS_DIR / "chapter_1_2_status.json",
+        "log_path": LOG_DIR / "chapter_1_2_refresh.log",
+        "expected_outputs": [
+            "outputs/figures/fig1_nem_realtime_mix.html",
+            "outputs/figures/fig2_annual_generation_by_fuel.html",
+            "outputs/figures/fig3_state_comparison.html",
         ],
     },
     "1.3::fig1_4": {
@@ -78,24 +88,6 @@ REFRESH_REGISTRY = {
             "data/raw/weather_price_correlation.csv",
             "outputs/figures/fig2_4_weather_correlation.html",
         ],
-    },
-    "3::*": {
-        "scope_label": "AI Data Center Power Demand",
-        "button_label": "Refresh market signals",
-        "command": ["python", "scripts/10_ch3_refresh_pipeline.py"],
-        "status_path": CH3_STATUS_PATH,
-        "log_path": CH3_LOG_PATH,
-        "expected_outputs": [
-            "runtime/ch3/latest_policy_news.json",
-            "runtime/ch3/last_run_status.json",
-            "logs/ch3_refresh_log.txt",
-        ],
-        "status_labels": {
-            "success": "Signals Ready",
-            "stale": "Signals Stale",
-            "missing": "Not Refreshed Yet",
-        },
-        "time_label": "Last refreshed:",
     },
 }
 
@@ -1054,34 +1046,33 @@ def run_registered_refresh(config: dict[str, Any]) -> tuple[bool, str]:
     )
     end_time = datetime.now().astimezone().isoformat()
 
-    if config["status_path"] != CH3_STATUS_PATH:
-        status_payload = {
-            "status": "success" if result.returncode == 0 else "failed",
-            "last_updated": end_time,
-            "scope_label": config["scope_label"],
-            "command": config["command"],
-            "expected_outputs": config["expected_outputs"],
-            "last_error": None if result.returncode == 0 else (result.stderr or result.stdout or "Refresh failed.").strip(),
-        }
-        write_refresh_status(config, status_payload)
-        write_refresh_log(
-            config,
-            [
-                f"scope: {config['scope_label']}",
-                f"start_time: {start_time}",
-                f"end_time: {end_time}",
-                f"command: {' '.join(config['command'])}",
-                f"status: {status_payload['status']}",
-                "expected_outputs:",
-                *(f"- {path}" for path in config["expected_outputs"]),
-                "",
-                "stdout:",
-                result.stdout.strip() or "(empty)",
-                "",
-                "stderr:",
-                result.stderr.strip() or "(empty)",
-            ],
-        )
+    status_payload = {
+        "status": "success" if result.returncode == 0 else "failed",
+        "last_updated": end_time,
+        "scope_label": config["scope_label"],
+        "command": config["command"],
+        "expected_outputs": config["expected_outputs"],
+        "last_error": None if result.returncode == 0 else (result.stderr or result.stdout or "Refresh failed.").strip(),
+    }
+    write_refresh_status(config, status_payload)
+    write_refresh_log(
+        config,
+        [
+            f"scope: {config['scope_label']}",
+            f"start_time: {start_time}",
+            f"end_time: {end_time}",
+            f"command: {' '.join(config['command'])}",
+            f"status: {status_payload['status']}",
+            "expected_outputs:",
+            *(f"- {path}" for path in config["expected_outputs"]),
+            "",
+            "stdout:",
+            result.stdout.strip() or "(empty)",
+            "",
+            "stderr:",
+            result.stderr.strip() or "(empty)",
+        ],
+    )
 
     if result.returncode == 0:
         return True, "Analysis updated."
