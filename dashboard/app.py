@@ -201,7 +201,7 @@ def render_html(html: str) -> None:
 
 
 def ch3_global_comparison_html(html: str) -> str:
-    """Apply the Chapter 3 Figure 02 display-only Plotly redesign."""
+    """Apply the Chapter 3 Figure 02 display-only two-chart redesign."""
     overlay_script = """
     <script>
     (function () {
@@ -215,7 +215,7 @@ def ch3_global_comparison_html(html: str) -> str:
             "Japan": "#eda100",
             "India": "#eda100",
             "Singapore": "#eda100",
-            "Australia": "#00c9a7"
+            "Australia": "#199e70"
         };
         const growthRates = {
             "United States": 12.8,
@@ -233,7 +233,7 @@ def ch3_global_comparison_html(html: str) -> str:
             ["North America", "#2a78d6"],
             ["Europe", "#1baf7a"],
             ["Asia-Pacific", "#eda100"],
-            ["Australia (APAC growth leader)", "#00c9a7"]
+            ["Australia — APAC growth leader", "#199e70"]
         ];
 
         function redesign() {
@@ -243,33 +243,44 @@ def ch3_global_comparison_html(html: str) -> str:
                 return;
             }
 
-            const barTrace = Object.assign({}, graph.data[0]);
-            const countries = barTrace.y || [];
-            const growthPoints = countries.map((country) => ({
+            const sourceTrace = graph.data[0] || {};
+            const countries = sourceTrace.y || [];
+            const capacities = sourceTrace.x || [];
+            const rows = countries.map((country, index) => ({
                 country: country,
-                growthRate: growthRates[country]
-            }));
-            barTrace.marker = Object.assign({}, barTrace.marker, {
-                color: countries.map((country) => regionColors[country] || "rgba(255,255,255,0.15)")
-            });
-            barTrace.showlegend = false;
+                capacity: Number(capacities[index]),
+                growth: growthRates[country],
+                color: regionColors[country] || "rgba(255,255,255,0.16)"
+            })).filter((row) => row.country && Number.isFinite(row.capacity));
+
+            rows.sort((a, b) => b.capacity - a.capacity);
+            const countryOrder = rows.map((row) => row.country);
+            const colors = rows.map((row) => row.color);
+
+            const capacityTrace = {
+                type: "bar",
+                orientation: "h",
+                name: "Installed Capacity (GW)",
+                x: rows.map((row) => row.capacity),
+                y: countryOrder,
+                marker: { color: colors, line: { color: "rgba(255,255,255,0.20)", width: 0.5 } },
+                hovertemplate: "<b>%{y}</b><br>Installed capacity: %{x:.1f} GW<extra></extra>",
+                showlegend: false,
+                xaxis: "x",
+                yaxis: "y"
+            };
 
             const growthTrace = {
-                type: "scatter",
-                mode: "markers",
-                x: growthPoints.map((point) => point.growthRate),
-                y: growthPoints.map((point) => point.country),
+                type: "bar",
+                orientation: "h",
+                name: "Annual Growth Rate (%/yr)",
+                x: rows.map((row) => row.growth),
+                y: countryOrder,
+                marker: { color: colors, line: { color: "rgba(255,255,255,0.20)", width: 0.5 } },
+                hovertemplate: "<b>%{y}</b><br>Annual growth rate: %{x:.1f}%/yr<extra></extra>",
+                showlegend: false,
                 xaxis: "x2",
-                yaxis: "y",
-                name: "Growth rate (%/yr)",
-                hovertemplate: "<b>%{y}</b><br>Growth rate: %{x:.1f}%/yr<extra></extra>",
-                marker: {
-                    symbol: "diamond",
-                    size: 9,
-                    color: countries.map((country) => country === "Australia" ? "#00c9a7" : "rgba(255,255,255,0.5)"),
-                    line: { color: "rgba(5,12,10,0.85)", width: 1 }
-                },
-                showlegend: false
+                yaxis: "y2"
             };
 
             const legendTraces = legendItems.map(([name, color]) => ({
@@ -278,50 +289,138 @@ def ch3_global_comparison_html(html: str) -> str:
                 x: [null],
                 y: [null],
                 name: name,
-                marker: { color: color, size: 10, symbol: "square" },
+                marker: { color: color, size: 9, symbol: "circle" },
                 hoverinfo: "skip",
                 showlegend: true
             }));
 
+            const axisText = { color: "#B8BDB9", size: 11 };
+            const tickText = { color: "#6B7570", size: 10 };
+            const gridColor = "rgba(255,255,255,0.05)";
             const layout = Object.assign({}, graph.layout, {
-                bargap: 0.5,
+                height: 860,
+                bargap: 0.42,
                 showlegend: true,
-                legend: Object.assign({}, graph.layout.legend, {
+                legend: {
                     orientation: "h",
                     x: 0,
-                    y: 1.18,
+                    y: 1.04,
                     xanchor: "left",
-                    yanchor: "bottom"
-                }),
-                xaxis2: {
-                    title: { text: "Growth rate (%/yr)", font: { color: "#B8BDB9", size: 12 } },
-                    overlaying: "x",
-                    side: "top",
-                    range: [5, 32],
-                    tickfont: { color: "#6B7570", size: 11 },
-                    gridcolor: "rgba(255,255,255,0.04)",
+                    yanchor: "bottom",
+                    font: { color: "#B8BDB9", size: 12 },
+                    itemwidth: 30
+                },
+                margin: { l: 125, r: 38, t: 82, b: 86 },
+                plot_bgcolor: "rgba(0,0,0,0)",
+                paper_bgcolor: "rgba(0,0,0,0)",
+                hoverlabel: {
+                    bgcolor: "#1e2433",
+                    bordercolor: "#00c9a7",
+                    font: { color: "#ffffff", size: 12 }
+                },
+                xaxis: {
+                    domain: [0, 1],
+                    anchor: "y",
+                    title: { text: "Installed Capacity (GW)", font: axisText },
+                    rangemode: "tozero",
+                    gridcolor: gridColor,
                     zeroline: false,
-                    showline: true,
-                    linecolor: "rgba(255,255,255,0.12)"
-                }
+                    showline: false,
+                    tickfont: tickText
+                },
+                yaxis: {
+                    domain: [0.66, 0.93],
+                    anchor: "x",
+                    categoryorder: "array",
+                    categoryarray: countryOrder,
+                    autorange: "reversed",
+                    ticks: "",
+                    showgrid: false,
+                    zeroline: false,
+                    showline: false,
+                    tickfont: tickText
+                },
+                xaxis2: {
+                    domain: [0, 1],
+                    anchor: "y2",
+                    title: { text: "Annual growth rate (%/yr)", font: axisText },
+                    range: [0, 28],
+                    gridcolor: gridColor,
+                    zeroline: false,
+                    showline: false,
+                    tickfont: tickText
+                },
+                yaxis2: {
+                    domain: [0.07, 0.47],
+                    anchor: "x2",
+                    categoryorder: "array",
+                    categoryarray: countryOrder,
+                    autorange: "reversed",
+                    ticks: "",
+                    showgrid: false,
+                    zeroline: false,
+                    showline: false,
+                    tickfont: tickText
+                },
+                shapes: [
+                    {
+                        type: "line",
+                        xref: "paper",
+                        yref: "paper",
+                        x0: 0,
+                        x1: 1,
+                        y0: 0.565,
+                        y1: 0.565,
+                        line: { color: "rgba(255,255,255,0.10)", width: 0.5 }
+                    },
+                    {
+                        type: "rect",
+                        xref: "paper",
+                        yref: "paper",
+                        x0: 0,
+                        x1: 1,
+                        y0: 0.55,
+                        y1: 0.61,
+                        fillcolor: "rgba(25,158,112,0.11)",
+                        line: { color: "rgba(25,158,112,0.42)", width: 0.5 },
+                        layer: "below"
+                    }
+                ],
+                annotations: [
+                    {
+                        xref: "paper",
+                        yref: "paper",
+                        x: 0,
+                        y: 0.965,
+                        text: "Installed Capacity (GW)",
+                        showarrow: false,
+                        xanchor: "left",
+                        font: { color: "#ffffff", size: 13 }
+                    },
+                    {
+                        xref: "paper",
+                        yref: "paper",
+                        x: 0.018,
+                        y: 0.58,
+                        text: "Australia: fastest growth in APAC at 25.1%/yr — same installed base as India (1.3 GW), but accelerating fastest",
+                        showarrow: false,
+                        xanchor: "left",
+                        font: { color: "#cfe9dd", size: 12 }
+                    },
+                    {
+                        xref: "paper",
+                        yref: "paper",
+                        x: 0,
+                        y: 0.505,
+                        text: "Annual Growth Rate (%/yr)",
+                        showarrow: false,
+                        xanchor: "left",
+                        font: { color: "#ffffff", size: 13 }
+                    }
+                ]
             });
 
-            if (layout.annotations && layout.annotations.length) {
-                layout.annotations = layout.annotations.map((annotation) => (
-                    annotation.y === "Australia"
-                        ? Object.assign({}, annotation, {
-                            x: growthRates["Australia"],
-                            xref: "x2",
-                            y: "Australia",
-                            yref: "y",
-                            arrowcolor: "#00c9a7",
-                            font: Object.assign({}, annotation.font, { color: "#00c9a7" })
-                        })
-                        : annotation
-                ));
-            }
-
-            Plotly.react(graph, [barTrace, growthTrace].concat(legendTraces), layout, {
+            Plotly.react(graph, [capacityTrace, growthTrace].concat(legendTraces), layout, {
                 displayModeBar: false,
                 responsive: true
             });
