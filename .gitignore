@@ -40,4 +40,5 @@ outputs/figures/**/*.png
 
 dashboard_export*.html
 
-nemosis_cache
+nemosis_cachelogs/
+runtime/
