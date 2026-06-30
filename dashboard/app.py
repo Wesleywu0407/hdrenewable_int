@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from html import escape
 import json
+import sys
 from pathlib import Path
 import re
 import subprocess
@@ -428,8 +429,8 @@ def ch3_global_comparison_html(html: str) -> str:
 
         redesign();
     }());
-    </script>
-    """
+    </XXX>
+    """.replace("XXX", "script")
     return html.replace("</body>", f"{overlay_script}</body>") if "</body>" in html else f"{html}{overlay_script}"
 
 
@@ -557,8 +558,8 @@ def ch3_renewable_gap_html(html: str) -> str:
 
         redesign();
     }());
-    </script>
-    """
+    </XXX>
+    """.replace("XXX", "script")
     return html.replace("</body>", f"{overlay_script}</body>") if "</body>" in html else f"{html}{overlay_script}"
 
 
@@ -1223,7 +1224,7 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
 
     with button_col:
         st.markdown('<div class="refresh-primary-action">', unsafe_allow_html=True)
-        if st.button(config["button_label"], use_container_width=False):
+        if "pyodide" not in sys.modules and st.button(config["button_label"], use_container_width=False):
             with st.spinner(f"Updating {config['scope_label']}..."):
                 ok, message = run_registered_refresh(config)
             if ok:
@@ -1236,8 +1237,9 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
 
     with log_col:
         st.markdown('<div class="refresh-secondary-action">', unsafe_allow_html=True)
-        with st.popover("Run details", use_container_width=False):
-            render_run_details(config, status)
+        if "pyodide" not in sys.modules:
+            with st.popover("Run details", use_container_width=False):
+                render_run_details(config, status)
         st.markdown("</div>", unsafe_allow_html=True)
 
 

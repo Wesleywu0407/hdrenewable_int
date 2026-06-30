@@ -8,6 +8,7 @@ from dashboard.config import CHAPTERS
 
 directory = "."
 app_files = [
+    "dashboard/app.py",
     "dashboard/config.py",
     "dashboard/styles.py"
 ]
