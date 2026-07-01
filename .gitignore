@@ -7,6 +7,10 @@ data/raw/*
 !data/raw/master_WA_SWIS_open_electricity.csv
 !data/raw/plant_data.csv
 !plant_data.csv
+!data/raw/rez_*.geojson
+!data/raw/aemo_res_all.geojson
+!data/raw/transmission_lines.geojson
+
 
 # IDE / Editors
 .vscode/

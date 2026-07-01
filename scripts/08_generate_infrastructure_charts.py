@@ -9,6 +9,7 @@ Run: python scripts/08_generate_infrastructure_charts.py
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -31,7 +32,8 @@ DC_COLOR_BORDER = "#ffffff"     # white ring makes DCs pop over BESS markers
 
 SOURCE_FOOTER = (
     "Source: OpenElectricity API · treasury.qld.gov.au · Wikipedia (energy storage projects) · "
-    "Baxtel · Datacentermap.com · Curated public project records"
+    "Baxtel · Datacentermap.com · Curated public project records · "
+    "AEMO 2024 ISP · VicGrid · State Growth TAS · EnergyCo NSW"
 )
 
 # --------------------------------------------------------------------------- #
@@ -86,9 +88,17 @@ def save_png(fig: go.Figure, name: str, width: int = 1400, height: int = 900) ->
 # Chart builder
 # --------------------------------------------------------------------------- #
 
-def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_df: pd.DataFrame = None) -> go.Figure:
-    """Build a combined Plotly Scattermapbox chart of BESS, Solar + Datacentres."""
+def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_df: pd.DataFrame = None, show_rez: bool = True, show_transmission: bool = True) -> go.Figure:
+    """Build a combined Plotly Scattermapbox chart of BESS, Solar + Datacentres.
 
+    Parameters
+    ----------
+    bess_df:   Battery storage site DataFrame
+    dc_df:     Data centre DataFrame
+    solar_df:  Solar farm DataFrame (optional)
+    show_rez:  If True, load and render Renewable Energy Zone polygon overlays
+               from data/raw/rez_*.geojson files.
+    """
     fig = go.Figure()
     
     # Always add an empty trace to guarantee the mapbox tiles render when dataframes are empty
@@ -323,18 +333,159 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             )
             print(f"  [map] added {len(dc_valid)} Datacentre markers")
 
+    # -- Renewable Energy Zone polygon overlays ---------------------------------
+    rez_layers = []
+    if show_rez:
+        rez_colors = {
+            "VIC": "#1e88e5",   # blue
+            "TAS": "#43a047",   # green
+            "NSW": "#fb8c00",   # orange
+            "QLD": "#8e24aa",   # purple
+            "SA": "#e53935",    # red
+        }
+        
+        # Load AEMO combined GeoJSON if present (to extract QLD and SA)
+        aemo_features = []
+        aemo_path = RAW_DIR / "aemo_res_all.geojson"
+        if aemo_path.exists():
+            try:
+                with open(aemo_path, "r", encoding="utf-8") as f:
+                    aemo_geojson = json.load(f)
+                    aemo_features = aemo_geojson.get("features", [])
+            except Exception as e:
+                print(f"  [map/REZ] Failed to load {aemo_path.name}: {e}")
+
+        for state in ["VIC", "TAS", "NSW", "QLD", "SA"]:
+            geojson = {"type": "FeatureCollection", "features": []}
+            
+            # For VIC, TAS, NSW, prefer the state-specific files
+            state_file = RAW_DIR / f"rez_{state.lower()}.geojson"
+            if state_file.exists():
+                try:
+                    with open(state_file, "r", encoding="utf-8") as f:
+                        geojson = json.load(f)
+                except Exception as exc:
+                    print(f"  [map/REZ] Failed to load {state_file.name}: {exc}")
+            elif aemo_features:
+                # If no state-specific file, fall back to extracting from AEMO data
+                state_features = []
+                for feat in aemo_features:
+                    props = feat.get("properties", {})
+                    name = str(props.get("Name") or props.get("name") or "")
+                    
+                    if state == "QLD" and name.startswith("Q"):
+                        state_features.append(feat)
+                    elif state == "SA" and name.startswith("S"):
+                        # Exclude offshore zones
+                        if "coast" not in name.lower() and "ocean" not in name.lower():
+                            state_features.append(feat)
+                
+                geojson["features"] = state_features
+
+            n_features = len(geojson.get("features", []))
+            if n_features == 0:
+                print(f"  [map/REZ] No data found for {state} - skipping.")
+                continue
+
+            color = rez_colors.get(state, "#888888")
+            # Add as mapbox layers (fill + line outline) — no legend entry needed
+            rez_layers.append(dict(
+                sourcetype="geojson",
+                source=geojson,
+                type="fill",
+                color=color,
+                opacity=0.18,
+            ))
+            rez_layers.append(dict(
+                sourcetype="geojson",
+                source=geojson,
+                type="line",
+                color=color,
+                opacity=0.65,
+                line=dict(width=2),
+            ))
+            print(f"  [map/REZ] added {n_features} {state} REZ polygons.")
+
+    # -- Transmission Lines ---------------------------------------------------
+    transmission_layers = []
+    if show_transmission:
+        tx_path = RAW_DIR / "transmission_lines.geojson"
+        if tx_path.exists():
+            try:
+                with open(tx_path, "r", encoding="utf-8") as f:
+                    tx_data = json.load(f)
+                    
+                tx_features_by_voltage = {
+                    500: [],
+                    400: [],
+                    330: [],
+                    275: [],
+                    220: [],
+                    132: []
+                }
+                
+                for feat in tx_data.get("features", []):
+                    kv = feat.get("properties", {}).get("capacitykv")
+                    if kv is None:
+                        kv = 132
+                    
+                    if kv >= 500:
+                        tx_features_by_voltage[500].append(feat)
+                    elif kv >= 400:
+                        tx_features_by_voltage[400].append(feat)
+                    elif kv >= 330:
+                        tx_features_by_voltage[330].append(feat)
+                    elif kv >= 275:
+                        tx_features_by_voltage[275].append(feat)
+                    elif kv >= 220:
+                        tx_features_by_voltage[220].append(feat)
+                    else:
+                        tx_features_by_voltage[132].append(feat)
+                        
+                # Define styles
+                tx_styles = {
+                    500: {"color": "#d32f2f", "width": 3.0, "opacity": 0.8}, # Thick Red
+                    400: {"color": "#f57c00", "width": 2.0, "opacity": 0.7}, # Orange
+                    330: {"color": "#ff9800", "width": 1.5, "opacity": 0.7}, # Lighter Orange
+                    275: {"color": "#fbc02d", "width": 1.0, "opacity": 0.6}, # Yellow
+                    220: {"color": "#ffeb3b", "width": 0.8, "opacity": 0.6}, # Light Yellow
+                    132: {"color": "#fff59d", "width": 0.5, "opacity": 0.4}, # Very Light Yellow, very thin
+                }
+                
+                for kv, features in tx_features_by_voltage.items():
+                    if not features:
+                        continue
+                    style = tx_styles[kv]
+                    layer_geojson = {"type": "FeatureCollection", "features": features}
+                    transmission_layers.append(dict(
+                        sourcetype="geojson",
+                        source=layer_geojson,
+                        type="line",
+                        color=style["color"],
+                        opacity=style["opacity"],
+                        line=dict(width=style["width"]),
+                    ))
+                print(f"  [map] added {sum(len(f) for f in tx_features_by_voltage.values())} transmission lines.")
+            except Exception as e:
+                print(f"  [map/TX] Failed to load {tx_path.name}: {e}")
+
     # -- Layout -------------------------------------------------------------
     total_bess_mw = bess_df["capacity_mw"].sum() if not bess_df.empty else 0
     total_solar_mw = solar_df["capacity_mw"].sum() if not solar_df.empty else 0
 
+    mapbox_config = dict(
+        style="carto-darkmatter",
+        center=dict(lat=-25.27, lon=133.77),
+        zoom=3.5,
+    )
+    all_layers = rez_layers + transmission_layers
+    if all_layers:
+        mapbox_config["layers"] = all_layers
+
     fig.update_layout(
         # scattermapbox requires the `mapbox` key (not `map`)
         # and works reliably with the CDN-hosted plotly.js bundle.
-        mapbox=dict(
-            style="open-street-map",
-            center=dict(lat=-25.27, lon=133.77),
-            zoom=3.5,
-        ),
+        mapbox=mapbox_config,
         title=dict(
             text="<b>NEM Energy Infrastructure Map</b><br>"
                  "<sup>Battery Energy Storage Systems (BESS) · Solar Farms · Major Data Centres</sup>",

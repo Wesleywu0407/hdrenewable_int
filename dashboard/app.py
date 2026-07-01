@@ -1730,10 +1730,24 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             
             states = ["NSW", "QLD", "VIC", "SA", "TAS"]
             
-            col1, col2 = st.columns([0.88, 0.12], vertical_alignment="bottom")
+            col1, col2, col3, col4 = st.columns([0.62, 0.13, 0.13, 0.12], vertical_alignment="bottom")
             with col1:
                 st.markdown('<div style="font-size: 16px; font-weight: 500; color: #00D9A3; margin-top: 16px; margin-bottom: 8px;">Select States to Filter Metrics</div>', unsafe_allow_html=True)
             with col2:
+                if "show_rez" not in st.session_state:
+                    st.session_state.show_rez = True
+                rez_label = "REZ: On" if st.session_state.show_rez else "REZ: Off"
+                if st.button(rez_label, key="show_rez_toggle", width="stretch"):
+                    st.session_state.show_rez = not st.session_state.show_rez
+                show_rez = st.session_state.show_rez
+            with col3:
+                if "show_tx" not in st.session_state:
+                    st.session_state.show_tx = True
+                tx_label = "Grid: On" if st.session_state.show_tx else "Grid: Off"
+                if st.button(tx_label, key="show_tx_toggle", width="stretch"):
+                    st.session_state.show_tx = not st.session_state.show_tx
+                show_transmission = st.session_state.show_tx
+            with col4:
                 if st.button("Clear", key="clear_states", width="stretch"):
                     st.session_state.state_filter = []
                     
@@ -1751,7 +1765,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
                 dc_df = dc_df.iloc[0:0]
                 
             # 1. Build the dynamic map using the filtered dataframes
-            fig = infrastructure_charts.build_infrastructure_map(bess_df, dc_df, solar_df)
+            fig = infrastructure_charts.build_infrastructure_map(bess_df, dc_df, solar_df, show_rez=show_rez, show_transmission=show_transmission)
             
             # 2. Adjust height to match the dashboard's design
             fig.update_layout(height=figure.get("height", 750), margin=dict(l=0, r=0, t=60, b=0))

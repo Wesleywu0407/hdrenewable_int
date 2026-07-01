@@ -194,13 +194,14 @@ CHAPTERS = [
                 "subtitle": "Battery Energy Storage Systems, Solar Farms & Major Data Centre Locations",
                 "html_path": "outputs/figures/fig1_4_infrastructure_map.html",
                 "png_path": "outputs/figures/png/fig1_4_infrastructure_map.png",
-                "source": "OpenElectricity API · Wikipedia · treasury.qld.gov.au · nextdc.com · airtrunk.com · Equinix/OSM",
+                "source": "OpenElectricity API · Wikipedia · treasury.qld.gov.au · AEMO 2024 ISP · VicGrid · EnergyCo NSW · Geoscience Australia",
                 "metrics": [
                     {"label": "BESS Sites", "value": "91", "note": "NEM states only"},
                     {"label": "BESS Capacity", "value": "67,336 MW", "note": "Existing & Proposed"},
                     {"label": "Solar Farms", "value": "136", "note": "Utility-scale"},
                     {"label": "Solar Capacity", "value": "29,017 MW", "note": "Utility-scale"},
                     {"label": "Data Centres", "value": "42", "note": "NextDC, Equinix, AirTrunk, AWS, Google, Microsoft"},
+                    {"label": "Renewable Energy Zones", "value": "31", "note": "Across 5 NEM states"},
                     {"label": "Coverage", "value": "NEM Only", "note": "All NEM regions (excludes WA / WEM)"},
                 ],
                 "takeaway": (
@@ -211,11 +212,12 @@ CHAPTERS = [
                 ),
                 "description": (
                     "This interactive map overlays the locations of Existing/Proposed Battery Energy Storage Systems (BESS), "
-                    "Existing Solar Panels, and major Data Centres across the NEM (National Electricity Market). BESS and solar markers are sized proportionally to "
-                    "registered capacity (MW), revealing the scale hierarchy from large grid-scale "
+                    "Existing Solar Panels, Renewable Energy Zones (REZs), and major Data Centres across the NEM (National Electricity Market). "
+                    "BESS and solar markers are sized proportionally to registered capacity (MW), revealing the scale hierarchy from large grid-scale "
                     "installations like Hornsdale and Victorian Big Battery down to smaller utility projects. "
                     "Data centre markers identify major hyperscaler and colocation operators "
-                    "(NextDC, Equinix, AirTrunk, AWS, Microsoft, Google).\n\n"
+                    "(NextDC, Equinix, AirTrunk, AWS, Microsoft, Google). REZ polygons outline the optimal geographic regions identified "
+                    "for future renewable generation and transmission infrastructure.\n\n"
                     "**BESS & Solar data sources:**\n"
                     "• OpenElectricity API (openelectricity.org.au) - live registered battery and solar units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
                     "• treasury.qld.gov.au - official Queensland government plant data\n"
@@ -226,6 +228,13 @@ CHAPTERS = [
                     "• airtrunk.com - facility pages scraped for SYD1, SYD2, SYD3, MEL1, MEL2\n"
                     "• Equinix - 12 Australian sites (SY1-SY6, ME1-ME3, BR1, AD1, CA1) geocoded via Nominatim/OSM using publicly listed suburb locations\n"
                     "• Cloud provider regions (AWS, Google Cloud, Microsoft Azure, Oracle Cloud) geocoded via Nominatim/OSM\n\n"
+                    "**Renewable Energy Zone (REZ) sources:**\n"
+                    "• AEMO 2024 Integrated System Plan (ISP) - Indicative onshore REZ boundaries for Queensland (9) and South Australia (9)\n"
+                    "• EnergyCo NSW - Declared REZ boundaries for New South Wales (5)\n"
+                    "• VicGrid - Declared REZ boundaries for Victoria (5)\n"
+                    "• Department of State Growth TAS - REZ boundaries for Tasmania (3)\n\n"
+                    "**Transmission Line sources:**\n"
+                    "• Geoscience Australia - National Electricity Infrastructure dataset (Electricity Transmission Lines >= 220kV)\n\n"
                     "Data is based off scripts/07_fetch_infrastructure_data.py and charted by scripts/08_generate_infrastructure_charts.py."
                 ),
             },

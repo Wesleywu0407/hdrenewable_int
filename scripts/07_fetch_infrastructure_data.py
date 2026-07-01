@@ -1111,6 +1111,433 @@ def fetch_macquarie() -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
+# BESS: Geoscience Australia REST API
+# --------------------------------------------------------------------------- #
+
+def fetch_ga_batteries() -> pd.DataFrame:
+    """Fetch battery storage facilities from Geoscience Australia REST API.
+
+    Endpoint: http://services.ga.gov.au/gis/rest/services/BatteryStorageFacilities/MapServer/0/query
+    Returns a DataFrame with columns [name, state, capacity_mw, status, lat, lon, source].
+    """
+    url = (
+        "http://services.ga.gov.au/gis/rest/services/BatteryStorageFacilities"
+        "/MapServer/0/query?where=1%3D1&outFields=*&f=json"
+    )
+    print(f"  [BESS/GA] GET {url}")
+    try:
+        resp = SESSION.get(url, timeout=20)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        print(f"  [BESS/GA] request failed: {exc}")
+        return pd.DataFrame()
+
+    features = data.get("features", [])
+    if not features:
+        print("  [BESS/GA] no features returned.")
+        return pd.DataFrame()
+
+    rows: list[dict] = []
+    for feature in features:
+        attrs = feature.get("attributes", {})
+        geom = feature.get("geometry", {})
+
+        # Geometry uses x=longitude, y=latitude in WGS84
+        lon = geom.get("x") or geom.get("X")
+        lat = geom.get("y") or geom.get("Y")
+        if lon is None or lat is None:
+            continue
+        try:
+            lat, lon = float(lat), float(lon)
+        except (TypeError, ValueError):
+            continue
+
+        # Australia bounding box sanity check
+        if not (-44 < lat < -10 and 112 < lon < 154):
+            continue
+
+        # Extract name - try multiple field name variants
+        name = (
+            attrs.get("Name")
+            or attrs.get("NAME")
+            or attrs.get("FACILITY_NAME")
+            or attrs.get("facility_name")
+            or attrs.get("SITE_NAME")
+            or attrs.get("site_name")
+            or ""
+        )
+        if not name:
+            name = f"GA Battery {lat:.3f},{lon:.3f}"
+
+        # Capacity - look for MW field variants
+        cap_raw = (
+            attrs.get("CAPACITY_MW")
+            or attrs.get("capacity_mw")
+            or attrs.get("MW")
+            or attrs.get("mw")
+            or attrs.get("Power_MW")
+        )
+        try:
+            capacity_mw = float(cap_raw) if cap_raw is not None else None
+        except (TypeError, ValueError):
+            capacity_mw = None
+
+        # Status
+        status_raw = (
+            attrs.get("Status")
+            or attrs.get("STATUS")
+            or attrs.get("OPERATIONAL_STATUS")
+            or "Unknown"
+        )
+        status = str(status_raw).strip()
+
+        # State - infer from coords or field
+        state_raw = attrs.get("State") or attrs.get("STATE") or attrs.get("state") or ""
+        state = str(state_raw).strip().upper() if state_raw else _infer_state_from_coords(lat, lon)
+
+        rows.append({
+            "name": str(name).strip(),
+            "state": state,
+            "capacity_mw": capacity_mw,
+            "status": status,
+            "lat": lat,
+            "lon": lon,
+            "source": "Geoscience Australia REST API",
+        })
+
+    df = pd.DataFrame(rows)
+    print(f"  [BESS/GA] {len(df)} battery facilities from GA API.")
+    return df
+
+
+def _infer_state_from_coords(lat: float, lon: float) -> str:
+    """Infer approximate Australian state from lat/lon bounding boxes."""
+    if lat < -43.5:  # Tasmania approx
+        return "TAS"
+    if lon > 150.5 and lat < -28:  # NSW coast approximation
+        return "NSW"
+    if lat > -28 and lon > 138:
+        return "QLD"
+    if lon < 138:
+        return "SA"
+    if -39 < lat < -34 and 140 < lon < 150:
+        return "VIC"
+    return ""
+
+
+# --------------------------------------------------------------------------- #
+# BESS: RenewEconomy Big Battery Map scraping
+# --------------------------------------------------------------------------- #
+
+def fetch_reneweconomy_batteries() -> pd.DataFrame:
+    """Scrape the RenewEconomy Big Battery Map page for BESS data.
+
+    RenewEconomy embeds battery data in WordPress page source via JS variables
+    or JSON blobs. We attempt multiple extraction strategies and fall back
+    gracefully if the page structure changes.
+    Returns a DataFrame with columns [name, state, capacity_mw, status, lat, lon, source].
+    """
+    import json
+    url = "https://reneweconomy.com.au/big-battery-storage-map/"
+    print(f"  [BESS/RE] GET {url}")
+    try:
+        resp = SESSION.get(url, timeout=25)
+        resp.raise_for_status()
+    except Exception as exc:
+        print(f"  [BESS/RE] request failed: {exc}")
+        return pd.DataFrame()
+
+    soup = BeautifulSoup(resp.text, "lxml")
+    rows: list[dict] = []
+
+    # Strategy 1: Look for JSON blobs embedded in <script> tags
+    # RenewEconomy WordPress maps often embed data as a JS variable like:
+    # var mapData = {...}; or window.mapData = [...];
+    json_patterns = [
+        r'var\s+\w*[Dd]ata\s*=\s*(\[\{.+?\}\])',
+        r'var\s+\w*[Mm]ap\w*\s*=\s*(\[\{.+?\}\])',
+        r'window\.\w+\s*=\s*(\[\{.+?\}\])',
+        r'"batteries"\s*:\s*(\[.+?\])',
+        r'"locations"\s*:\s*(\[.+?\])',
+        r'"markers"\s*:\s*(\[.+?\])',
+        r'"features"\s*:\s*(\[.+?\])',
+    ]
+
+    page_text = resp.text
+    for pattern in json_patterns:
+        matches = re.findall(pattern, page_text, re.DOTALL | re.IGNORECASE)
+        for match in matches:
+            # Trim to a reasonable length to avoid huge captures
+            if len(match) > 500_000:
+                match = match[:500_000]
+            try:
+                items = json.loads(match)
+                if not isinstance(items, list) or not items:
+                    continue
+                # Check if items look like battery/location data
+                sample = items[0] if items else {}
+                has_lat = any(k in sample for k in ["lat", "latitude", "Lat", "Latitude"])
+                has_name = any(k in sample for k in ["name", "Name", "title", "Title"])
+                if not (has_lat and has_name):
+                    continue
+                print(f"  [BESS/RE] Found embedded JSON with {len(items)} items via pattern.")
+                for item in items:
+                    name = (
+                        item.get("name") or item.get("Name") or
+                        item.get("title") or item.get("Title") or ""
+                    )
+                    lat_raw = item.get("lat") or item.get("latitude") or item.get("Lat")
+                    lon_raw = item.get("lng") or item.get("lon") or item.get("longitude") or item.get("Lng")
+                    try:
+                        lat = float(lat_raw)
+                        lon = float(lon_raw)
+                    except (TypeError, ValueError):
+                        continue
+                    if not (-44 < lat < -10 and 112 < lon < 154):
+                        continue
+                    cap_raw = item.get("capacity") or item.get("mw") or item.get("power_mw")
+                    try:
+                        capacity_mw = float(re.sub(r"[^\d.]", "", str(cap_raw))) if cap_raw else None
+                    except (TypeError, ValueError):
+                        capacity_mw = None
+                    status = str(item.get("status") or item.get("Status") or "Unknown").strip()
+                    state_raw = item.get("state") or item.get("State") or ""
+                    state = _infer_state(str(state_raw)) or _infer_state_from_coords(lat, lon)
+                    rows.append({
+                        "name": str(name).strip(),
+                        "state": state,
+                        "capacity_mw": capacity_mw,
+                        "status": status,
+                        "lat": lat,
+                        "lon": lon,
+                        "source": "RenewEconomy Big Battery Map",
+                    })
+                if rows:  # stop if we found data
+                    break
+            except (json.JSONDecodeError, TypeError):
+                continue
+        if rows:
+            break
+
+    # Strategy 2: Look for GeoJSON embedded in page (FeatureCollection format)
+    if not rows:
+        geojson_matches = re.findall(
+            r'\{\s*["\']type["\']\s*:\s*["\']FeatureCollection["\'].+?\}\s*(?=;|\s*<)',
+            page_text, re.DOTALL
+        )
+        for match in geojson_matches:
+            try:
+                gj = json.loads(match)
+                features = gj.get("features", [])
+                for feat in features:
+                    props = feat.get("properties", {})
+                    geom = feat.get("geometry", {})
+                    if geom.get("type") == "Point":
+                        lon, lat = geom["coordinates"][0], geom["coordinates"][1]
+                    else:
+                        continue
+                    if not (-44 < lat < -10 and 112 < lon < 154):
+                        continue
+                    name = props.get("name") or props.get("Name") or props.get("title") or ""
+                    cap_raw = props.get("capacity") or props.get("mw")
+                    try:
+                        capacity_mw = float(re.sub(r"[^\d.]", "", str(cap_raw))) if cap_raw else None
+                    except (TypeError, ValueError):
+                        capacity_mw = None
+                    status = str(props.get("status") or "Unknown").strip()
+                    state = _infer_state(str(props.get("state") or "")) or _infer_state_from_coords(lat, lon)
+                    rows.append({
+                        "name": str(name).strip(),
+                        "state": state,
+                        "capacity_mw": capacity_mw,
+                        "status": status,
+                        "lat": float(lat),
+                        "lon": float(lon),
+                        "source": "RenewEconomy Big Battery Map",
+                    })
+            except (json.JSONDecodeError, TypeError, KeyError, IndexError):
+                continue
+
+    df = pd.DataFrame(rows)
+    print(f"  [BESS/RE] {len(df)} battery facilities from RenewEconomy.")
+    return df
+
+
+# --------------------------------------------------------------------------- #
+# BESS: Clean Energy Council Project Tracker scraping
+# --------------------------------------------------------------------------- #
+
+def fetch_clean_energy_council() -> pd.DataFrame:
+    """Scrape BESS projects from the Clean Energy Council website.
+
+    The CEC's publicly accessible website contains project information.
+    We attempt to scrape their large-scale project pages for BESS entries.
+    Returns a DataFrame with columns [name, state, capacity_mw, status, lat, lon, source].
+    """
+    import json
+    rows: list[dict] = []
+
+    # Try known CEC project tracker URL patterns
+    candidate_urls = [
+        "https://www.cleanenergycouncil.org.au/resources/project-tracker",
+        "https://www.cleanenergycouncil.org.au/industry-resources/project-tracker",
+        "https://www.cleanenergycouncil.org.au/resources/resources-for-business/project-tracker",
+    ]
+
+    resp = None
+    for url in candidate_urls:
+        print(f"  [BESS/CEC] trying {url}")
+        try:
+            r = SESSION.get(url, timeout=20)
+            if r.status_code == 200 and len(r.text) > 1000:
+                resp = r
+                print(f"  [BESS/CEC] success: {url}")
+                break
+        except Exception as exc:
+            print(f"  [BESS/CEC] {url} failed: {exc}")
+            continue
+
+    if resp is None:
+        print("  [BESS/CEC] All CEC URLs unreachable - skipping.")
+        return pd.DataFrame()
+
+    soup = BeautifulSoup(resp.text, "lxml")
+    page_text = resp.text
+
+    # Strategy 1: Look for JSON API responses embedded in page (REST endpoint calls)
+    json_api_patterns = [
+        r'"projects"\s*:\s*(\[\{.+?\}\])',
+        r'"data"\s*:\s*(\[\{.+?\}\])',
+        r'var\s+\w*[Pp]roject\w*\s*=\s*(\[\{.+?\}\])',
+    ]
+    for pattern in json_api_patterns:
+        matches = re.findall(pattern, page_text, re.DOTALL)
+        for match in matches:
+            try:
+                items = json.loads(match)
+                if not isinstance(items, list):
+                    continue
+                battery_items = [
+                    i for i in items
+                    if isinstance(i, dict) and any(
+                        "battery" in str(v).lower() or "storage" in str(v).lower() or "bess" in str(v).lower()
+                        for v in i.values()
+                    )
+                ]
+                if not battery_items:
+                    continue
+                print(f"  [BESS/CEC] Found {len(battery_items)} battery projects in embedded JSON.")
+                for item in battery_items:
+                    name = item.get("name") or item.get("project_name") or item.get("title") or ""
+                    if not name:
+                        continue
+                    state_raw = item.get("state") or item.get("region") or ""
+                    state = _infer_state(str(state_raw))
+                    cap_raw = item.get("capacity") or item.get("capacity_mw") or item.get("mw")
+                    try:
+                        capacity_mw = float(re.sub(r"[^\d.]", "", str(cap_raw))) if cap_raw else None
+                    except (TypeError, ValueError):
+                        capacity_mw = None
+                    status = str(item.get("status") or "Unknown").strip()
+                    lat_raw = item.get("lat") or item.get("latitude")
+                    lon_raw = item.get("lng") or item.get("lon") or item.get("longitude")
+                    try:
+                        lat = float(lat_raw) if lat_raw is not None else None
+                        lon = float(lon_raw) if lon_raw is not None else None
+                    except (TypeError, ValueError):
+                        lat, lon = None, None
+                    rows.append({
+                        "name": str(name).strip(),
+                        "state": state,
+                        "capacity_mw": capacity_mw,
+                        "status": status,
+                        "lat": lat,
+                        "lon": lon,
+                        "source": "Clean Energy Council Project Tracker",
+                    })
+                if rows:
+                    break
+            except (json.JSONDecodeError, TypeError):
+                continue
+        if rows:
+            break
+
+    # Strategy 2: Parse HTML table rows for battery-related entries
+    if not rows:
+        tables = soup.find_all("table")
+        for tbl in tables:
+            headers = [th.get_text(strip=True).lower() for th in tbl.find_all("th")]
+            # Look for project-like tables with name/state/capacity columns
+            has_project = any("name" in h or "project" in h for h in headers)
+            has_capacity = any("mw" in h or "capacity" in h for h in headers)
+            if not (has_project or has_capacity):
+                continue
+            for tr in tbl.find_all("tr")[1:]:
+                cells = [td.get_text(strip=True) for td in tr.find_all(["td", "th"])]
+                if not cells or len(cells) < 2:
+                    continue
+                row_text = " ".join(cells).lower()
+                if not ("battery" in row_text or "storage" in row_text or "bess" in row_text):
+                    continue
+                name = cells[0] if cells else ""
+                state = ""
+                capacity_mw = None
+                for cell in cells:
+                    st = _infer_state(cell)
+                    if st:
+                        state = st
+                        break
+                for cell in cells:
+                    m = re.search(r"(\d{1,5}\.?\d*)\s*(?:mw|MW)", cell)
+                    if m:
+                        try:
+                            capacity_mw = float(m.group(1))
+                        except ValueError:
+                            pass
+                        break
+                rows.append({
+                    "name": name.strip(),
+                    "state": state,
+                    "capacity_mw": capacity_mw,
+                    "status": "Unknown",
+                    "lat": None,
+                    "lon": None,
+                    "source": "Clean Energy Council Project Tracker",
+                })
+
+    # Strategy 3: Look for battery mentions in paragraph text with structured data
+    if not rows:
+        print("  [BESS/CEC] No structured data found - trying text extraction...")
+        paragraphs = soup.find_all(["p", "li"])
+        for p in paragraphs:
+            text = p.get_text(strip=True)
+            if not ("battery" in text.lower() or "BESS" in text or "storage" in text.lower()):
+                continue
+            # Look for capacity pattern
+            m_cap = re.search(r"(\d{1,4})\s*(?:MW|MWh)", text)
+            if not m_cap:
+                continue
+            name_match = re.match(r"^([A-Z][^.]{5,80}?)(?:\s+battery|\s+BESS|\s+storage)", text, re.I)
+            if name_match:
+                state = _infer_state(text)
+                capacity_mw = float(m_cap.group(1)) if m_cap else None
+                rows.append({
+                    "name": name_match.group(1).strip(),
+                    "state": state,
+                    "capacity_mw": capacity_mw,
+                    "status": "Unknown",
+                    "lat": None,
+                    "lon": None,
+                    "source": "Clean Energy Council (text extraction)",
+                })
+
+    df = pd.DataFrame(rows)
+    print(f"  [BESS/CEC] {len(df)} BESS projects from CEC.")
+    return df
+
+
+# --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
 
@@ -1131,9 +1558,13 @@ def main() -> int:
     oe_df = fetch_bess_openelectricity()
     wiki_df = fetch_bess_wikipedia()
     osm_bess = fetch_osm_infrastructure("battery")
+    ga_df = fetch_ga_batteries()
+    re_df = fetch_reneweconomy_batteries()
+    cec_df = fetch_clean_energy_council()
     
     # Pass wiki first so coordinates are favored, then others
-    bess_df = merge_bess([wiki_df, oe_df, aemo_bess, osm_bess])
+    # GA, RenewEconomy, CEC appended after dedup
+    bess_df = merge_bess([wiki_df, oe_df, aemo_bess, osm_bess, ga_df, re_df, cec_df])
 
     if not official_bess.empty:
         bess_df = pd.concat([official_bess, bess_df], ignore_index=True)
