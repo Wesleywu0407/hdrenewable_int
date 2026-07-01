@@ -7,11 +7,29 @@ sys.path.insert(0, os.path.abspath("."))
 from dashboard.config import CHAPTERS
 
 directory = "."
+import glob
+
 app_files = [
     "dashboard/app.py",
     "dashboard/config.py",
     "dashboard/styles.py"
 ]
+
+for f in glob.glob("scripts/*"):
+    if os.path.isfile(f):
+        app_files.append(f)
+
+for f in glob.glob("data/raw/*"):
+    if os.path.isfile(f):
+        app_files.append(f)
+
+for f in glob.glob("runtime/refresh/*"):
+    if os.path.isfile(f):
+        app_files.append(f)
+
+for f in glob.glob("logs/*"):
+    if os.path.isfile(f):
+        app_files.append(f)
 
 for chapter in CHAPTERS:
     for figure in chapter.get("figures", []):
@@ -33,7 +51,7 @@ settings = {
     "|STLITE_CSS|": top_css,
     "|STLITE_JS|": top_js,
     "|PYODIDE_VERSION|": top_pyo,
-    "CONFIG": "missing.toml"
+    "CONFIG": ".streamlit/config.toml"
 }
 
 print(f"Bundling {len(app_files)} files into single HTML...")
