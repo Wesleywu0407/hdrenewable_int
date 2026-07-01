@@ -56,7 +56,7 @@ def _status_label(status: str | None) -> str:
     return str(status).strip().title()
 
 
-def _capacity_to_size(cap: pd.Series, min_px: float = 4, max_px: float = 20) -> pd.Series:
+def _capacity_to_size(cap: pd.Series, min_px: float = 3, max_px: float = 14) -> pd.Series:
     """Scale MW capacity to marker pixel sizes using sqrt scaling."""
     cap = pd.to_numeric(cap, errors="coerce").fillna(50)
     cap_sqrt = cap.clip(lower=1).pow(0.5)
@@ -68,7 +68,7 @@ def _capacity_to_size(cap: pd.Series, min_px: float = 4, max_px: float = 20) -> 
 
 def save_html(fig: go.Figure, name: str) -> Path:
     path = FIG_DIR / name
-    fig.write_html(path, include_plotlyjs="cdn")
+    fig.write_html(path, include_plotlyjs="cdn", config={"scrollZoom": True, "displayModeBar": True})
     print(f"  wrote {name} ({path.stat().st_size / 1024:.0f} KB)")
     return path
 
@@ -302,7 +302,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                     lat=dc_valid["lat"],
                     lon=dc_valid["lon"],
                     mode="markers",
-                    marker=dict(size=14, color="#ffffff", opacity=0.8),
+                    marker=dict(size=10, color="#ffffff", opacity=0.8),
                     text=dc_valid["name"].tolist(),
                     hoverinfo="skip",
                     showlegend=False,
@@ -314,7 +314,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                     lat=dc_valid["lat"],
                     lon=dc_valid["lon"],
                     mode="markers",
-                    marker=dict(size=10, color=DC_COLOR, opacity=0.8),
+                    marker=dict(size=7, color=DC_COLOR, opacity=0.8),
                     text=hover_texts,
                     hovertemplate="%{text}<extra></extra>",
                     name="🖥️ Data Centres",

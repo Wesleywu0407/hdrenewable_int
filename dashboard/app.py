@@ -1759,7 +1759,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             # 3. Render directly in Streamlit using the container
             with map_container:
                 st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
-                st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+                st.plotly_chart(fig, width="stretch", config={"displayModeBar": True, "scrollZoom": True})
                 st.markdown('</div>', unsafe_allow_html=True)
                 
             bess_operating = bess_df[bess_df['status'].astype(str).str.lower() == 'operating']
