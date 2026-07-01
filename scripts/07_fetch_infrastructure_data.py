@@ -1538,6 +1538,30 @@ def fetch_clean_energy_council() -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
+# HDRE/ZEBRE Manual Data Injection
+# --------------------------------------------------------------------------- #
+
+def inject_hdre_manual_projects(bess_df: pd.DataFrame, solar_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Inject missing HDRE/ZEBRE projects manually."""
+    manual_bess = pd.DataFrame([
+        {"name": "Solar River Hybrid", "state": "SA", "capacity_mw": 256.0, "status": "operating", "lat": -33.9, "lon": 139.7, "source": "HDRE/ZEBRE Verified Data"},
+        {"name": "Wagga North", "state": "NSW", "capacity_mw": 105.0, "status": "operating", "lat": -35.07, "lon": 147.43, "source": "HDRE/ZEBRE Verified Data"},
+        {"name": "North Yarragon", "state": "VIC", "capacity_mw": 210.0, "status": "operating", "lat": -38.2, "lon": 146.0, "source": "HDRE/ZEBRE Verified Data"},
+        {"name": "Noblevale", "state": "QLD", "capacity_mw": 180.0, "status": "operating", "lat": -27.65, "lon": 152.8, "source": "HDRE/ZEBRE Verified Data"},
+        {"name": "Hookey Creek", "state": "QLD", "capacity_mw": 200.0, "status": "operating", "lat": -26.1, "lon": 152.4, "source": "HDRE/ZEBRE Verified Data"}
+    ])
+    
+    manual_solar = pd.DataFrame([
+        {"name": "Solar River Hybrid", "state": "SA", "capacity_mw": 210.0, "status": "operating", "lat": -33.9, "lon": 139.7, "source": "HDRE/ZEBRE Verified Data"},
+        {"name": "Hookey Creek", "state": "QLD", "capacity_mw": 100.0, "status": "operating", "lat": -26.1, "lon": 152.4, "source": "HDRE/ZEBRE Verified Data"}
+    ])
+    
+    bess_combined = pd.concat([bess_df, manual_bess], ignore_index=True) if not bess_df.empty else manual_bess
+    solar_combined = pd.concat([solar_df, manual_solar], ignore_index=True) if not solar_df.empty else manual_solar
+    
+    return bess_combined, solar_combined
+
+# --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
 
@@ -1589,14 +1613,19 @@ def main() -> int:
     bess_df = bess_df.drop_duplicates(subset=["name_norm"], keep="first").drop(columns=["name_norm"]).reset_index(drop=True)
     print(f"  dropped {before - len(bess_df)} rows without valid AU coordinates or duplicates.")
 
-    bess_path = RAW_DIR / "bess_locations.csv"
-    cols = ["name", "state", "capacity_mw", "status", "lat", "lon", "source"]
-    # Only save columns that exist
-    save_cols = [c for c in cols if c in bess_df.columns]
-    bess_df[save_cols].to_csv(bess_path, index=False)
-    size_kb = bess_path.stat().st_size / 1024
-    print(f"  saved bess_locations.csv: {len(bess_df)} sites, {size_kb:.1f} KB")
-    print(f"  sources: {bess_df['source'].value_counts().to_dict()}")
+    # Phase 1: Address Templers BESS Data Issue
+    templers_mask = bess_df["name"].str.contains("Templers", case=False, na=False)
+    if templers_mask.any():
+        bess_df.loc[templers_mask, "capacity_mw"] = 111.0
+        bess_df.loc[templers_mask, "source"] = "HDRE/ZEBRE Verified Data"
+        print(f"  [Override] Set Templers BESS capacity to 111 MW.")
+
+    # Phase 5: Filter extreme outliers (> 1000 MW for BESS)
+    before_outliers = len(bess_df)
+    bess_df = bess_df[(bess_df["capacity_mw"].isna()) | (bess_df["capacity_mw"] <= 1000)]
+    print(f"  [Filter] dropped {before_outliers - len(bess_df)} outlier rows (>1000 MW).")
+
+    # Defer saving BESS locations until after HDRE injection at the end
 
     # -- Datacentres -------------------------------------------------------- #
     print("\n[2/3] Fetching Datacentre locations...")
@@ -1656,11 +1685,31 @@ def main() -> int:
         solar_df = solar_df.drop_duplicates(subset=["name_norm"], keep="first").drop(columns=["name_norm"]).reset_index(drop=True)
         print(f"  dropped {before - len(solar_df)} rows without valid AU coordinates or duplicates.")
 
+        # Phase 5: Filter extreme outliers (> 1000 MW for Solar)
+        before_outliers_solar = len(solar_df)
+        solar_df = solar_df[(solar_df["capacity_mw"].isna()) | (solar_df["capacity_mw"] <= 1000)]
+        print(f"  [Filter] dropped {before_outliers_solar - len(solar_df)} outlier rows (>1000 MW).")
+
+    # Phase 2: Inject HDRE/ZEBRE missing projects
+    print("\n[4/4] Injecting HDRE/ZEBRE Manual Projects...")
+    bess_df, solar_df = inject_hdre_manual_projects(bess_df, solar_df)
+
+    # Save BESS
+    bess_path = RAW_DIR / "bess_locations.csv"
+    cols = ["name", "state", "capacity_mw", "status", "lat", "lon", "source"]
+    save_cols_bess = [c for c in cols if c in bess_df.columns]
+    bess_df[save_cols_bess].to_csv(bess_path, index=False)
+    size_kb_bess = bess_path.stat().st_size / 1024
+    print(f"  saved bess_locations.csv: {len(bess_df)} sites, {size_kb_bess:.1f} KB")
+    print(f"  sources: {bess_df['source'].value_counts().to_dict()}")
+
+    # Save Solar
+    if not solar_df.empty:
         solar_path = RAW_DIR / "solar_locations.csv"
-        save_cols = [c for c in cols if c in solar_df.columns]
-        solar_df[save_cols].to_csv(solar_path, index=False)
-        size_kb = solar_path.stat().st_size / 1024
-        print(f"  saved solar_locations.csv: {len(solar_df)} sites, {size_kb:.1f} KB")
+        save_cols_solar = [c for c in cols if c in solar_df.columns]
+        solar_df[save_cols_solar].to_csv(solar_path, index=False)
+        size_kb_solar = solar_path.stat().st_size / 1024
+        print(f"  saved solar_locations.csv: {len(solar_df)} sites, {size_kb_solar:.1f} KB")
         print(f"  sources: {solar_df['source'].value_counts().to_dict()}")
 
     print("\nDone.")

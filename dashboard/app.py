@@ -228,496 +228,10 @@ def render_html(html: str) -> None:
         st.markdown(html, unsafe_allow_html=True)
 
 
-def ch3_global_comparison_html(html: str) -> str:
-    """Apply the Chapter 3 Figure 02 display-only two-chart redesign."""
-    overlay_script = """
-    <script>
-    (function () {
-        const regionColors = {
-            "United States": "#2a78d6",
-            "Canada": "#2a78d6",
-            "Germany": "#1baf7a",
-            "United Kingdom": "#1baf7a",
-            "Netherlands": "#1baf7a",
-            "China": "#eda100",
-            "Japan": "#eda100",
-            "India": "#eda100",
-            "Singapore": "#eda100",
-            "Australia": "#199e70"
-        };
-        const growthRates = {
-            "United States": 12.8,
-            "China": 18.4,
-            "Germany": 12.1,
-            "United Kingdom": 14.3,
-            "Canada": 11.9,
-            "Netherlands": 15.7,
-            "Japan": 13.2,
-            "India": 22.4,
-            "Australia": 25.1,
-            "Singapore": 10.6
-        };
-        const legendItems = [
-            ["North America", "#2a78d6"],
-            ["Europe", "#1baf7a"],
-            ["Asia-Pacific", "#eda100"],
-            ["Australia - APAC growth leader", "#199e70"]
-        ];
-
-        function redesign() {
-            const graph = document.querySelector(".plotly-graph-div");
-            if (!graph || !window.Plotly || !graph.data || !graph.data.length) {
-                window.setTimeout(redesign, 80);
-                return;
-            }
-
-            const sourceTrace = graph.data[0] || {};
-            const countries = sourceTrace.y || [];
-            const capacities = sourceTrace.x || [];
-            const rows = countries.map((country, index) => ({
-                country: country,
-                capacity: Number(capacities[index]),
-                growth: growthRates[country],
-                color: regionColors[country] || "rgba(255,255,255,0.16)"
-            })).filter((row) => row.country && Number.isFinite(row.capacity));
-
-            rows.sort((a, b) => b.capacity - a.capacity);
-            const countryOrder = rows.map((row) => row.country);
-            const colors = rows.map((row) => row.color);
-
-            const capacityTrace = {
-                type: "bar",
-                orientation: "h",
-                name: "Installed Capacity (GW)",
-                x: rows.map((row) => row.capacity),
-                y: countryOrder,
-                marker: { color: colors, line: { color: "rgba(255,255,255,0.20)", width: 0.5 } },
-                hovertemplate: "<b>%{y}</b><br>Installed capacity: %{x:.1f} GW<extra></extra>",
-                showlegend: false,
-                xaxis: "x",
-                yaxis: "y"
-            };
-
-            const growthTrace = {
-                type: "bar",
-                orientation: "h",
-                name: "Annual Growth Rate (%/yr)",
-                x: rows.map((row) => row.growth),
-                y: countryOrder,
-                marker: { color: colors, line: { color: "rgba(255,255,255,0.20)", width: 0.5 } },
-                hovertemplate: "<b>%{y}</b><br>Annual growth rate: %{x:.1f}%/yr<extra></extra>",
-                showlegend: false,
-                xaxis: "x2",
-                yaxis: "y2"
-            };
-
-            const legendTraces = legendItems.map(([name, color]) => ({
-                type: "scatter",
-                mode: "markers",
-                x: [null],
-                y: [null],
-                name: name,
-                marker: { color: color, size: 9, symbol: "circle" },
-                hoverinfo: "skip",
-                showlegend: true
-            }));
-
-            const axisText = { color: "#B8BDB9", size: 11 };
-            const tickText = { color: "#6B7570", size: 10 };
-            const gridColor = "rgba(255,255,255,0.05)";
-            const layout = Object.assign({}, graph.layout, {
-                height: 860,
-                bargap: 0.42,
-                showlegend: true,
-                legend: {
-                    orientation: "h",
-                    x: 0,
-                    y: 1.04,
-                    xanchor: "left",
-                    yanchor: "bottom",
-                    font: { color: "#B8BDB9", size: 12 },
-                    itemwidth: 30
-                },
-                margin: { l: 125, r: 38, t: 82, b: 86 },
-                plot_bgcolor: "rgba(0,0,0,0)",
-                paper_bgcolor: "rgba(0,0,0,0)",
-                hoverlabel: {
-                    bgcolor: "#1e2433",
-                    bordercolor: "#00c9a7",
-                    font: { color: "#ffffff", size: 12 }
-                },
-                xaxis: {
-                    domain: [0, 1],
-                    anchor: "y",
-                    title: { text: "Installed Capacity (GW)", font: axisText },
-                    rangemode: "tozero",
-                    gridcolor: gridColor,
-                    zeroline: false,
-                    showline: false,
-                    tickfont: tickText
-                },
-                yaxis: {
-                    domain: [0.66, 0.93],
-                    anchor: "x",
-                    categoryorder: "array",
-                    categoryarray: countryOrder,
-                    autorange: "reversed",
-                    ticks: "",
-                    showgrid: false,
-                    zeroline: false,
-                    showline: false,
-                    tickfont: tickText
-                },
-                xaxis2: {
-                    domain: [0, 1],
-                    anchor: "y2",
-                    title: { text: "Annual growth rate (%/yr)", font: axisText },
-                    range: [0, 28],
-                    gridcolor: gridColor,
-                    zeroline: false,
-                    showline: false,
-                    tickfont: tickText
-                },
-                yaxis2: {
-                    domain: [0.07, 0.47],
-                    anchor: "x2",
-                    categoryorder: "array",
-                    categoryarray: countryOrder,
-                    autorange: "reversed",
-                    ticks: "",
-                    showgrid: false,
-                    zeroline: false,
-                    showline: false,
-                    tickfont: tickText
-                },
-                shapes: [
-                    {
-                        type: "line",
-                        xref: "paper",
-                        yref: "paper",
-                        x0: 0,
-                        x1: 1,
-                        y0: 0.565,
-                        y1: 0.565,
-                        line: { color: "rgba(255,255,255,0.10)", width: 0.5 }
-                    },
-                    {
-                        type: "rect",
-                        xref: "paper",
-                        yref: "paper",
-                        x0: 0,
-                        x1: 1,
-                        y0: 0.55,
-                        y1: 0.61,
-                        fillcolor: "rgba(25,158,112,0.11)",
-                        line: { color: "rgba(25,158,112,0.42)", width: 0.5 },
-                        layer: "below"
-                    }
-                ],
-                annotations: [
-                    {
-                        xref: "paper",
-                        yref: "paper",
-                        x: 0,
-                        y: 0.965,
-                        text: "Installed Capacity (GW)",
-                        showarrow: false,
-                        xanchor: "left",
-                        font: { color: "#ffffff", size: 13 }
-                    },
-                    {
-                        xref: "paper",
-                        yref: "paper",
-                        x: 0.018,
-                        y: 0.58,
-                        text: "Australia: fastest growth in APAC at 25.1%/yr - same installed base as India (1.3 GW), but accelerating fastest",
-                        showarrow: false,
-                        xanchor: "left",
-                        font: { color: "#cfe9dd", size: 12 }
-                    },
-                    {
-                        xref: "paper",
-                        yref: "paper",
-                        x: 0,
-                        y: 0.505,
-                        text: "Annual Growth Rate (%/yr)",
-                        showarrow: false,
-                        xanchor: "left",
-                        font: { color: "#ffffff", size: 13 }
-                    }
-                ]
-            });
-
-            Plotly.react(graph, [capacityTrace, growthTrace].concat(legendTraces), layout, {
-                displayModeBar: false,
-                responsive: true
-            });
-        }
-
-        redesign();
-    }());
-    </XXX>
-    """.replace("XXX", "script")
-    return html.replace("</body>", f"{overlay_script}</body>") if "</body>" in html else f"{html}{overlay_script}"
-
-
-def ch3_renewable_gap_html(html: str) -> str:
-    """Apply the Chapter 3 Figure 04 display-only Plotly redesign."""
-    overlay_script = """
-    <script>
-    (function () {
-        const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2040, 2045, 2050];
-        const dcDemand = [4.0, 5.2, 6.5, 7.8, 9.0, 12.0, 13.5, 15.5, 18.0, 21.0, 24.0, 28.0, 31.0, 34.5];
-        const renewSupply = [2.0, 2.3, 2.7, 3.1, 3.6, 4.2, 5.0, 5.9, 7.0, 8.4, 10.0, 14.5, 19.0, 22.5];
-        const gaps = dcDemand.map((demand, index) => demand - renewSupply[index]);
-        const gapPct = gaps.map((gap, index) => Math.round((gap / dcDemand[index]) * 100));
-        const hoverData = years.map((year, index) => [
-            dcDemand[index],
-            renewSupply[index],
-            gaps[index],
-            gapPct[index]
-        ]);
-
-        function redesign() {
-            const graph = document.querySelector(".plotly-graph-div");
-            if (!graph || !window.Plotly) {
-                window.setTimeout(redesign, 80);
-                return;
-            }
-
-            const renewTrace = {
-                type: "scatter",
-                mode: "lines",
-                name: "Available Renewable Supply",
-                x: years,
-                y: renewSupply,
-                customdata: hoverData,
-                line: { color: "#1baf7a", width: 2.5, shape: "spline" },
-                marker: { color: "#1baf7a" },
-                hovertemplate: "Renewable Supply: %{y:.1f} TWh<extra></extra>"
-            };
-            const gapTrace = {
-                type: "scatter",
-                mode: "lines",
-                name: "HDRE Opportunity Zone",
-                x: years,
-                y: dcDemand,
-                customdata: hoverData,
-                fill: "tonexty",
-                fillcolor: "rgba(227,73,72,0.12)",
-                line: { color: "#e34948", width: 1.5, dash: "dot", shape: "spline" },
-                hoverinfo: "skip"
-            };
-            const demandTrace = {
-                type: "scatter",
-                mode: "lines",
-                name: "Total DC Demand",
-                x: years,
-                y: dcDemand,
-                customdata: hoverData,
-                fill: "tonexty",
-                fillcolor: "rgba(227,73,72,0.12)",
-                line: { color: "#e34948", width: 2.5, shape: "spline" },
-                marker: { color: "#e34948" },
-                hovertemplate: "DC Demand: %{y:.1f} TWh<br>Gap: %{customdata[2]:.1f} TWh (%{customdata[3]}% unmet)<extra></extra>"
-            };
-
-            const layout = Object.assign({}, graph.layout, {
-                annotations: [
-                    {
-                        x: 2030,
-                        y: 12,
-                        text: "2030: 12 TWh<br>= 6% of NEM",
-                        showarrow: true,
-                        arrowhead: 2,
-                        arrowcolor: "#e34948",
-                        font: { color: "#e34948", size: 10 }
-                    },
-                    {
-                        x: 2035,
-                        y: 17,
-                        text: "Gap: 55% unmet",
-                        showarrow: true,
-                        arrowhead: 2,
-                        arrowcolor: "#e34948",
-                        font: { color: "#e34948", size: 10 }
-                    },
-                    {
-                        x: 2042,
-                        y: 22,
-                        text: "HDRE Opportunity Zone",
-                        showarrow: false,
-                        font: { color: "#e34948", size: 11 }
-                    }
-                ],
-                xaxis: Object.assign({}, graph.layout.xaxis, {
-                    range: [2025, 2050],
-                    showgrid: false,
-                    zeroline: false,
-                    title: { text: "Year", font: { color: "#B8BDB9", size: 12 } },
-                    tickfont: { color: "#6B7570", size: 11 },
-                    linecolor: "rgba(255,255,255,0.12)"
-                }),
-                yaxis: Object.assign({}, graph.layout.yaxis, {
-                    range: [0, 40],
-                    title: { text: "Energy (TWh)", font: { color: "#B8BDB9", size: 12 } },
-                    tickfont: { color: "#6B7570", size: 11 },
-                    gridcolor: "rgba(255,255,255,0.06)",
-                    zerolinecolor: "rgba(255,255,255,0.12)",
-                    linecolor: "rgba(255,255,255,0.12)"
-                }),
-                legend: Object.assign({}, graph.layout.legend, {
-                    orientation: "h",
-                    yanchor: "bottom",
-                    y: 1.02,
-                    xanchor: "left",
-                    x: 0
-                }),
-                height: 500,
-                hovermode: "x unified"
-            });
-
-            Plotly.react(graph, [renewTrace, demandTrace, gapTrace], layout, {
-                displayModeBar: false,
-                responsive: true
-            });
-        }
-
-        redesign();
-    }());
-    </XXX>
-    """.replace("XXX", "script")
-    return html.replace("</body>", f"{overlay_script}</body>") if "</body>" in html else f"{html}{overlay_script}"
-
-
-def ch3_state_breakdown_html(html: str) -> str:
-    """Render the Chapter 3 Figure 05 dashboard-only two-panel redesign."""
-    states = ["NSW", "VIC", "QLD", "SA", "TAS"]
-    pipeline = [11400, 9400, 800, 350, 50]
-    renewable = [38, 45, 32, 80, 99]
-    colors = ["#2a78d6", "#1baf7a", "#eda100", "#7f77dd", "#888780"]
-    statuses = [
-        "Largest pipeline · low green match",
-        "Strong pipeline · growing renewables",
-        "Low pipeline · early mover opportunity",
-        "High renewables · small pipeline",
-        "Near 100% renewables · minimal DC",
-    ]
-    states_sorted = ["TAS", "SA", "VIC", "NSW", "QLD"]
-    renew_sorted = [99, 80, 45, 38, 32]
-    colors_sorted = ["#888780", "#7f77dd", "#1baf7a", "#2a78d6", "#eda100"]
-
-    fig = make_subplots(
-        rows=1,
-        cols=2,
-        column_widths=[0.58, 0.42],
-        horizontal_spacing=0.16,
-        subplot_titles=("Planned pipeline by state", "Renewable share by state"),
-    )
-    fig.add_trace(
-        go.Bar(
-            x=states,
-            y=pipeline,
-            marker=dict(
-                color=colors,
-                line=dict(color="rgba(255,255,255,0.30)", width=1),
-            ),
-            hovertemplate=(
-                "<b>%{x}</b><br>"
-                "Pipeline: %{y:,.0f} MW<br>"
-                "Renewable: %{customdata[0]}%<br>"
-                "%{customdata[1]}"
-                "<extra></extra>"
-            ),
-            customdata=list(zip(renewable, statuses)),
-        ),
-        row=1,
-        col=1,
-    )
-    fig.add_trace(
-        go.Bar(
-            x=renew_sorted,
-            y=states_sorted,
-            orientation="h",
-            marker=dict(
-                color=colors_sorted,
-                line=dict(color="rgba(255,255,255,0.30)", width=1),
-            ),
-            text=[f"{value}%" for value in renew_sorted],
-            textposition="outside",
-            textfont=dict(color="#ffffff", size=12),
-            hovertemplate="<b>%{y}</b><br>Renewable share: %{x}%<extra></extra>",
-            cliponaxis=False,
-        ),
-        row=1,
-        col=2,
-    )
-    fig.update_layout(
-        height=430,
-        showlegend=False,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#898781", family="Inter, system-ui, sans-serif", size=12),
-        margin=dict(l=60, r=28, t=44, b=52),
-        hovermode="closest",
-        hoverlabel=dict(
-            bgcolor="#1e2433",
-            bordercolor="#00c9a7",
-            font=dict(color="#ffffff", size=13),
-        ),
-    )
-    fig.update_xaxes(
-        title_text="NEM State",
-        showgrid=False,
-        zeroline=False,
-        linecolor="rgba(255,255,255,0.12)",
-        tickfont=dict(color="#898781"),
-        row=1,
-        col=1,
-    )
-    fig.update_yaxes(
-        title_text="Capacity (MW)",
-        tickformat="~s",
-        gridcolor="rgba(255,255,255,0.06)",
-        zeroline=False,
-        linecolor="rgba(255,255,255,0.12)",
-        tickfont=dict(color="#898781"),
-        row=1,
-        col=1,
-    )
-    fig.update_xaxes(
-        title_text="Renewable share (%)",
-        range=[0, 110],
-        showgrid=False,
-        zeroline=False,
-        linecolor="rgba(255,255,255,0.12)",
-        tickfont=dict(color="#898781"),
-        row=1,
-        col=2,
-    )
-    fig.update_yaxes(
-        autorange="reversed",
-        gridcolor="rgba(255,255,255,0.06)",
-        zeroline=False,
-        linecolor="rgba(255,255,255,0.12)",
-        tickfont=dict(color="#898781"),
-        row=1,
-        col=2,
-    )
-    fig.update_annotations(font=dict(color="#B8BDB9", size=12))
-    return fig.to_html(include_plotlyjs="cdn", full_html=False, config={"displayModeBar": False, "responsive": True})
 
 
 def figure_html(entry: dict[str, Any], html_path: Path) -> str:
     html = html_path.read_text(encoding="utf-8")
-    chapter = entry["chapter"]
-    figure = entry["figure"]
-    if chapter.get("id") == "3" and figure.get("id") == "ch3_fig1":
-        return ch3_global_comparison_html(html)
-    if chapter.get("id") == "3" and figure.get("id") == "ch3_fig3":
-        return ch3_renewable_gap_html(html)
-    if chapter.get("id") == "3" and figure.get("id") == "ch3_fig4":
-        return ch3_state_breakdown_html(html)
     return html
 
 
@@ -1277,9 +791,6 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                 <a href="/" target="_self" class="hdre-wordmark-link">
                     <div class="hdre-wordmark">HDRE</div>
                 </a>
-                <div class="hdre-divider"></div>
-                <div class="hdre-label">FIELD INDEX</div>
-                <div class="hdre-subtitle">Australia NEM research atlas</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1349,51 +860,6 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
 
 
 def render_standard_metrics(metrics: list[dict[str, str]], entry: dict[str, Any] | None = None) -> None:
-    if entry and entry["chapter"].get("id") == "3" and entry["figure"].get("id") == "ch3_fig4":
-        state_cards = [
-            ("NSW", "#2a78d6", "11,400 MW", "38% renewable", "Largest pipeline"),
-            ("VIC", "#1baf7a", "9,400 MW", "45% renewable", "Growing renewables"),
-            ("QLD", "#eda100", "800 MW", "32% renewable", "Early mover opp."),
-            ("SA", "#7f77dd", "350 MW", "80% renewable", "High renewables"),
-            ("TAS", "#888780", "50 MW", "99% renewable", "Near 100% green"),
-        ]
-        columns = st.columns(5, gap="small")
-        st.markdown(
-            """
-            <style>
-            .ch3-state-card {
-                border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 6px;
-                padding: 12px 12px 11px;
-                min-height: 112px;
-                transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-            }
-            .ch3-state-card:hover {
-                transform: translateY(-4px);
-                border-color: var(--state-color);
-                box-shadow: 0 10px 24px rgba(0,0,0,0.22);
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-        for col, (state, color, capacity, renewable_text, note) in zip(columns, state_cards):
-            with col:
-                st.markdown(
-                    f"""
-                    <div class="ch3-state-card" style="
-                        --state-color: {color};
-                        background: color-mix(in srgb, {color} 12%, rgba(8,14,12,0.72));
-                    ">
-                        <div style="color: {color}; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">{state}</div>
-                        <div style="color: #F5F5F0; font-size: 19px; font-weight: 700; margin-top: 8px;">{capacity}</div>
-                        <div style="color: #A7AEA9; font-size: 12px; margin-top: 5px;">{renewable_text}</div>
-                        <div style="color: #7E8782; font-size: 11px; line-height: 1.3; margin-top: 8px;">{note}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-        return
     cols_per_row = max(1, min(3, len(metrics)))
     columns = st.columns(cols_per_row, gap="small")
     for i, metric in enumerate(metrics):
@@ -1417,36 +883,36 @@ def render_ch3_research_outline() -> None:
             "pair": "1",
             "color": "#5b8def",
             "eyebrow": "FIG 02 · Q1",
-            "title": "Global comparison",
-            "metric": "1.3 GW",
-            "label": "AU capacity · 25.1%/yr",
+            "title": "State Mismatch",
+            "metric": "34 of 48",
+            "label": "DCs in NSW/VIC",
         },
         {
             "href": f"?figure={quote('3::ch3_fig2')}",
             "pair": "2",
             "color": "#a78bfa",
             "eyebrow": "FIG 03 · Q2",
-            "title": "Demand forecast",
-            "metric": "12 TWh",
-            "label": "2030 · 6% of NEM",
+            "title": "Price Volatility",
+            "metric": "16.2%",
+            "label": "Negative Price Freq",
         },
         {
             "href": f"?figure={quote('3::ch3_fig3')}",
             "pair": "3",
             "color": "#ec6a5e",
             "eyebrow": "FIG 04 · Q3",
-            "title": "Green energy gap",
-            "metric": "55%",
-            "label": "2035 supply deficit",
+            "title": "The Duck Curve",
+            "metric": "Extreme",
+            "label": "Midday Irradiance",
         },
         {
             "href": f"?figure={quote('3::ch3_fig4')}",
             "pair": "4",
             "color": "#d4a857",
             "eyebrow": "FIG 05 · Q4",
-            "title": "State breakdown",
-            "metric": "11.4 GW",
-            "label": "NSW pipeline",
+            "title": "Value of Firming",
+            "metric": "Massive",
+            "label": "Arbitrage Savings",
         },
     ]
     step_card_html = "\n".join(
@@ -1632,22 +1098,22 @@ def render_ch3_research_outline() -> None:
 
             <section class="ch3-thesis-card">
                 <div class="ch3-thesis-label">CENTRAL THESIS</div>
-                <div class="ch3-thesis-body">AI data centre demand in Australia will grow from 4 TWh to 34.5 TWh by 2050, but renewable supply will lag - creating a structural green energy deficit that defines HDRE's primary market opportunity.</div>
+                <div class="ch3-thesis-body">Data centres are heavily clustered in Southern states (71%), while over 62% of upcoming BESS and solar firming capacity is located in the North. This geographic mismatch, combined with predictable intraday spot price volatility (16.2% negative pricing events), defines a lucrative arbitrage and firming opportunity for HDRE.</div>
             </section>
 
             <section>
                 <div class="ch3-question-grid">
                     <div class="ch3-question-card ch3-pair-1" style="--accent: #5b8def;">
-                        <div class="ch3-question-title">Q1 · Global context</div>
-                        <p>How does Australia's data centre capacity compare globally, and where is growth concentrated?</p>
+                        <div class="ch3-question-title">Q1 · State Mismatch</div>
+                        <p>Where are data centres being built compared to where BESS and solar capacity is located?</p>
                     </div>
                     <div class="ch3-question-card ch3-pair-2" style="--accent: #a78bfa;">
-                        <div class="ch3-question-title">Q2 · Demand trajectory</div>
-                        <p>How fast will AI power demand grow, and what share of the NEM will it consume?</p>
+                        <div class="ch3-question-title">Q2 · Price Volatility</div>
+                        <p>How frequently do negative wholesale prices occur, and how severe are the evening peaks?</p>
                     </div>
                     <div class="ch3-question-card ch3-pair-3" style="--accent: #ec6a5e;">
-                        <div class="ch3-question-title">Q3 · Supply gap</div>
-                        <p>Can existing renewable supply meet projected AI load - and how big is the gap?</p>
+                        <div class="ch3-question-title">Q3 · The Duck Curve</div>
+                        <p>How does solar irradiance directly drive the intraday collapse of energy prices?</p>
                     </div>
                     <div class="ch3-question-card ch3-pair-4" style="--accent: #d4a857;">
                         <div class="ch3-question-title">Q4 · Market entry</div>
@@ -1769,7 +1235,10 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
                 coverage = "NEM Only"
             else:
                 coverage = ", ".join(selected_states)
-                
+            
+            bess_hdre = bess_df[bess_df["source"] == "HDRE/ZEBRE Verified Data"]
+            solar_hdre = solar_df[solar_df["source"] == "HDRE/ZEBRE Verified Data"]
+            
             metrics = [
                 {"label": "BESS Capacity", "value": f"{bess_operating['capacity_mw'].sum():,.0f} MW"},
                 {"label": "Proposed BESS Capacity", "value": f"{bess_proposed['capacity_mw'].sum():,.0f} MW"},
@@ -1778,6 +1247,7 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
                 {"label": "Proposed Solar Capacity", "value": f"{solar_proposed['capacity_mw'].sum():,.0f} MW"},
                 {"label": "Solar Farms", "value": f"{len(solar_operating):,}"},
                 {"label": "Data Centres", "value": f"{len(dc_df):,}"},
+                {"label": "HDRE Sites", "value": f"{len(bess_hdre) + len(solar_hdre):,}"},
                 {"label": "Coverage", "value": coverage}
             ]
             render_standard_metrics(metrics, entry)
@@ -1788,12 +1258,18 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     
     takeaway = figure.get("takeaway", "")
     description = figure.get("description", "")
+    
+    def format_text(t: str) -> str:
+        if not t: return ""
+        # Escape HTML, convert newlines to <br>, and convert **text** to styled note-label divs
+        return re.sub(r'\*\*(.*?):?\*\*(?:<br>)?', r'<div class="note-label" style="margin-top: 1rem;">\1</div>', escape(t).replace('\n', '<br>'))
+
     if takeaway or description:
         st.markdown(
             f"""
             <div class="research-note">
-                {f'<div class="note-label">key takeaway</div><div>{escape(takeaway)}</div>' if takeaway else ''}
-                {f'<div class="note-label" style="margin-top: 1rem;">graph description</div><div>{escape(description)}</div>' if description else ''}
+                {f'<div class="note-label">key takeaway</div><div>{format_text(takeaway)}</div>' if takeaway else ''}
+                {f'<div class="note-label" style="margin-top: 1rem;">graph description</div><div>{format_text(description)}</div>' if description else ''}
             </div>
             """,
             unsafe_allow_html=True,
@@ -1822,3 +1298,8 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
+
+

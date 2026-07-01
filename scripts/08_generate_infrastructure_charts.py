@@ -99,6 +99,49 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
     # Always add an empty trace to guarantee the mapbox tiles render when dataframes are empty
     fig.add_trace(go.Scattermapbox(lat=[None], lon=[None], showlegend=False, hoverinfo="skip"))
 
+    # -- State Boundaries -------------------------------------------------------
+    state_bounds_path = RAW_DIR / "australian_states.geojson"
+    if state_bounds_path.exists():
+        try:
+            with open(state_bounds_path, "r", encoding="utf-8") as f:
+                state_data = json.load(f)
+            
+            lons, lats = [], []
+            for feat in state_data.get("features", []):
+                geom = feat.get("geometry", {})
+                if not geom:
+                    continue
+                geom_type = geom.get("type")
+                coords = geom.get("coordinates", [])
+                
+                def add_line(line_coords):
+                    for pt in line_coords:
+                        lons.append(pt[0])
+                        lats.append(pt[1])
+                    lons.append(None)
+                    lats.append(None)
+                    
+                if geom_type == "Polygon":
+                    for ring in coords:
+                        add_line(ring)
+                elif geom_type == "MultiPolygon":
+                    for poly in coords:
+                        for ring in poly:
+                            add_line(ring)
+                            
+            if lons:
+                fig.add_trace(go.Scattermapbox(
+                    lon=lons, lat=lats,
+                    mode='lines',
+                    line=dict(color='rgba(255, 255, 255, 0.06)', width=1.5),
+                    name='State Borders',
+                    showlegend=False,
+                    hoverinfo='skip'
+                ))
+            print("  [map] added State Borders.")
+        except Exception as e:
+            print(f"  [map/States] Failed to load {state_bounds_path.name}: {e}")
+
     # -- Renewable Energy Zone polygon overlays ---------------------------------
     # Load AEMO combined GeoJSON if present (to extract QLD and SA)
     aemo_features = []
@@ -232,17 +275,23 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             print(f"  [map/TX] Failed to load {tx_path.name}: {e}")
 
     # -- BESS trace (drawn first = underneath) ------------------------------
+    bess_hdre = None
+    solar_hdre = None
+    
     if not bess_df.empty:
         bess_valid = bess_df.dropna(subset=["lat", "lon"]).copy()
         if not bess_valid.empty:
             bess_valid["status_lower"] = bess_valid["status"].fillna("").astype(str).str.lower()
             existing_mask = bess_valid["status_lower"].isin(["operating", "commissioning"])
-            bess_existing = bess_valid[existing_mask]
-            bess_proposed = bess_valid[~existing_mask]
+            hdre_mask = bess_valid["source"] == "HDRE/ZEBRE Verified Data"
+            
+            bess_hdre = bess_valid[hdre_mask]
+            bess_existing = bess_valid[existing_mask & ~hdre_mask]
+            bess_proposed = bess_valid[~existing_mask & ~hdre_mask]
 
-            for subset_df, color, name_label, border_color, lg in [
-                (bess_existing, BESS_COLOR, "🔋 Existing BESS Sites", BESS_COLOR_BORDER, "bess_existing"),
-                (bess_proposed, "#9b59b6", "🏗️ Proposed BESS Sites", "#5e3370", "bess_proposed")
+            for subset_df, color, name_label, border_color, lg, lg_title in [
+                (bess_existing, BESS_COLOR, "🔋 BESS", BESS_COLOR_BORDER, "current", "Current Sites"),
+                (bess_proposed, "#9b59b6", "🏗️ BESS", "#5e3370", "proposed", "Proposed Sites")
             ]:
                 if subset_df.empty:
                     continue
@@ -296,6 +345,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                         hovertemplate="%{text}<extra></extra>",
                         name=name_label,
                         legendgroup=lg,
+                        legendgrouptitle_text=lg_title,
                     )
                 )
                 print(f"  [map] added {len(subset_df)} {name_label.strip('🔋🏗️ ')} markers")
@@ -305,13 +355,20 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
         solar_valid = solar_df.dropna(subset=["lat", "lon"]).copy()
         if not solar_valid.empty:
             solar_valid["status_lower"] = solar_valid["status"].fillna("").astype(str).str.lower()
-            solar_existing = solar_valid[solar_valid["status_lower"].isin(["operating", "commissioning"])]
-            solar_proposed = solar_valid[~solar_valid["status_lower"].isin(["operating", "commissioning"])]
+            hdre_mask = solar_valid["source"] == "HDRE/ZEBRE Verified Data"
+            solar_hdre = solar_valid[hdre_mask]
+            solar_existing = solar_valid[solar_valid["status_lower"].isin(["operating", "commissioning"]) & ~hdre_mask]
+            solar_proposed = solar_valid[~solar_valid["status_lower"].isin(["operating", "commissioning"]) & ~hdre_mask]
             
-            if not solar_existing.empty:
-                sizes = _capacity_to_size(solar_existing["capacity_mw"])
+            for subset_df, color, name_label, border_color, lg, lg_title in [
+                (solar_existing, "#FFD700", "☀️ Solar Panels", "#b8860b", "current", "Current Sites"),
+                (solar_proposed, "#ff8833", "🏗️ Solar Panels", "#cc6600", "proposed", "Proposed Sites")
+            ]:
+                if subset_df.empty:
+                    continue
+                sizes = _capacity_to_size(subset_df["capacity_mw"])
                 hover_texts = []
-                for _, row in solar_existing.iterrows():
+                for _, row in subset_df.iterrows():
                     cap = row.get("capacity_mw")
                     cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
                     status = _status_label(row.get("status", ""))
@@ -328,91 +385,39 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                 # Border trace
                 fig.add_trace(
                     go.Scattermapbox(
-                        lat=solar_existing["lat"],
-                        lon=solar_existing["lon"],
+                        lat=subset_df["lat"],
+                        lon=subset_df["lon"],
                         mode="markers",
                         marker=dict(
                             size=sizes + 3,
-                            color="#b8860b",
+                            color=border_color,
                             opacity=0.7,
                         ),
-                        text=solar_existing["name"].tolist(),
+                        text=subset_df["name"].tolist(),
                         hoverinfo="skip",
                         showlegend=False,
-                        legendgroup="solar_existing",
+                        legendgroup=lg,
                     )
                 )
                 # Fill trace
                 fig.add_trace(
                     go.Scattermapbox(
-                        lat=solar_existing["lat"],
-                        lon=solar_existing["lon"],
+                        lat=subset_df["lat"],
+                        lon=subset_df["lon"],
                         mode="markers",
                         marker=dict(
                             size=sizes,
-                            color="#FFD700",
+                            color=color,
                             opacity=0.5,
                         ),
                         text=hover_texts,
                         hovertemplate="%{text}<extra></extra>",
-                        name="☀️ Existing Solar Panels",
-                        legendgroup="solar_existing",
+                        name=name_label,
+                        legendgroup=lg,
+                        legendgrouptitle_text=lg_title,
                     )
                 )
-                print(f"  [map] added {len(solar_existing)} Existing Solar markers")
-
-            if not solar_proposed.empty:
-                sizes = _capacity_to_size(solar_proposed["capacity_mw"])
-                hover_texts = []
-                for _, row in solar_proposed.iterrows():
-                    cap = row.get("capacity_mw")
-                    cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
-                    status = _status_label(row.get("status", ""))
-                    state = row.get("state", "")
-                    source = row.get("source", "")
-                    hover_texts.append(
-                        f"<b>{row['name']}</b><br>"
-                        f"Capacity: {cap_str}<br>"
-                        f"Status: {status}<br>"
-                        f"State: {state}<br>"
-                        f"<i>Source: {source}</i>"
-                    )
-
-                # Border trace
-                fig.add_trace(
-                    go.Scattermapbox(
-                        lat=solar_proposed["lat"],
-                        lon=solar_proposed["lon"],
-                        mode="markers",
-                        marker=dict(
-                            size=sizes + 2,
-                            color="#cc6600",
-                            opacity=0.8,
-                        ),
-                        text=solar_proposed["name"].tolist(),
-                        hoverinfo="skip",
-                        showlegend=False,
-                        legendgroup="solar_proposed",
-                    )
-                )
-                # Fill trace
-                fig.add_trace(
-                    go.Scattermapbox(
-                        lat=solar_proposed["lat"],
-                        lon=solar_proposed["lon"],
-                        mode="markers",
-                        marker=dict(
-                            size=sizes,
-                            color="#ff8833",
-                            opacity=0.45,
-                        ),
-                        text=hover_texts,
-                        hovertemplate="%{text}<extra></extra>",
-                        name="🏗️ Proposed Solar Panels",
-                        legendgroup="solar_proposed",
-                    )
-                )
-                print(f"  [map] added {len(solar_proposed)} Proposed Solar markers")
+                print(f"  [map] added {len(subset_df)} {name_label.strip('☀️🏗️⚡ ')} markers")
 
     # -- Datacentre trace ---------------------------------------------------
     if not dc_df.empty:
@@ -456,9 +461,86 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                     hovertemplate="%{text}<extra></extra>",
                     name="🖥️ Data Centres",
                     legendgroup="dc",
+                    legendgrouptitle_text="Data Centres",
                 )
             )
             print(f"  [map] added {len(dc_valid)} Datacentre markers")
+
+    # -- Overlaid HDRE/ZEBRE traces (drawn last = on top) -------------------
+    hdre_curr_pattern = r"(?i)(?:Solar River|Wagga North|Templers)"
+    
+    bess_hdre_curr = bess_hdre[bess_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if bess_hdre is not None else None
+    bess_hdre_seek = bess_hdre[~bess_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if bess_hdre is not None else None
+    
+    solar_hdre_curr = solar_hdre[solar_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if solar_hdre is not None else None
+    solar_hdre_seek = solar_hdre[~solar_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if solar_hdre is not None else None
+
+    for subset_df, color, name_label, border_color, lg, lg_title, b_op, f_op in [
+        (bess_hdre_curr, "#00d2ff", "⚡ BESS", "white", "hdre_curr", "ZEBRE Current Projects", 0.9, 1.0),
+        (solar_hdre_curr, "#00d2ff", "⚡ Solar Panels", "white", "hdre_curr", "ZEBRE Current Projects", 0.9, 1.0),
+        (bess_hdre_seek, "#00d2ff", "⚡ BESS", "white", "hdre_seek", "ZEBRE Seeking Projects", 0.4, 0.5),
+        (solar_hdre_seek, "#00d2ff", "⚡ Solar Panels", "white", "hdre_seek", "ZEBRE Seeking Projects", 0.4, 0.5)
+    ]:
+        if subset_df is None or subset_df.empty:
+            continue
+        sizes = _capacity_to_size(subset_df["capacity_mw"])
+
+        # Build hover text
+        hover_texts = []
+        is_bess = "BESS" in name_label
+        site_type = "Battery (BESS)" if is_bess else "Solar Farm"
+        
+        for _, row in subset_df.iterrows():
+            cap = row.get("capacity_mw")
+            cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
+            status = _status_label(row.get("status", ""))
+            state = row.get("state", "")
+            source = row.get("source", "")
+            hover_texts.append(
+                f"<b>{row['name']}</b><br>"
+                f"Type: {site_type}<br>"
+                f"Capacity: {cap_str}<br>"
+                f"Status: {status}<br>"
+                f"State: {state}<br>"
+                f"<i>Source: {source}</i>"
+            )
+
+        # Border trace
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=subset_df["lat"],
+                lon=subset_df["lon"],
+                mode="markers",
+                marker=dict(
+                    size=sizes + 2,
+                    color=border_color,
+                    opacity=b_op,
+                ),
+                text=subset_df["name"].tolist(),
+                hoverinfo="skip",
+                showlegend=False,
+                legendgroup=lg,
+            )
+        )
+        # Fill trace
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=subset_df["lat"],
+                lon=subset_df["lon"],
+                mode="markers",
+                marker=dict(
+                    size=sizes - 1,
+                    color=color,
+                    opacity=f_op,
+                ),
+                text=hover_texts,
+                hovertemplate="%{text}<extra></extra>",
+                name=name_label,
+                legendgroup=lg,
+                legendgrouptitle_text=lg_title,
+            )
+        )
+        print(f"  [map] added {len(subset_df)} {name_label.strip('⚡ ')} markers (OVERLAID)")
 
 
     # -- Layout -------------------------------------------------------------

@@ -25,11 +25,11 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig1_1_qld_renewable_share.png",
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "QLD renewable", "value": "Rising"},
-                    {"label": "Comparison", "value": "Converging"}
+                    {"label": "QLD Renewable Share", "value": "32.0%"},
+                    {"label": "NSW Renewable Share", "value": "30.9%"}
                 ],
                 "takeaway": (
-                    "QLD is accelerating its renewable deployment and converging with its peer state NSW."
+                    "Queensland has accelerated its renewable deployment significantly, increasing its renewable generation share from 26.5% to 32.0% over the last 24 months. This rapid growth has allowed Queensland to slightly overtake its peer state New South Wales (30.9% as of June 2026)."
                 ),
                 "description": (
                     "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
@@ -45,10 +45,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig1_2_qld_fuel_mix.png",
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Renewables", "value": "Increasing"}
+                    {"label": "Coal Share", "value": "Down to 55.3%"},
+                    {"label": "Wind Share", "value": "Up to 11.1%"},
+                    {"label": "Total Renewables", "value": "32.0%"}
                 ],
                 "takeaway": (
-                    "The past 24 months show a steady increase in renewable penetration in Queensland's fuel mix."
+                    "Over the past 24 months, Queensland's reliance on coal generation has noticeably decreased from 62.6% to 55.3%. This base-load capacity gap has been filled primarily by a remarkable doubling in wind generation (growing from 5.2% to 11.1%), which has steadily driven the total renewable penetration up to 32.0%."
                 ),
                 "description": (
                     "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
@@ -64,10 +66,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig1_3_qld_negative_prices.png",
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Price Volatility", "value": "High"}
+                    {"label": "Negative Prices", "value": "Frequent"},
+                    {"label": "Recent 6-Month Avg", "value": "~59 hrs/month"},
+                    {"label": "Historical Peak", "value": ">170 hrs/month"}
                 ],
                 "takeaway": (
-                    "High instances of negative spot prices indicate excess solar generation during midday."
+                    "Queensland experiences a high frequency of negative wholesale spot prices, occasionally peaking at over 170 hours per month during high-solar seasons. These frequent negative price events indicate severe daytime oversupply, presenting a highly lucrative arbitrage and firming opportunity for battery storage operators."
                 ),
                 "description": (
                     "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
@@ -116,14 +120,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig2_annual_generation_by_fuel.png",
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Coal average", "value": "52.3%", "note": "as of last data refresh"},
-                    {"label": "Solar average", "value": "21.5%", "note": "as of last data refresh"},
-                    {"label": "Wind average", "value": "15.6%", "note": "as of last data refresh"},
+                    {"label": "Coal Share", "value": "Down to 51.5%", "note": "From 56.9% in Jul 2024"},
+                    {"label": "Wind Share", "value": "Up to 17.7%", "note": "From 15.2% in Jul 2024"},
+                    {"label": "Solar Share", "value": "12.7%", "note": "Subject to seasonal dips"},
                 ],
                 "takeaway": (
-                    "Even within the available 2024-06 to 2026-06 window, zero-marginal-cost "
-                    "solar and wind are visibly eroding coal's share across the entire NEM, "
-                    "with seasonal solar peaks reshaping the monthly mix."
+                    "Across the NEM, the 24-month window from July 2024 to June 2026 shows a decisive structural shift. Coal's contribution to the monthly generation mix eroded substantially from 56.9% to 51.5%, displaced by consistent growth in wind generation (which expanded from 15.2% to 17.7%) and persistent, zero-marginal-cost solar generation."
                 ),
                 "description": (
                     "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
@@ -139,14 +141,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig3_state_comparison.png",
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "QLD coal", "value": "59.2%", "note": "as of last data refresh"},
-                    {"label": "NSW coal", "value": "57.6%", "note": "as of last data refresh"},
-                    {"label": "SA coal", "value": "0%", "note": "as of last data refresh"},
+                    {"label": "QLD Renewables", "value": "34.5%", "note": "56.5% Coal"},
+                    {"label": "NSW Renewables", "value": "39.4%", "note": "56.0% Coal"},
+                    {"label": "SA Renewables", "value": "76.6%", "note": "0% Coal"},
                 ],
                 "takeaway": (
-                    "South Australia shows a near-fully-renewable synchronous grid in "
-                    "operation, while QLD and NSW remain the largest decarbonisation and "
-                    "investment headroom in the NEM."
+                    "Analyzing the last 12 months reveals starkly different grid realities. South Australia operates a world-leading 76.6% renewable grid with zero coal. In contrast, the eastern seaboard heavyweights—QLD and NSW—still rely on coal for over 56% of their energy, representing massive upside and investment headroom for renewable infrastructure."
                 ),
                 "description": (
                     "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
@@ -164,14 +164,12 @@ CHAPTERS = [
                 "scrolling": True,
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Retired units", "value": "43", "note": "as of last data refresh"},
-                    {"label": "Operating units", "value": "44", "note": "as of last data refresh"},
-                    {"label": "Retiring by 2035", "value": "12.9 GW", "note": "as of last data refresh"},
+                    {"label": "Retired units", "value": "43"},
+                    {"label": "Operating units", "value": "44"},
+                    {"label": "Retiring by 2035", "value": "13.6 GW", "note": "Of 21.1 GW total"},
                 ],
                 "takeaway": (
-                    "Expected coal retirements create a large, date-certain capacity gap "
-                    "that must be filled by renewables and firming, making the timeline a "
-                    "practical map for project development and offtake positioning."
+                    "The NEM is approaching a massive, date-certain thermal cliff. Of the 21.1 GW of currently operating coal capacity across 44 units, a staggering 13.6 GW (over 64%) is officially scheduled to retire by 2035. This timeline acts as an aggressive, unalterable deadline that mandates the rapid acceleration of replacement renewable and firming capacity."
                 ),
                 "description": (
                     "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
@@ -194,21 +192,21 @@ CHAPTERS = [
                 "subtitle": "Battery Energy Storage Systems, Solar Farms & Major Data Centre Locations",
                 "html_path": "outputs/figures/fig1_4_infrastructure_map.html",
                 "png_path": "outputs/figures/png/fig1_4_infrastructure_map.png",
-                "source": "OpenElectricity API · Wikipedia · treasury.qld.gov.au · AEMO 2024 ISP · VicGrid · EnergyCo NSW · Geoscience Australia",
+                "source": "OpenElectricity API · Wikipedia · treasury.qld.gov.au · HDRE/ZEBRE Verified Data · AEMO 2024 ISP · VicGrid · EnergyCo NSW · Geoscience Australia",
                 "metrics": [
-                    {"label": "BESS Sites", "value": "91", "note": "NEM states only"},
-                    {"label": "BESS Capacity", "value": "67,336 MW", "note": "Existing & Proposed"},
-                    {"label": "Solar Farms", "value": "136", "note": "Utility-scale"},
-                    {"label": "Solar Capacity", "value": "29,017 MW", "note": "Utility-scale"},
-                    {"label": "Data Centres", "value": "42", "note": "NextDC, Equinix, AirTrunk, AWS, Google, Microsoft"},
-                    {"label": "Renewable Energy Zones", "value": "31", "note": "Across 5 NEM states"},
-                    {"label": "Coverage", "value": "NEM Only", "note": "All NEM regions (excludes WA / WEM)"},
+                    {"label": "BESS Sites", "value": "191", "note": "QLD (101) & NSW (29) leading"},
+                    {"label": "BESS Capacity", "value": "68,731 MW", "note": "Existing & proposed"},
+                    {"label": "Solar Farms", "value": "275", "note": "Utility-scale"},
+                    {"label": "Solar Capacity", "value": "33,013 MW", "note": "Utility-scale"},
+                    {"label": "Data Centres", "value": "48", "note": "NSW (21) & VIC (13) leading"},
+                    {"label": "Renewable Energy Zones", "value": "56", "note": "Across 4 mapped layers"},
+                    {"label": "Transmission Lines", "value": "2,000", "note": "Segments across NEM"},
                 ],
                 "takeaway": (
-                    "Australia's BESS pipeline is geographically concentrated in NSW, VIC and SA "
-                    "- precisely where coal retirements are most imminent. Data centres cluster "
-                    "in the same eastern seaboard corridors, creating strong co-location "
-                    "opportunities for on-site firming and dispatchable renewable supply."
+                    "The spatial analysis uncovers a critical geographic mismatch between future generation and incoming load:\n\n"
+                    "• **Renewable Supply is Northern-Weighted:** A massive pipeline of 191 BESS sites (68.7 GW) and 275 utility solar farms (33.0 GW) is heavily concentrated in Queensland and NSW.\n"
+                    "• **Data Centre Load is Southern-Weighted:** The 48 major energy-intensive AI and data centres are clustered primarily around NSW (21) and Victoria (13).\n\n"
+                    "This regional separation between generation and consumption underscores the urgent need for the **56 Renewable Energy Zones** and **2,000 major transmission segments** to effectively bridge the power gap."
                 ),
                 "description": (
                     "This interactive map overlays the locations of Existing/Proposed Battery Energy Storage Systems (BESS), "
@@ -222,6 +220,7 @@ CHAPTERS = [
                     "• OpenElectricity API (openelectricity.org.au) - live registered battery and solar units across all NEM regions (NSW, QLD, VIC, SA, TAS)\n"
                     "• treasury.qld.gov.au - official Queensland government plant data\n"
                     "• Wikipedia - Battery_storage_power_station article wikitables (operating, under construction & planned Australian projects)\n"
+                    "• HDRE/ZEBRE Verified Data: Manual insertion of known JV projects missing from public databases\n"
                     "• Coordinates geocoded live via Nominatim / OpenStreetMap where not embedded in source data\n\n"
                     "**Data centre sources:**\n"
                     "• nextdc.com - facility pages scraped for 12 operating Australian sites (S1-S6, M1-M3, B1-B2, C1, A1, SC1)\n"
@@ -257,12 +256,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig2_1_spot_heatmap.png",
                 "source": "OpenElectricity API",
                 "metrics": [
-                    {"label": "Region", "value": "QLD1", "note": "Representative NEM state"},
-                    {"label": "Data window", "value": "365 days", "note": "Historical spot prices"},
-                    {"label": "Interval", "value": "Hourly avg", "note": "By hour & day of week"},
+                    {"label": "Peak Window", "value": "17:00-19:00", "note": "Avg ~$122/MWh"},
+                    {"label": "Cheapest Window", "value": "10:00-12:00", "note": "Avg ~$9.8/MWh"},
+                    {"label": "Daily Spread", "value": ">$110/MWh", "note": "Arbitrage potential"}
                 ],
                 "takeaway": (
-                    "Identifying peak pricing hours is essential for dispatchable storage and battery ROI."
+                    "The spot market exhibits a massive, predictable intraday spread. Prices collapse to near-zero (averaging below $10/MWh) between 10:00 and 12:00 due to solar abundance, but skyrocket during the evening peak (17:00-19:00) to an average of over $120/MWh. This >$110/MWh daily spread forms the lucrative foundation of the battery arbitrage business case."
                 ),
                 "description": (
                     "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing).\n\nData is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
@@ -278,11 +277,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig2_2_fcas_regulation.png",
                 "source": "NEMOSIS (AEMO MMS Data)",
                 "metrics": [
-                    {"label": "Data source", "value": "AEMO MMS", "note": "Via NEMOSIS"},
-                    {"label": "Services", "value": "Reg Raise/Lower", "note": "Continuous correction"},
+                    {"label": "Avg Raise Price", "value": "$8.01/MWh"},
+                    {"label": "Avg Lower Price", "value": "$3.44/MWh"},
+                    {"label": "Average Volume", "value": "~47.7 MW", "note": "Cleared per interval"}
                 ],
                 "takeaway": (
-                    "Battery storage has high opportunity for continuous frequency correction revenue."
+                    "In the continuous frequency correction market (Regulation FCAS), Raise services command a significant structural premium, averaging $8.01/MWh compared to just $3.44/MWh for Lower services. This highlights the grid's constant need for dispatchable injection to stabilize momentary frequency dips, a service batteries are uniquely positioned to provide."
                 ),
                 "description": (
                     "This chart visualizes the market prices and cleared volumes for Regulation Frequency Control Ancillary Services (FCAS). Regulation FCAS is a service used by the grid operator to continuously correct minor deviations in grid frequency (50Hz) caused by momentary imbalances between electricity supply and demand.\n\n"
@@ -301,11 +301,12 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig2_3_fcas_contingency.png",
                 "source": "NEMOSIS (AEMO MMS Data)",
                 "metrics": [
-                    {"label": "Data source", "value": "AEMO MMS", "note": "Via NEMOSIS"},
-                    {"label": "Services", "value": "6 types", "note": "Fast/Slow/Delayed Raise/Lower"},
+                    {"label": "Fast (6s) Share", "value": "74.2%", "note": "Of total market value"},
+                    {"label": "Slow (60s) Share", "value": "23.1%"},
+                    {"label": "Delayed (5m) Share", "value": "2.7%"}
                 ],
                 "takeaway": (
-                    "Fast response services represent a significant portion of the contingency market value."
+                    "Contingency FCAS market value is overwhelmingly concentrated in ultra-fast response times. Fast (6-second) response services capture 74.2% of the total market value, heavily favoring inverter-based technologies like battery storage that can respond instantaneously over slower, mechanical thermal plants."
                 ),
                 "description": (
                     "This visualization breaks down the market value of Contingency FCAS, which are services that respond to sudden, major grid events like a generator tripping off. It shows the value split between Fast (6 seconds), Slow (60 seconds), and Delayed (5 minutes) response times, demonstrating the premium paid for rapid-response assets like batteries.\n\n"
@@ -339,11 +340,12 @@ CHAPTERS = [
                 "source": "Open-Meteo & OpenElectricity API",
                 "height": 950,
                 "metrics": [
-                    {"label": "Data window", "value": "Available history", "note": "Merged hourly data"},
-                    {"label": "Weather points", "value": "Temp / Solar / Wind"}
+                    {"label": "Extreme Cold Avg", "value": "$92.66/MWh", "note": "vs $34.51 in Extreme Heat"},
+                    {"label": "Top 10% Demand", "value": "$124.39/MWh", "note": "When >7,729 MW"},
+                    {"label": "Max Price Event", "value": "$1,924.53/MWh", "note": "Low solar (147 W/m²) & Peak demand"}
                 ],
                 "takeaway": (
-                    "Extreme weather directly drives spot price volatility and demand surges."
+                    "Weather dictates severe market extremes with strong statistical correlation. Solar irradiance holds a strong negative correlation (-0.55) with price, driving massive negative price events (e.g., -$199/MWh during 659 W/m² irradiance and low demand). Conversely, extreme cold (<13.3°C) drives average prices almost 3x higher than extreme heat ($92 vs $34) due to winter evening peaks lacking solar cover. When demand enters the top 10th percentile (>7,729 MW), prices average an exceptionally lucrative $124.39/MWh."
                 ),
                 "description": (
                     "This interactive chart provides a time-series view of hourly temperature against spot prices and demand, as well as a scatter plot comparing solar irradiance with market prices. It reveals how high midday solar correlates with negative prices, and how extreme temperatures trigger price spikes.\n\nData is based off scripts/09_fetch_weather_data.py (which issues HTTP GET requests to the Open-Meteo API for historical weather data based on specific coordinates) and charted by scripts/10_generate_weather_charts.py."
@@ -353,39 +355,35 @@ CHAPTERS = [
     },
     {
         "id": "3",
-        "title": "IMPACT OF AI DATA CENTER POWER DEMAND ON THE POWER GRID",
-        "subtitle": "Impact of AI Data Center Power Demand on the Grid",
+        "title": "DATA CENTRE LOAD VS. FIRMING CAPACITY",
+        "subtitle": "Geographical Mismatch & The BESS Arbitrage Opportunity",
         "status": "done",
-        "source": "Synthetic Baseline Assumptions",
+        "source": "AEMO / OpenElectricity API / Open-Meteo",
         "figures": [
             {
                 "id": "fig3_1",
                 "number": 1,
                 "type": "outline",
-                "title": "3. Impact of AI Data Center Power Demand on the Power Grid",
+                "title": "3. Geographic Load vs. Generation Mismatch",
                 "sidebar_title": "RESEARCH OUTLINE",
-                "subtitle": "Impact of AI Data Center Power Demand on the Grid",
+                "subtitle": "Empirical analysis of load vs. generation",
                 "html_path": "",
                 "png_path": "",
-                "source": "Synthetic Baseline Assumptions",
+                "source": "AEMO / OpenElectricity API",
                 "metrics": [],
                 "takeaway": "",
                 "description": (
                     "<div class='outline-container' style='border-top: 1px solid var(--line); padding-top: 24px; margin-top: 16px;'>"
                     "  <div class='outline-section' style='margin-bottom: 28px;'>"
-                    "    <h3 style='color: var(--ivory); font-family: Inter, sans-serif; font-size: 18px; font-weight: 500; margin-bottom: 12px;'>3.1 Global and Local Market Analysis</h3>"
+                    "    <h3 style='color: var(--ivory); font-family: Inter, sans-serif; font-size: 18px; font-weight: 500; margin-bottom: 12px;'>3.1 Geographic Load vs. Generation Mismatch</h3>"
                     "  </div>"
                     "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
-                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.1 Global Data Center Development Assessment: Australia vs. International Benchmarks, Government Initiatives, Regulatory Constraints, Policy Subsidies, Key Market Players, and Strategic Opportunities for HDRE</h4>"
-                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Global Data Center Development Assessment: Australia vs. International Benchmarks, Government Initiatives, Regulatory Constraints, Policy Subsidies, Key Market Players, and HDRE's Development Opportunities</p>"
+                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>Southern Load, Northern Generation</h4>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Data centres are highly concentrated in NSW and VIC, while the majority of BESS and solar development is occurring in QLD and NSW, creating a structural reliance on interstate transmission.</p>"
                     "  </div>"
                     "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
-                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.2 Projections of Power Consumption Growth and Green Energy Deficits, and Potential Business Opportunities for HDRE</h4>"
-                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Estimation of Power Growth and Green Energy Demand Gap, and HDRE's Potential Business Opportunities</p>"
-                    "  </div>"
-                    "  <div class='outline-subsection' style='margin-bottom: 24px; border-left: 2px solid var(--line-strong); padding-left: 16px;'>"
-                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>3.1.3 Data Modeling Assumptions & Synthetic Baselines</h4>"
-                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Note on Methodology: Due to the lack of live forward-looking APIs, figures in this chapter use synthetic baseline modeling. Key assumptions include an exponential data center demand growth curve (from 4.0 TWh in 2025 to 34.5 TWh in 2050 based on AEMO Step Change frameworks) and fixed-capacity state pipeline estimates (e.g., NSW at 4.0 GW).</p>"
+                    "    <h4 style='color: var(--wind); font-family: Inter, sans-serif; font-size: 15px; font-weight: 500; margin-bottom: 6px; white-space: normal; word-wrap: break-word; line-height: 1.4;'>The BESS Arbitrage Case</h4>"
+                    "    <p style='color: var(--muted); font-size: 14px; font-style: italic; line-height: 1.6; margin: 0;'>Running data centres 24/7 on raw grid spot prices exposes operators to massive evening peak costs. Using BESS to firm this power unlocks significant arbitrage value.</p>"
                     "  </div>"
                     "</div>"
                 ),
@@ -393,64 +391,65 @@ CHAPTERS = [
             {
                 "id": "ch3_fig1",
                 "number": 2,
-                "title": "Global Data Centre Capacity - Australia in Context",
-                "sidebar_title": "GLOBAL COMPARISON",
-                "subtitle": "Global comparison of installed data centre capacity and growth rates",
-                "html_path": "outputs/figures/ch3_fig1_international_comparison.html",
+                "title": "State-by-State Mismatch",
+                "sidebar_title": "GEOGRAPHIC MISMATCH",
+                "subtitle": "Data Centre Load vs Renewable Firming Capacity",
+                "html_path": "outputs/figures/ch3_fig1_state_mismatch.html",
                 "png_path": "",
-                "source": "AEMO / Synthetic Baseline Assumptions",
+                "source": "OpenElectricity API / Data Centre Data",
                 "metrics": [
-                    {"label": "Australia Capacity", "value": "2.8 GW"},
-                    {"label": "Australia Growth", "value": "14.5%"}
+                    {"label": "NSW & VIC Data Centres", "value": "34 of 48", "note": "71% of total"},
+                    {"label": "QLD BESS & Solar", "value": "42.3 GW", "note": "62% of NEM capacity"}
                 ],
-                "takeaway": "Australia ranks 6th globally at 2.8 GW, showing strong growth at 14.5%/yr. NSW represents a significant portion of this with a 4.0 GW pipeline.",
-                "description": "This chart compares Australia's data centre capacity against international benchmarks, highlighting its rapid growth rate within the Asia-Pacific region.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
+                "takeaway": "There is a severe geographic mismatch. 71% of major data centres (34 out of 48) are clustered in Southern states (NSW and VIC). Conversely, over 62% of upcoming BESS and solar firming capacity is located in Queensland. This Southern Load vs Northern Generation dynamic requires immense transmission routing and localized firming solutions.",
+                "description": "This chart highlights the imbalance between where major data centres are built and where massive renewable generation and battery storage projects are deployed.\n\nData is processed from empirical dataset CSVs."
             },
             {
                 "id": "ch3_fig2",
                 "number": 3,
-                "title": "AI Data Centre Power Demand Forecast",
-                "sidebar_title": "DEMAND FORECAST",
-                "subtitle": "AEMO 2026 ISP · Three scenarios · 2025-2050",
-                "html_path": "outputs/figures/ch3_fig2_demand_forecast.html",
+                "title": "Hourly Spot Price & Negative Pricing Frequency",
+                "sidebar_title": "PRICE VOLATILITY",
+                "subtitle": "Predictable intraday pricing swings",
+                "html_path": "outputs/figures/ch3_fig2_hourly_profile.html",
                 "png_path": "",
-                "source": "AEMO 2026 ISP",
+                "source": "Open-Meteo & OpenElectricity API",
                 "metrics": [
-                    {"label": "2030 Step Change", "value": "6.15 TWh"},
-                    {"label": "2050 Step Change", "value": "34.5 TWh"}
+                    {"label": "Negative Price Frequency", "value": "16.2%"},
+                    {"label": "Max Extreme", "value": "$1,924.53/MWh"}
                 ],
-                "takeaway": "Under the Step Change scenario, data centre demand rises from 4.0 TWh (2025) to 6.15 TWh by 2030, reaching 34.5 TWh by 2050 - representing a significant structural load.",
-                "description": "Projections of data centre power consumption in Australia across progressive, step, and green export scenarios.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
+                "takeaway": "The NEM exhibits extreme intraday price volatility. Negative pricing occurs in 16.2% of all hours due to midday solar oversupply. During evening peaks, prices can skyrocket to almost $2,000/MWh. This high volatility severely punishes baseload consumers like data centres while heavily rewarding dispatchable BESS assets.",
+                "description": "Hourly average spot prices overlayed with the frequency of negative price events, demonstrating the midday slump and evening spike.\n\nData is processed from real weather and price CSVs."
             },
             {
                 "id": "ch3_fig3",
                 "number": 4,
-                "title": "Green Energy Supply vs Data Centre Demand",
-                "sidebar_title": "GREEN ENERGY GAP",
-                "subtitle": "Renewable supply gap analysis · HDRE opportunity zone",
-                "html_path": "outputs/figures/ch3_fig3_renewable_gap.html",
+                "title": "The Duck Curve: Solar vs Demand",
+                "sidebar_title": "SOLAR & DEMAND",
+                "subtitle": "Irradiance driving the market",
+                "html_path": "outputs/figures/ch3_fig3_duck_curve.html",
                 "png_path": "",
-                "source": "Synthetic Baseline Assumptions",
+                "source": "Open-Meteo & OpenElectricity API",
                 "metrics": [
-                    {"label": "Supply Gap 2035", "value": "55%"}
+                    {"label": "Midday Irradiance", "value": "High", "note": "Drives prices below zero"}
                 ],
-                "takeaway": "Tech giants (Microsoft, Google, OpenAI) have committed to 100% renewable power, but available renewable supply will cover only ~45% of projected DC demand by 2035, creating a structural green energy deficit - HDRE's primary market opportunity.",
-                "description": "Analysis of the supply deficit between available renewable energy generation and data centre load demands.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
+                "takeaway": "Solar generation predictably pushes midday demand and prices into negative territory, while evening demand remains high when solar drops off. This perfectly creates the 'Duck Curve' phenomenon, cementing the need for overnight BESS firming for 24/7 data centre operations.",
+                "description": "Comparing average hourly solar irradiance against grid demand. High midday irradiance correlates directly with negative pricing events.\n\nData is processed from empirical datasets."
             },
             {
                 "id": "ch3_fig4",
                 "number": 5,
-                "title": "DC Pipeline vs Renewable Readiness by State",
-                "sidebar_title": "STATE BREAKDOWN",
-                "subtitle": "NEM states compared · MW pipeline vs renewable share %",
-                "html_path": "outputs/figures/ch3_fig4_state_breakdown.html",
+                "title": "The Value of Firming: Unfirmed Grid vs BESS Offset",
+                "sidebar_title": "BESS ARBITRAGE",
+                "subtitle": "Simulated Cost for 100MW Continuous Load",
+                "html_path": "outputs/figures/ch3_fig4_firming_value.html",
                 "png_path": "",
-                "source": "AEMO / Synthetic Baseline Assumptions",
+                "source": "Empirical Simulation",
                 "metrics": [
-                    {"label": "NSW Pipeline", "value": "4,000 MW"}
+                    {"label": "Daily Spread", "value": "Extreme"},
+                    {"label": "BESS Opportunity", "value": "Arbitrage Savings"}
                 ],
-                "takeaway": "NSW dominates with 4.0 GW in the pipeline but only 35% renewable share - the largest mismatch in the NEM. QLD has a growing pipeline (850 MW) and 28% renewable share, representing an early-mover opportunity for HDRE.",
-                "description": "State-by-state comparison of operational and planned data centre capacity pipeline against local renewable energy share.\n\nData is based off scripts/11_generate_real_ch3_data.py (which generates synthetic baseline data using explicit assumptions: exponential demand growth from 4.0 TWh in 2025 to 34.5 TWh in 2050, and fixed-capacity state pipeline estimates) and charted by scripts/09_generate_ch3_charts.py."
+                "takeaway": "Simulating a 100MW constant data centre load reveals that pulling raw 24/7 power from the spot market is prohibitively expensive due to evening peaks. Utilizing a co-located or contracted BESS to charge during negative midday prices and discharge during evening peaks drastically reduces the net cost of power, proving the financial necessity of firming for AI workloads.",
+                "description": "A cumulative cost comparison showing the financial impact of running a 100MW data centre purely on grid spot prices versus offsetting those costs with an optimized BESS arbitrage strategy.\n\nData is simulated from historical hourly profiles."
             }
         ],
     }
