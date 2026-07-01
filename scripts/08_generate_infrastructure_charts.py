@@ -234,7 +234,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
         print(f"  [map/REZ] added {n_features} {state} REZ polygons.")
 
     # -- Transmission Lines ---------------------------------------------------
-    tx_path = RAW_DIR / "transmission_lines.geojson"
+    tx_path = RAW_DIR / "transmission_lines_simplified.geojson"
     if tx_path.exists():
         try:
             with open(tx_path, "r", encoding="utf-8") as f:

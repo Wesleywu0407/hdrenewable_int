@@ -18,8 +18,16 @@ app_files = [
 for f in glob.glob("scripts/*"):
     if os.path.isfile(f):
         app_files.append(f)
-
-for f in glob.glob("data/raw/*"):
+for f in [
+    "data/raw/bess_locations.csv", 
+    "data/raw/solar_locations.csv", 
+    "data/raw/datacentre_locations.csv",
+    "data/raw/transmission_lines_simplified.geojson",
+    "data/raw/rez_nsw.geojson",
+    "data/raw/rez_vic.geojson",
+    "data/raw/rez_tas.geojson",
+    "data/raw/aemo_res_all.geojson"
+]:
     if os.path.isfile(f):
         app_files.append(f)
 
