@@ -16,8 +16,8 @@ if [ -d "nemosis_cache" ]; then
 fi
 
 if [ -d "data/raw" ]; then
-    find data/raw -type f ! -name 'master_*.csv' ! -name 'plant_data.csv' -delete
-    echo "  Deleted non-master files in data/raw/ (kept plant_data.csv)"
+    find data/raw -type f ! -name 'master_*.csv' ! -name 'plant_data.csv' ! -name '*.geojson' -delete
+    echo "  Deleted non-master files in data/raw/ (kept plant_data.csv and .geojson files)"
 fi
 
 if [ -d "outputs" ]; then

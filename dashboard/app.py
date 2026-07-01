@@ -1261,8 +1261,12 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     
     def format_text(t: str) -> str:
         if not t: return ""
-        # Escape HTML, convert newlines to <br>, and convert **text** to styled note-label divs
-        return re.sub(r'\*\*(.*?):?\*\*(?:<br>)?', r'<div class="note-label" style="margin-top: 1rem;">\1</div>', escape(t).replace('\n', '<br>'))
+        t = escape(t)
+        # Block-level headers: ^**Header**$ or ^**Header:**$ (with optional whitespace)
+        t = re.sub(r'(?m)^\s*\*\*(.*?):?\*\*\s*$', r'<div class="note-label" style="margin-top: 1rem;">\1</div>', t)
+        # Inline bold:
+        t = re.sub(r'\*\*(.*?)\*\*', r'<strong style="color: var(--ivory);">\1</strong>', t)
+        return t.replace('\n', '<br>')
 
     if takeaway or description:
         st.markdown(
