@@ -1668,9 +1668,17 @@ def main() -> int:
     # Exclude non-NEM states (WA, NT) from datacentres
     if "state" not in dc_df.columns:
         dc_df["state"] = dc_df["city"].apply(lambda c: _infer_state(str(c) + " Australia"))
-    dc_df = dc_df[~dc_df["state"].str.upper().isin(["WA", "NT"])]
+    dc_df["state"] = dc_df.apply(lambda row: row["state"] if pd.notna(row.get("state")) and str(row.get("state")).strip() else _infer_state_from_coords(row["lat"], row["lon"]), axis=1)
+    
+    # Replace empty strings with NA to drop them properly
+    dc_df["state"] = dc_df["state"].replace("", pd.NA)
+    dc_df = dc_df.dropna(subset=["state"])
+    dc_df = dc_df[~dc_df["state"].astype(str).str.upper().isin(["WA", "NT"])]
     
     dc_df = dc_df.drop_duplicates(subset=["name"]).reset_index(drop=True)
+    
+    if "address" in dc_df.columns:
+        dc_df = dc_df.drop(columns=["address"])
 
     dc_path = RAW_DIR / "datacentre_locations.csv"
     dc_df.to_csv(dc_path, index=False)
@@ -1707,6 +1715,16 @@ def main() -> int:
     # Phase 2: Inject HDRE/ZEBRE missing projects
     print("\n[4/4] Injecting HDRE/ZEBRE Manual Projects...")
     bess_df, solar_df = inject_hdre_manual_projects(bess_df, solar_df)
+
+    # Clean up any missing data before saving (Strict Data Goal)
+    bess_df["state"] = bess_df.apply(lambda row: row["state"] if pd.notna(row.get("state")) and str(row.get("state")).strip() else _infer_state_from_coords(row["lat"], row["lon"]), axis=1)
+    bess_df["state"] = bess_df["state"].replace("", pd.NA)
+    bess_df = bess_df.dropna(subset=["capacity_mw", "state", "lat", "lon"]).reset_index(drop=True)
+    
+    if not solar_df.empty:
+        solar_df["state"] = solar_df.apply(lambda row: row["state"] if pd.notna(row.get("state")) and str(row.get("state")).strip() else _infer_state_from_coords(row["lat"], row["lon"]), axis=1)
+        solar_df["state"] = solar_df["state"].replace("", pd.NA)
+        solar_df = solar_df.dropna(subset=["capacity_mw", "state", "lat", "lon"]).reset_index(drop=True)
 
     # Save BESS
     bess_path = RAW_DIR / "bess_locations.csv"
