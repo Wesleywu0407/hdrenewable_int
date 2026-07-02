@@ -156,25 +156,53 @@ def fig2_3_fcas_contingency() -> None:
     
     fig = go.Figure()
     
-    services = ["fast_raise", "slow_raise", "delayed_raise", "fast_lower", "slow_lower", "delayed_lower"]
-    labels = ["Fast Raise (6s)", "Slow Raise (60s)", "Delayed Raise (5m)", "Fast Lower (6s)", "Slow Lower (60s)", "Delayed Lower (5m)"]
-    colors = ["#e74c3c", "#f39c12", "#f1c40f", "#3498db", "#2980b9", "#2c3e50"]
-    
-    for srv, lbl, col in zip(services, labels, colors):
+    # Raise services (warm tones) — grouped together with legendgroup
+    raise_services = [
+        ("fast_raise",    "Fast Raise (6s)",     "#e74c3c"),
+        ("slow_raise",    "Slow Raise (60s)",     "#f39c12"),
+        ("delayed_raise", "Delayed Raise (5m)",   "#f1c40f"),
+    ]
+    # Lower services (cool tones) — grouped together with legendgroup
+    lower_services = [
+        ("fast_lower",    "Fast Lower (6s)",      "#3498db"),
+        ("slow_lower",    "Slow Lower (60s)",      "#2980b9"),
+        ("delayed_lower", "Delayed Lower (5m)",    "#2c3e50"),
+    ]
+
+    for srv, lbl, col in raise_services:
         fig.add_trace(go.Bar(
             x=df["interval"],
             y=df[srv],
             name=lbl,
-            marker_color=col
+            marker_color=col,
+            legendgroup="raise",
+            legendgrouptitle_text="Raise",
+            offsetgroup="raise",
+        ))
+
+    for srv, lbl, col in lower_services:
+        fig.add_trace(go.Bar(
+            x=df["interval"],
+            y=df[srv],
+            name=lbl,
+            marker_color=col,
+            legendgroup="lower",
+            legendgrouptitle_text="Lower",
+            offsetgroup="lower",
         ))
         
     fig.update_layout(
         template=TEMPLATE,
-        title=english_title("Contingency FCAS Market Value Breakdown"),
+        title=english_title("Contingency FCAS Market Value Breakdown (Raise vs Lower)"),
         barmode="stack",
-        xaxis_title="Day",
+        bargroupgap=0.08,
+        xaxis_title="Week",
         yaxis_title="Market Value (Million AUD)",
         margin=dict(b=110),
+        legend=dict(
+            groupclick="toggleitem",
+            tracegroupgap=12,
+        ),
     )
     fig.update_xaxes(
         rangeslider_visible=True,
@@ -198,6 +226,7 @@ def fig2_3_fcas_contingency() -> None:
         )
     add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
     save(fig, "fig2_3_fcas_contingency.html", "fig2_3_fcas_contingency.png")
+
 
 def main() -> int:
     print("Generating trading charts -> outputs/figures/")

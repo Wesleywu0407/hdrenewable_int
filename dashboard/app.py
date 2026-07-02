@@ -42,21 +42,9 @@ REFRESH_STATUS_DIR = PROJECT_ROOT / "runtime" / "refresh"
 LOG_DIR = PROJECT_ROOT / "logs"
 
 REFRESH_REGISTRY = {
-    "1.1::*": {
-        "scope_label": "Queensland renewables",
-        "button_label": "Update this analysis",
-        "command": ["bash", "scripts/run_qld_scrape.sh"],
-        "status_path": REFRESH_STATUS_DIR / "chapter_1_1_status.json",
-        "log_path": LOG_DIR / "chapter_1_1_refresh.log",
-        "expected_outputs": [
-            "outputs/figures/fig1_1_qld_renewable_share.html",
-            "outputs/figures/fig1_2_qld_fuel_mix.html",
-            "outputs/figures/fig1_3_qld_negative_prices.html",
-        ],
-    },
     "1.2::*": {
         "scope_label": "National Electricity Market grid analysis",
-        "button_label": "Update this analysis",
+        "button_label": "Refresh",
         "command": ["bash", "scripts/run_nem_scrape.sh"],
         "status_path": REFRESH_STATUS_DIR / "chapter_1_2_status.json",
         "log_path": LOG_DIR / "chapter_1_2_refresh.log",
@@ -64,41 +52,6 @@ REFRESH_REGISTRY = {
             "outputs/figures/fig1_nem_realtime_mix.html",
             "outputs/figures/fig2_annual_generation_by_fuel.html",
             "outputs/figures/fig3_state_comparison.html",
-        ],
-    },
-    "1.3::fig1_4": {
-        "scope_label": "Infrastructure & Storage Mapping",
-        "button_label": "Update this analysis",
-        "command": ["bash", "scripts/run_infrastructure_scrape.sh"],
-        "status_path": REFRESH_STATUS_DIR / "chapter_1_3_status.json",
-        "log_path": LOG_DIR / "chapter_1_3_refresh.log",
-        "expected_outputs": [
-            "data/raw/bess_locations.csv",
-            "data/raw/datacentre_locations.csv",
-            "outputs/figures/fig1_4_infrastructure_map.html",
-        ],
-    },
-    "2.1::*": {
-        "scope_label": "Electricity trading market",
-        "button_label": "Update this analysis",
-        "command": ["bash", "scripts/run_trading_scrape.sh"],
-        "status_path": REFRESH_STATUS_DIR / "chapter_2_1_status.json",
-        "log_path": LOG_DIR / "chapter_2_1_refresh.log",
-        "expected_outputs": [
-            "outputs/figures/fig2_1_spot_heatmap.html",
-            "outputs/figures/fig2_2_fcas_regulation.html",
-            "outputs/figures/fig2_3_fcas_contingency.html",
-        ],
-    },
-    "2.2::fig2_4": {
-        "scope_label": "Weather & Market Price Correlation",
-        "button_label": "Update this analysis",
-        "command": ["bash", "scripts/run_weather_scrape.sh"],
-        "status_path": REFRESH_STATUS_DIR / "chapter_2_2_status.json",
-        "log_path": LOG_DIR / "chapter_2_2_refresh.log",
-        "expected_outputs": [
-            "data/raw/weather_price_correlation.csv",
-            "outputs/figures/fig2_4_weather_correlation.html",
         ],
     },
 }

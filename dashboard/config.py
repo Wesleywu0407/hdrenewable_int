@@ -301,12 +301,15 @@ CHAPTERS = [
                 "png_path": "outputs/figures/png/fig2_3_fcas_contingency.png",
                 "source": "NEMOSIS (AEMO MMS Data)",
                 "metrics": [
-                    {"label": "Fast (6s) Share", "value": "74.2%", "note": "Of total market value"},
-                    {"label": "Slow (60s) Share", "value": "23.1%"},
-                    {"label": "Delayed (5m) Share", "value": "2.7%"}
+                    {"label": "Fast Raise (6s)", "value": "42.7%", "note": "Of total market value"},
+                    {"label": "Fast Lower (6s)", "value": "31.5%", "note": "Of total market value"},
+                    {"label": "Slow Raise (60s)", "value": "9.6%"},
+                    {"label": "Slow Lower (60s)", "value": "13.5%"},
+                    {"label": "Delayed Raise (5m)", "value": "1.5%"},
+                    {"label": "Delayed Lower (5m)", "value": "1.2%"},
                 ],
                 "takeaway": (
-                    "Contingency FCAS market value is overwhelmingly concentrated in ultra-fast response times. Fast (6-second) response services capture 74.2% of the total market value, heavily favoring inverter-based technologies like battery storage that can respond instantaneously over slower, mechanical thermal plants."
+                    "Contingency FCAS market value is dominated by fast-response services: Fast Raise (6s) captures 42.7% and Fast Lower (6s) 31.5% of total market value, together accounting for 74.2% of the market. Raise services (53.8% total) command a slight structural premium over Lower (46.2%), reflecting the grid's bias toward needing rapid injection during under-frequency events — a role batteries are uniquely suited to fill."
                 ),
                 "description": (
                     "This visualization breaks down the market value of Contingency FCAS, which are services that respond to sudden, major grid events like a generator tripping off. It shows the value split between Fast (6 seconds), Slow (60 seconds), and Delayed (5 minutes) response times, demonstrating the premium paid for rapid-response assets like batteries.\n\n"
@@ -398,42 +401,31 @@ CHAPTERS = [
                 "png_path": "",
                 "source": "OpenElectricity API / Data Centre Data",
                 "metrics": [
-                    {"label": "NSW & VIC Data Centres", "value": "34 of 48", "note": "71% of total"},
-                    {"label": "QLD BESS & Solar", "value": "42.3 GW", "note": "62% of NEM capacity"}
+                    {"label": "NSW Data Centres", "value": "21", "note": "8.5 GW BESS, 8.2 GW Solar"},
+                    {"label": "VIC Data Centres", "value": "13", "note": "9.4 GW BESS, 2.5 GW Solar"},
+                    {"label": "QLD BESS Capacity", "value": "23.0 GW", "note": "53% of NEM BESS pipeline"},
+                    {"label": "QLD Solar Capacity", "value": "15.1 GW", "note": "57% of NEM solar farms"}
                 ],
-                "takeaway": "There is a severe geographic mismatch. 71% of major data centres (34 out of 48) are clustered in Southern states (NSW and VIC). Conversely, over 62% of upcoming BESS and solar firming capacity is located in Queensland. This Southern Load vs Northern Generation dynamic requires immense transmission routing and localized firming solutions.",
-                "description": "This chart highlights the imbalance between where major data centres are built and where massive renewable generation and battery storage projects are deployed.\n\nData is processed from empirical dataset CSVs."
-            },
-            {
-                "id": "ch3_fig2",
-                "number": 3,
-                "title": "Hourly Spot Price & Negative Pricing Frequency",
-                "sidebar_title": "PRICE VOLATILITY",
-                "subtitle": "Predictable intraday pricing swings",
-                "html_path": "outputs/figures/ch3_fig2_hourly_profile.html",
-                "png_path": "",
-                "source": "Open-Meteo & OpenElectricity API",
-                "metrics": [
-                    {"label": "Negative Price Frequency", "value": "16.2%"},
-                    {"label": "Max Extreme", "value": "$1,924.53/MWh"}
-                ],
-                "takeaway": "The NEM exhibits extreme intraday price volatility. Negative pricing occurs in 16.2% of all hours due to midday solar oversupply. During evening peaks, prices can skyrocket to almost $2,000/MWh. This high volatility severely punishes baseload consumers like data centres while heavily rewarding dispatchable BESS assets.",
-                "description": "Hourly average spot prices overlayed with the frequency of negative price events, demonstrating the midday slump and evening spike.\n\nData is processed from real weather and price CSVs."
+                "takeaway": "There is a severe geographic mismatch between data centre load and generation capacity. NSW and VIC host 34 of 48 major data centres (71%) yet have only 8.5 GW and 9.4 GW of BESS respectively. Queensland, with just 4 data centres, hosts 23.0 GW of BESS (53% of NEM total) and 15.1 GW of solar (57% of NEM total). This Northern Generation vs Southern Load dynamic structurally depends on interstate transmission and localized firming.",
+                "description": "This chart highlights the geographic mismatch between where major data centres are built (NSW and VIC) and where massive renewable generation and battery storage projects are deployed (QLD and NSW). NSW hosts 21 data centres against 8.5 GW of BESS; Queensland hosts just 4 data centres but 23.0 GW of BESS and 15.1 GW of solar.\n\nData is based off data/raw/bess_locations.csv (OpenElectricity API, Wikipedia, Queensland Gov), data/raw/solar_locations.csv (OpenElectricity API), and data/raw/datacentre_locations.csv (nextdc.com, airtrunk.com, Equinix) and charted by scripts/09_generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig3",
-                "number": 4,
-                "title": "The Duck Curve: Solar vs Demand",
-                "sidebar_title": "SOLAR & DEMAND",
-                "subtitle": "Irradiance driving the market",
+                "number": 3,
+                "title": "The Duck Curve: Total vs Net Grid Demand",
+                "sidebar_title": "DUCK CURVE",
+                "subtitle": "Net Grid Demand (Total Demand minus Solar Generation) revealing the duck belly",
                 "html_path": "outputs/figures/ch3_fig3_duck_curve.html",
                 "png_path": "",
                 "source": "Open-Meteo & OpenElectricity API",
                 "metrics": [
-                    {"label": "Midday Irradiance", "value": "High", "note": "Drives prices below zero"}
+                    {"label": "Peak Total Demand", "value": "~7,997 MW", "note": "18:00 (real QLD annual avg)"},
+                    {"label": "Midday Net Demand", "value": "~4,896 MW", "note": "10:00 (after solar subtraction)"},
+                    {"label": "Solar Displacement at Peak", "value": "~7,997 MW", "note": "NEM solar peaks 12,577 MW midday"},
+                    {"label": "Evening Ramp", "value": "+3,101 MW", "note": "15:00–18:00 demand surge"}
                 ],
-                "takeaway": "Solar generation predictably pushes midday demand and prices into negative territory, while evening demand remains high when solar drops off. This perfectly creates the 'Duck Curve' phenomenon, cementing the need for overnight BESS firming for 24/7 data centre operations.",
-                "description": "Comparing average hourly solar irradiance against grid demand. High midday irradiance correlates directly with negative pricing events.\n\nData is processed from empirical datasets."
+                "takeaway": "NEM solar generation peaks at 12,577 MW at noon, displacing QLD grid demand from ~7,997 MW to a trough of ~4,896 MW between 10:00-12:00. The evening ramp from 15:00-18:00 (+3,101 MW) is the critical firming window and the core arbitrage case for co-located BESS.",
+                "description": "This chart overlays QLD Total Demand against Net Grid Demand (Total Demand minus solar generation) to reveal the Duck Curve phenomenon. The gap between the two lines shows how solar displaces midday grid load, while the steep evening ramp-up from 15:00–18:00 is the critical firming window for BESS assets.\n\nData is based off data/raw/weather_price_correlation.csv (8,760 hourly QLD observations from Open-Meteo & OpenElectricity API, 2025-07-01 to 2026-07-01) for demand, and data/raw/master_NEM_open_electricity.csv (5-min NEM-wide Solar Rooftop + Utility MW from OpenElectricity API) for solar generation. NEM solar is scaled to QLD proportional basis using the ratio of peak QLD demand to peak NEM solar. Charted by scripts/09_generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig4",
@@ -449,7 +441,25 @@ CHAPTERS = [
                     {"label": "BESS Opportunity", "value": "Arbitrage Savings"}
                 ],
                 "takeaway": "Simulating a 100MW constant data centre load reveals that pulling raw 24/7 power from the spot market is prohibitively expensive due to evening peaks. Utilizing a co-located or contracted BESS to charge during negative midday prices and discharge during evening peaks drastically reduces the net cost of power, proving the financial necessity of firming for AI workloads.",
-                "description": "A cumulative cost comparison showing the financial impact of running a 100MW data centre purely on grid spot prices versus offsetting those costs with an optimized BESS arbitrage strategy.\n\nData is simulated from historical hourly profiles."
+                "description": "A cumulative cost comparison for a 100 MW data centre load on raw grid spot prices versus the same load offset by a co-located 100 MW / 2-hour BESS. Daily grid cost is the sum of (hourly QLD spot price \u00d7 100 MWh). BESS arbitrage revenue is one charge/discharge cycle per day: (daily max price \u2212 daily min price) \u00d7 200 MWh.\n\nData is based off data/raw/weather_price_correlation.csv (8,760 hourly QLD spot price observations from Open-Meteo & OpenElectricity API, 2025-07-01 to 2026-07-01) and charted by scripts/09_generate_ch3_charts.py."
+            },
+            {
+                "id": "ch3_fig5",
+                "number": 6,
+                "title": "AI Data Centre Load vs Planned Green Energy Capacity",
+                "sidebar_title": "AI DC PROJECTIONS",
+                "subtitle": "Projected AI Data Centre MW Load Growth vs Planned Renewable Capacity (2025–2035)",
+                "html_path": "outputs/figures/ch3_fig5_projections.html",
+                "png_path": "",
+                "source": "AEMO ISP 2024 / IEA / Empirical Projections",
+                "metrics": [
+                    {"label": "2025 AI DC Baseline", "value": "1.2 GW", "note": "48 NEM hyperscaler sites (real)"},
+                    {"label": "AI DC Load by 2030", "value": "~4.8 GW", "note": "Projected (AEMO ISP + IEA)"},
+                    {"label": "Planned Green Capacity by 2030", "value": "~7.0 GW", "note": "Projected (AEMO ISP Step Change)"},
+                    {"label": "Green Energy Deficit onset", "value": "2033", "note": "AI load outpaces additions"}
+                ],
+                "takeaway": "The 2025 baseline uses 48 hyperscaler DC sites from datacentre_locations.csv consuming ~1.2 GW. Forward years (2026–2035) are projections anchored to IEA Electricity 2024 growth benchmarks and the AEMO 2024 ISP Step Change scenario. The crossover into a structural green energy deficit from 2033 follows directly from announced buildout rates and AEMO's own planning assumptions.",
+                "description": "This time-series chart plots projected AI data centre MW load growth against planned renewable generation capacity additions across the NEM (2025–2035). The 2025 baseline uses 48 hyperscaler DC sites from data/raw/datacentre_locations.csv at ~25 MW average power density. Forward years are projections, with the vertical dashed line marking the boundary.\n\nData is based off data/raw/datacentre_locations.csv for the 2025 baseline, with 2026–2035 projections anchored to the IEA Electricity 2024 report and the AEMO 2024 Integrated System Plan Step Change scenario for renewable capacity additions. All projection assumptions are documented in scripts/09_generate_ch3_charts.py."
             }
         ],
     }
