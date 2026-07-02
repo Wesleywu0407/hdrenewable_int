@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import streamlit as st
+
+ASSET_CSS_PATH = Path(__file__).with_name("assets") / "dashboard.css"
+
+
+def _load_asset_css() -> str:
+    return ASSET_CSS_PATH.read_text(encoding="utf-8") if ASSET_CSS_PATH.exists() else ""
 
 
 def inject_styles() -> None:
@@ -1039,3 +1047,6 @@ def inject_styles() -> None:
         """,
         unsafe_allow_html=True,
     )
+    asset_css = _load_asset_css()
+    if asset_css:
+        st.markdown(f"<style>{asset_css}</style>", unsafe_allow_html=True)

@@ -6,7 +6,6 @@ structure directly, so adding a new figure does not require app code changes.
 
 from __future__ import annotations
 
-
 CHAPTERS = [
     {
         "id": "1.1",
@@ -32,7 +31,7 @@ CHAPTERS = [
                     "Queensland has accelerated its renewable deployment significantly, increasing its renewable generation share from 26.5% to 32.0% over the last 24 months. This rapid growth has allowed Queensland to slightly overtake its peer state New South Wales (30.9% as of June 2026)."
                 ),
                 "description": (
-                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
+                    "This graph compares the percentage of total electricity generated from renewable sources (solar, wind, hydro, bioenergy) in Queensland against New South Wales over time. It illustrates the relative pace at which these two major states are transitioning away from fossil fuels.\n\nData is based off scripts/chapter_1/fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/chapter_1/generate_qld_charts.py."
                 ),
             },
             {
@@ -53,7 +52,7 @@ CHAPTERS = [
                     "Over the past 24 months, Queensland's reliance on coal generation has noticeably decreased from 62.6% to 55.3%. This base-load capacity gap has been filled primarily by a remarkable doubling in wind generation (growing from 5.2% to 11.1%), which has steadily driven the total renewable penetration up to 32.0%."
                 ),
                 "description": (
-                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
+                    "This area chart visualizes the total volume of electricity generated in Queensland by different fuel types (coal, gas, solar, wind, etc.) over the past 24 months. It highlights the changing proportions and seasonal variations of each generation source.\n\nData is based off scripts/chapter_1/fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/chapter_1/generate_qld_charts.py."
                 ),
             },
             {
@@ -74,7 +73,7 @@ CHAPTERS = [
                     "Queensland experiences extreme wholesale spot price volatility. Alongside frequent negative price events that indicate severe daytime solar oversupply, the market also sees massive price spikes (maximums) when demand peaks or supply is constrained. This volatility presents a highly lucrative arbitrage and firming opportunity for battery storage operators."
                 ),
                 "description": (
-                    "This chart tracks the daily maximum and minimum wholesale electricity spot prices in Queensland, alongside the frequency of negative price hours. A negative spot price occurs when the supply of electricity exceeds demand, meaning generators effectively pay the market to take their power, while high maximum prices indicate supply constraints.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
+                    "This chart tracks the daily maximum and minimum wholesale electricity spot prices in Queensland, alongside the frequency of negative price hours. A negative spot price occurs when the supply of electricity exceeds demand, meaning generators effectively pay the market to take their power, while high maximum prices indicate supply constraints.\n\nData is based off scripts/chapter_1/fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/chapter_1/generate_qld_charts.py."
                 ),
             }
         ],
@@ -107,7 +106,7 @@ CHAPTERS = [
                     "make storage and flexible capacity commercially attractive."
                 ),
                 "description": (
-                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
+                    "This interactive chart stacks the real-time electricity generation from all fuel types across the National Electricity Market (NEM) to show total demand over the past 7 days. The overlaid dashed line represents the wholesale electricity spot price (in AUD/MWh) during those same intervals.\n\nData is based off scripts/chapter_1/fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/chapter_1/generate_nem_charts.py."
                 ),
             },
             {
@@ -128,7 +127,7 @@ CHAPTERS = [
                     "Across the NEM, the 24-month window from July 2024 to June 2026 shows a decisive structural shift. Coal's contribution to the monthly generation mix eroded substantially from 56.9% to 51.5%, displaced by consistent growth in wind generation (which expanded from 15.2% to 17.7%) and persistent, zero-marginal-cost solar generation."
                 ),
                 "description": (
-                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
+                    "This stacked bar chart aggregates the total monthly electricity generation across all NEM regions, broken down by fuel type. It reveals how seasonal weather patterns (affecting solar and wind output) and long-term trends shape the overall grid energy mix.\n\nData is based off scripts/chapter_1/fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/chapter_1/generate_nem_charts.py."
                 ),
             },
             {
@@ -149,7 +148,7 @@ CHAPTERS = [
                     "Analyzing the last 12 months reveals starkly different grid realities. South Australia operates a world-leading 76.6% renewable grid with zero coal. In contrast, the eastern seaboard heavyweights—QLD and NSW—still rely on coal for over 56% of their energy, representing massive upside and investment headroom for renewable infrastructure."
                 ),
                 "description": (
-                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
+                    "This chart provides a comparative breakdown of the electricity generation mix for each individual NEM state over the last 12 months. It highlights the stark regional differences in grid composition, such as South Australia's high renewable penetration versus Queensland's reliance on coal.\n\nData is based off scripts/chapter_1/fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/chapter_1/generate_nem_charts.py."
                 ),
             },
             {
@@ -172,7 +171,7 @@ CHAPTERS = [
                     "The NEM is approaching a massive, date-certain thermal cliff. Of the 21.1 GW of currently operating coal capacity across 44 units, a staggering 13.6 GW (over 64%) is officially scheduled to retire by 2035. This timeline acts as an aggressive, unalterable deadline that mandates the rapid acceleration of replacement renewable and firming capacity."
                 ),
                 "description": (
-                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets.\n\nData is based off scripts/01_fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/02_generate_charts.py."
+                    "This timeline plots the operational status and officially scheduled retirement dates for every coal-fired power unit in the NEM. It visualizes the impending base-load capacity gap that must be replaced by new renewable generation and dispatchable firming assets.\n\nData is based off scripts/chapter_1/fetch_nem_data.py (which queries the OpenElectricity API using the openelectricity Python SDK for NEM-wide generation data) and charted by scripts/chapter_1/generate_nem_charts.py."
                 ),
             },
         ],
@@ -234,7 +233,7 @@ CHAPTERS = [
                     "• Department of State Growth TAS - REZ boundaries for Tasmania (3)\n\n"
                     "**Transmission Line sources:**\n"
                     "• Geoscience Australia - National Electricity Infrastructure dataset (Electricity Transmission Lines >= 220kV)\n\n"
-                    "Data is based off scripts/07_fetch_infrastructure_data.py and charted by scripts/08_generate_infrastructure_charts.py."
+                    "Data is based off scripts/chapter_1/fetch_infrastructure_data.py and charted by scripts/chapter_1/generate_infrastructure_charts.py."
                 ),
             },
         ],
@@ -264,7 +263,7 @@ CHAPTERS = [
                     "The spot market exhibits a massive, predictable intraday spread. Prices collapse to near-zero (averaging below $10/MWh) between 10:00 and 12:00 due to solar abundance, but skyrocket during the evening peak (17:00-19:00) to an average of over $120/MWh. This >$110/MWh daily spread forms the lucrative foundation of the battery arbitrage business case."
                 ),
                 "description": (
-                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing).\n\nData is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
+                    "This heatmap visualizes the average wholesale electricity spot price (in AUD/MWh) across different hours of the day and days of the week, using QLD as a representative NEM state. The spot price is the price power generators receive for supplying electricity to the grid. The heatmap highlights periods of high demand and low supply (peak pricing) versus periods of oversupply (low or negative pricing).\n\nData is based off scripts/chapter_2/fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/chapter_2/generate_trading_charts.py."
                 ),
             },
             {
@@ -288,7 +287,7 @@ CHAPTERS = [
                     "This chart visualizes the market prices and cleared volumes for Regulation Frequency Control Ancillary Services (FCAS). Regulation FCAS is a service used by the grid operator to continuously correct minor deviations in grid frequency (50Hz) caused by momentary imbalances between electricity supply and demand.\n\n"
                     "- Regulation Raise\n"
                     "- Regulation Lower\n\n"
-                    "Data is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
+                    "Data is based off scripts/chapter_2/fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/chapter_2/generate_trading_charts.py."
                 ),
             },
             {
@@ -319,7 +318,7 @@ CHAPTERS = [
                     "- Slow Lower: Stabilize high frequency within 60 seconds\n"
                     "- Delayed Raise: Restore frequency within 5 minutes\n"
                     "- Delayed Lower: Restore frequency within 5 minutes\n\n"
-                    "Data is based off scripts/05_fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/06_generate_trading_charts.py."
+                    "Data is based off scripts/chapter_2/fetch_trading_data.py (which uses the nemosis Python library to dynamically compile raw AEMO MMS SQLite tables into a local cache) and charted by scripts/chapter_2/generate_trading_charts.py."
                 ),
             }
         ],
@@ -351,7 +350,7 @@ CHAPTERS = [
                     "Weather dictates severe market extremes with strong statistical correlation. Solar irradiance holds a strong negative correlation (-0.55) with price, driving massive negative price events (e.g., -$199/MWh during 659 W/m² irradiance and low demand). Conversely, extreme cold (<13.3°C) drives average prices almost 3x higher than extreme heat ($92 vs $34) due to winter evening peaks lacking solar cover. When demand enters the top 10th percentile (>7,729 MW), prices average an exceptionally lucrative $124.39/MWh."
                 ),
                 "description": (
-                    "This interactive chart provides a time-series view of hourly temperature against spot prices and demand, as well as a scatter plot comparing solar irradiance with market prices. It reveals how high midday solar correlates with negative prices, and how extreme temperatures trigger price spikes.\n\nData is based off scripts/09_fetch_weather_data.py (which issues HTTP GET requests to the Open-Meteo API for historical weather data based on specific coordinates) and charted by scripts/10_generate_weather_charts.py."
+                    "This interactive chart provides a time-series view of hourly temperature against spot prices and demand, as well as a scatter plot comparing solar irradiance with market prices. It reveals how high midday solar correlates with negative prices, and how extreme temperatures trigger price spikes.\n\nData is based off scripts/chapter_2/fetch_weather_data.py (which issues HTTP GET requests to the Open-Meteo API for historical weather data based on specific coordinates) and charted by scripts/chapter_2/generate_weather_charts.py."
                 ),
             }
         ]
@@ -407,7 +406,7 @@ CHAPTERS = [
                     {"label": "QLD Solar Capacity", "value": "15.1 GW", "note": "57% of NEM solar farms"}
                 ],
                 "takeaway": "There is a severe geographic mismatch between data centre load and generation capacity. NSW and VIC host 34 of 48 major data centres (71%) yet have only 8.5 GW and 9.4 GW of BESS respectively. Queensland, with just 4 data centres, hosts 23.0 GW of BESS (53% of NEM total) and 15.1 GW of solar (57% of NEM total). This Northern Generation vs Southern Load dynamic structurally depends on interstate transmission and localized firming.",
-                "description": "This chart highlights the geographic mismatch between where major data centres are built (NSW and VIC) and where massive renewable generation and battery storage projects are deployed (QLD and NSW). NSW hosts 21 data centres against 8.5 GW of BESS; Queensland hosts just 4 data centres but 23.0 GW of BESS and 15.1 GW of solar.\n\nData is based off data/raw/bess_locations.csv (OpenElectricity API, Wikipedia, Queensland Gov), data/raw/solar_locations.csv (OpenElectricity API), and data/raw/datacentre_locations.csv (nextdc.com, airtrunk.com, Equinix) and charted by scripts/09_generate_ch3_charts.py."
+                "description": "This chart highlights the geographic mismatch between where major data centres are built (NSW and VIC) and where massive renewable generation and battery storage projects are deployed (QLD and NSW). NSW hosts 21 data centres against 8.5 GW of BESS; Queensland hosts just 4 data centres but 23.0 GW of BESS and 15.1 GW of solar.\n\nData is based off data/raw/bess_locations.csv (OpenElectricity API, Wikipedia, Queensland Gov), data/raw/solar_locations.csv (OpenElectricity API), and data/raw/datacentre_locations.csv (nextdc.com, airtrunk.com, Equinix) and charted by scripts/chapter_3/generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig3",
@@ -425,7 +424,7 @@ CHAPTERS = [
                     {"label": "Evening Ramp", "value": "+3,101 MW", "note": "15:00–18:00 demand surge"}
                 ],
                 "takeaway": "NEM solar generation peaks at 12,577 MW at noon, displacing QLD grid demand from ~7,997 MW to a trough of ~4,896 MW between 10:00-12:00. The evening ramp from 15:00-18:00 (+3,101 MW) is the critical firming window and the core arbitrage case for co-located BESS.",
-                "description": "This chart overlays QLD Total Demand against Net Grid Demand (Total Demand minus solar generation) to reveal the Duck Curve phenomenon. The gap between the two lines shows how solar displaces midday grid load, while the steep evening ramp-up from 15:00–18:00 is the critical firming window for BESS assets.\n\nData is based off data/raw/weather_price_correlation.csv (8,760 hourly QLD observations from Open-Meteo & OpenElectricity API, 2025-07-01 to 2026-07-01) for demand, and data/raw/master_NEM_open_electricity.csv (5-min NEM-wide Solar Rooftop + Utility MW from OpenElectricity API) for solar generation. NEM solar is scaled to QLD proportional basis using the ratio of peak QLD demand to peak NEM solar. Charted by scripts/09_generate_ch3_charts.py."
+                "description": "This chart overlays QLD Total Demand against Net Grid Demand (Total Demand minus solar generation) to reveal the Duck Curve phenomenon. The gap between the two lines shows how solar displaces midday grid load, while the steep evening ramp-up from 15:00–18:00 is the critical firming window for BESS assets.\n\nData is based off data/raw/weather_price_correlation.csv (8,760 hourly QLD observations from Open-Meteo & OpenElectricity API, 2025-07-01 to 2026-07-01) for demand, and data/raw/master_NEM_open_electricity.csv (5-min NEM-wide Solar Rooftop + Utility MW from OpenElectricity API) for solar generation. NEM solar is scaled to QLD proportional basis using the ratio of peak QLD demand to peak NEM solar. Charted by scripts/chapter_3/generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig4",
@@ -441,7 +440,7 @@ CHAPTERS = [
                     {"label": "BESS Opportunity", "value": "Arbitrage Savings"}
                 ],
                 "takeaway": "Simulating a 100MW constant data centre load reveals that pulling raw 24/7 power from the spot market is prohibitively expensive due to evening peaks. Utilizing a co-located or contracted BESS to charge during negative midday prices and discharge during evening peaks drastically reduces the net cost of power, proving the financial necessity of firming for AI workloads.",
-                "description": "A cumulative cost comparison for a 100 MW data centre load on raw grid spot prices versus the same load offset by a co-located 100 MW / 2-hour BESS. Daily grid cost is the sum of (hourly QLD spot price \u00d7 100 MWh). BESS arbitrage revenue is one charge/discharge cycle per day: (daily max price \u2212 daily min price) \u00d7 200 MWh.\n\nData is based off data/raw/weather_price_correlation.csv (8,760 hourly QLD spot price observations from Open-Meteo & OpenElectricity API, 2025-07-01 to 2026-07-01) and charted by scripts/09_generate_ch3_charts.py."
+                "description": "A cumulative cost comparison for a 100 MW data centre load on raw grid spot prices versus the same load offset by a co-located 100 MW / 2-hour BESS. Daily grid cost is the sum of (hourly QLD spot price \u00d7 100 MWh). BESS arbitrage revenue is one charge/discharge cycle per day: (daily max price \u2212 daily min price) \u00d7 200 MWh.\n\nData is based off data/raw/weather_price_correlation.csv (8,760 hourly QLD spot price observations from Open-Meteo & OpenElectricity API, 2025-07-01 to 2026-07-01) and charted by scripts/chapter_3/generate_ch3_charts.py."
             },
             {
                 "id": "ch3_fig5",
@@ -459,7 +458,7 @@ CHAPTERS = [
                     {"label": "Green Energy Deficit onset", "value": "2033", "note": "AI load outpaces additions"}
                 ],
                 "takeaway": "The 2025 baseline uses 48 hyperscaler DC sites from datacentre_locations.csv consuming ~1.2 GW. Forward years (2026–2035) are projections anchored to IEA Electricity 2024 growth benchmarks and the AEMO 2024 ISP Step Change scenario. The crossover into a structural green energy deficit from 2033 follows directly from announced buildout rates and AEMO's own planning assumptions.",
-                "description": "This time-series chart plots projected AI data centre MW load growth against planned renewable generation capacity additions across the NEM (2025–2035). The 2025 baseline uses 48 hyperscaler DC sites from data/raw/datacentre_locations.csv at ~25 MW average power density. Forward years are projections, with the vertical dashed line marking the boundary.\n\nData is based off data/raw/datacentre_locations.csv for the 2025 baseline, with 2026–2035 projections anchored to the IEA Electricity 2024 report and the AEMO 2024 Integrated System Plan Step Change scenario for renewable capacity additions. All projection assumptions are documented in scripts/09_generate_ch3_charts.py."
+                "description": "This time-series chart plots projected AI data centre MW load growth against planned renewable generation capacity additions across the NEM (2025–2035). The 2025 baseline uses 48 hyperscaler DC sites from data/raw/datacentre_locations.csv at ~25 MW average power density. Forward years are projections, with the vertical dashed line marking the boundary.\n\nData is based off data/raw/datacentre_locations.csv for the 2025 baseline, with 2026–2035 projections anchored to the IEA Electricity 2024 report and the AEMO 2024 Integrated System Plan Step Change scenario for renewable capacity additions. All projection assumptions are documented in scripts/chapter_3/generate_ch3_charts.py."
             }
         ],
     }

@@ -68,7 +68,7 @@ source .venv/bin/activate
 
 # Ensure requirements are installed
 echo "Checking and verifying dependencies..."
-pip install openelectricity[analysis] pandas plotly python-dotenv jupyter pyarrow kaleido openpyxl "streamlit>=1.32" nemosis --quiet
+pip install -r requirements.txt --quiet
 
 # Execute Fetch phase
 if [ "$FETCH" = true ]; then
@@ -83,11 +83,11 @@ if [ "$FETCH" = true ]; then
     if [ -z "$OPENELECTRICITY_API_KEY" ]; then
         echo "WARNING: OPENELECTRICITY_API_KEY is not set. Data fetch might fail or use cached data."
     fi
-    python scripts/01_fetch_nem_data.py
-    python scripts/03_fetch_qld_data.py
-    python scripts/05_fetch_trading_data.py
-    python scripts/07_fetch_infrastructure_data.py
-    python scripts/09_fetch_weather_data.py
+    python -m scripts.chapter_1.fetch_nem_data
+    python -m scripts.chapter_1.fetch_qld_data
+    python -m scripts.chapter_2.fetch_trading_data
+    python -m scripts.chapter_1.fetch_infrastructure_data
+    python -m scripts.chapter_2.fetch_weather_data
 fi
 
 # Execute Generate phase
@@ -95,12 +95,12 @@ if [ "$GENERATE" = true ]; then
     echo "=========================================="
     echo "2. Generating charts..."
     echo "=========================================="
-    python scripts/02_generate_charts.py
-    python scripts/04_generate_qld_charts.py
-    python scripts/06_generate_trading_charts.py
-    python scripts/08_generate_infrastructure_charts.py
-    python scripts/09_generate_ch3_charts.py
-    python scripts/10_generate_weather_charts.py
+    python -m scripts.chapter_1.generate_nem_charts
+    python -m scripts.chapter_1.generate_qld_charts
+    python -m scripts.chapter_2.generate_trading_charts
+    python -m scripts.chapter_1.generate_infrastructure_charts
+    python -m scripts.chapter_3.generate_ch3_charts
+    python -m scripts.chapter_2.generate_weather_charts
 fi
 
 # Execute Infrastructure-only phase
@@ -111,8 +111,8 @@ if [ "$INFRA" = true ]; then
     if [ -f ".env" ]; then
         export $(grep -v '^#' .env | xargs) 2>/dev/null || true
     fi
-    python scripts/07_fetch_infrastructure_data.py
-    python scripts/08_generate_infrastructure_charts.py
+    python -m scripts.chapter_1.fetch_infrastructure_data
+    python -m scripts.chapter_1.generate_infrastructure_charts
 fi
 
 # Execute Dashboard phase

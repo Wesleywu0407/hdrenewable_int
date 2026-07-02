@@ -18,6 +18,8 @@ If you have already run the pipeline and have cached data, you can start the Str
 ./run.sh --dashboard
 ```
 
+Dependencies are pinned in `requirements.txt`. The main runner installs from that file when creating or refreshing the virtual environment.
+
 ## Running the Complete Pipeline
 
 To fetch fresh data and regenerate charts, configure your API credentials:
@@ -67,7 +69,7 @@ To fetch fresh data and regenerate charts, configure your API credentials:
 To re-scrape BESS and Datacentre data and regenerate the infrastructure map independently:
 
 ```bash
-bash scripts/run_infrastructure_scrape.sh
+bash scripts/chapter_1/run_infrastructure_scrape.sh
 ```
 
 Or via the main pipeline flag:
@@ -81,5 +83,16 @@ Or via the main pipeline flag:
 To re-scrape weather data and regenerate the correlation charts independently:
 
 ```bash
-bash scripts/run_weather_scrape.sh
+bash scripts/chapter_2/run_weather_scrape.sh
 ```
+
+## Project Structure
+
+- `scripts/chapter_1/`, `scripts/chapter_2/`, `scripts/chapter_3/`: primary pipeline modules grouped by dashboard chapter.
+- `scripts/common/`: shared paths, constants, cache helpers, logging, and cleaning utilities.
+- `dashboard/components/`: reusable Streamlit UI components.
+- `dashboard/assets/`: dashboard CSS loaded by `dashboard/styles.py`.
+- `tools/`: standalone maintenance/export tools.
+- `docs/`: architecture, data pipeline, and deployment notes.
+
+Top-level numbered script wrappers were removed; use the chapter modules and chapter runner scripts shown above.

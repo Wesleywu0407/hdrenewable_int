@@ -11,7 +11,7 @@ echo "Checking script2stlite installation..."
 pip install script2stlite --quiet
 
 echo "Running export script..."
-python export_stlite.py
+python tools/export_stlite.py
 
 echo "========================================="
 echo "Success! The dashboard has been exported to: dashboard_exported.html"
