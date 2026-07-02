@@ -5,11 +5,16 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from html import escape
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
 import streamlit as st
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.chapter_1 import generate_infrastructure_charts as infrastructure_charts
 
@@ -30,7 +35,6 @@ except ImportError:
     from data import load_infrastructure_data
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 CARD_COLOR_PALETTE = {
     "fossil": "#8B6F47",
