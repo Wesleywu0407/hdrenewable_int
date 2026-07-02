@@ -30,4 +30,14 @@ if [ -f "dashboard_exported.html" ]; then
     echo "  Deleted dashboard_exported.html"
 fi
 
+if [ -d "logs" ]; then
+    rm -rf logs/
+    echo "  Deleted logs/ directory"
+fi
+
+if [ -d "runtime" ]; then
+    rm -rf runtime/
+    echo "  Deleted runtime/ directory"
+fi
+
 echo "Cache and generated outputs cleaned."
