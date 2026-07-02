@@ -211,7 +211,6 @@ def render_header(entry: dict[str, Any]) -> None:
         f"""
         <div class="topbar">
             <div>
-                <div class="terminal-label">HDRE NEM research terminal</div>
                 <div class="terminal-meta">{escape(source_label)} · Updated {UPDATED_DATE:%d %b %Y} · Chapter {escape(chapter["id"])}</div>
             </div>
             {system_state_html}
