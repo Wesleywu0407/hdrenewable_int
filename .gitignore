@@ -50,3 +50,5 @@ nemosis_cachelogs/
 runtime/
 nemosis_cache
 logs
+
+.claude/

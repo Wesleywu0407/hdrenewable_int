@@ -32,6 +32,12 @@ def inject_styles() -> None:
             --battery: #5D9C58;
             --warning: #C7903A;
             --success: #78A866;
+            --hairline: #262d38;
+            --amber: #f5c063;
+            --purple: #8f86e8;
+            --body-light: #e9e7e0;
+            --label-gray: #7d8590;
+            --desc-gray: #9aa2ad;
         }
 
         html,
@@ -779,44 +785,30 @@ def inject_styles() -> None:
         }
 
         .instrument-tile {
-            min-height: 104px;
+            min-height: 96px;
             margin-top: 12px;
-            padding: 12px;
-            border: 0.5px solid var(--line);
-            border-radius: 8px;
-            background: var(--panel-2);
+            padding: 14px 16px;
+            border: 0;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .instrument-tile.compact {
-            min-height: 86px;
+            min-height: 80px;
         }
-
-        /* KPI card color-tag system - 3px left bar indicates energy category */
-        .kpi-card {
-            --kpi-padding-left: 12px;
-            border-left: 3px solid transparent;
-            padding-left: calc(var(--kpi-padding-left, 20px) + 3px) !important;
-            border-top-left-radius: 0 !important;
-            border-bottom-left-radius: 0 !important;
-        }
-
-        .kpi-card--fossil  { border-left-color: #8B6F47 !important; }
-        .kpi-card--wind    { border-left-color: #1F8A5C !important; }
-        .kpi-card--solar   { border-left-color: #F5A623 !important; }
-        .kpi-card--storage { border-left-color: #5B8DEF !important; }
-        .kpi-card--market  { border-left-color: #6B5BD9 !important; }
 
         .instrument-label {
             font-size: 11px;
-            line-height: 1.2;
-            color: var(--muted);
+            line-height: 1.4;
+            color: var(--label-gray);
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             font-weight: 500;
         }
 
         .instrument-value {
-            margin-top: 12px;
-            font-size: 28px;
+            margin-top: 10px;
+            font-size: 24px;
             line-height: 1;
             color: var(--ivory);
             font-weight: 500;
@@ -848,27 +840,167 @@ def inject_styles() -> None:
             color: var(--faint);
         }
 
-        .research-note {
-            margin-top: 14px;
-            padding: 14px 16px;
-            border-left: 2px solid var(--solar);
-            border-top: 0.5px solid var(--line);
-            border-right: 0.5px solid var(--line);
-            border-bottom: 0.5px solid var(--line);
-            border-radius: 0 8px 8px 0;
-            background: #0D151C;
-            color: var(--muted);
+        /* Editorial figure notes: flat zones on page background, hairline dividers, no boxes */
+        .figure-notes {
+            margin-top: 36px;
+        }
+
+        .note-zone + .note-zone {
+            margin-top: 36px;
+        }
+
+        .zone-label {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--label-gray);
+        }
+
+        .zone-label::after {
+            content: "";
+            flex: 1 1 auto;
+            height: 0.5px;
+            background: var(--hairline);
+        }
+
+        .takeaway-body {
+            max-width: 64ch;
+            font-size: 19px;
+            line-height: 1.75;
+            font-weight: 400;
+            color: var(--body-light);
+        }
+
+        .takeaway-body strong,
+        .description-body strong,
+        .methodology-block strong {
+            font-weight: 500;
+            color: inherit;
+        }
+
+        .hl-amber { color: var(--amber); }
+        .hl-purple { color: var(--purple); }
+
+        .description-body {
+            max-width: 64ch;
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.7;
+            color: var(--desc-gray);
         }
 
         .note-label {
-            margin-bottom: 6px;
-            color: var(--ivory);
+            margin-bottom: 8px;
             font-size: 11px;
-            line-height: 1.2;
-            text-transform: uppercase;
+            line-height: 1.4;
             font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--label-gray);
+        }
+
+        .takeaway-body .note-label,
+        .methodology-block .note-label {
+            margin-top: 14px;
+        }
+
+        .takeaway-body .note-label:first-child,
+        .methodology-block .note-label:first-child {
+            margin-top: 0;
+        }
+
+        .data-methodology {
+            margin-top: 32px;
+        }
+
+        .data-methodology summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            border: 0.5px solid var(--hairline);
+            border-radius: 999px;
+            font-size: 12px;
+            color: var(--label-gray);
+            list-style: none;
+            cursor: pointer;
+            user-select: none;
+            transition: color 140ms ease, border-color 140ms ease;
+        }
+
+        .data-methodology summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .data-methodology summary::before {
+            content: "";
+            width: 5px;
+            height: 5px;
+            border-right: 1px solid currentColor;
+            border-bottom: 1px solid currentColor;
+            transform: rotate(45deg) translateY(-1px);
+            transition: transform 140ms ease;
+        }
+
+        .data-methodology[open] summary::before {
+            transform: rotate(225deg);
+        }
+
+        .data-methodology summary:hover {
+            color: var(--ivory);
+            border-color: var(--line-strong);
+        }
+
+        .methodology-content {
+            margin-top: 16px;
+            max-width: 110ch;
+            font-size: 12.5px;
+            line-height: 1.7;
+            color: var(--label-gray);
+        }
+
+        .methodology-block {
+            break-inside: avoid;
+            margin-bottom: 14px;
+        }
+
+        @media (min-width: 1100px) {
+            .methodology-content.cols-2 {
+                column-count: 2;
+                column-gap: 48px;
+            }
+        }
+
+        .data-footnote {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 32px;
+            font-size: 12.5px;
+            color: var(--label-gray);
+        }
+
+        .data-footnote svg {
+            flex: 0 0 auto;
+            opacity: 0.75;
+        }
+
+        .stat-single {
+            margin-top: 32px;
+            max-width: 64ch;
+        }
+
+        .stat-single-value {
+            font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+            font-feature-settings: 'tnum' on, 'lnum' on;
+            font-size: 33px;
+            line-height: 1.15;
+            font-weight: 500;
+            letter-spacing: -0.01em;
         }
 
         .missing-file {

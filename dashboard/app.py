@@ -859,7 +859,93 @@ def render_sidebar(figures: list[dict[str, Any]]) -> None:
                 )
 
 
+HIGHLIGHT_AMBER_RE = re.compile(
+    r"-?\$[\d,]+(?:\.\d+)?(?:/MWh)?"
+    r"|\b\d+(?:\.\d+)?%"
+    r"|\b\d+(?:,\d{3})*(?:\.\d+)?\s?(?:GW|MW|MWh)\b"
+    r"|\b\d+ of \d+\b"
+    r"|\b\d{2}:\d{2}-\d{2}:\d{2}\b"
+)
+HIGHLIGHT_PURPLE_RE = re.compile(r"\bBESS\b|\bbattery storage\b|\barbitrage\b|\bfirming\b", re.IGNORECASE)
+DATA_FOOTNOTE_ICON = (
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">'
+    '<ellipse cx="12" cy="5" rx="9" ry="3"/>'
+    '<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>'
+    '<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>'
+)
+
+
+def apply_note_highlights(escaped_text: str) -> str:
+    """Color-only emphasis: at most 2 amber (data/price) + 1 purple (BESS/strategy) per paragraph."""
+    highlighted_paragraphs = []
+    for paragraph in escaped_text.split("\n\n"):
+        counts = {"amber": 0, "purple": 0}
+
+        def amber_repl(match: re.Match) -> str:
+            if counts["amber"] >= 2:
+                return match.group(0)
+            counts["amber"] += 1
+            return f'<span class="hl-amber">{match.group(0)}</span>'
+
+        def purple_repl(match: re.Match) -> str:
+            if counts["purple"] >= 1:
+                return match.group(0)
+            counts["purple"] += 1
+            return f'<span class="hl-purple">{match.group(0)}</span>'
+
+        paragraph = HIGHLIGHT_AMBER_RE.sub(amber_repl, paragraph)
+        paragraph = HIGHLIGHT_PURPLE_RE.sub(purple_repl, paragraph)
+        highlighted_paragraphs.append(paragraph)
+    return "\n\n".join(highlighted_paragraphs)
+
+
+def format_note_text(text: str, highlight: bool = False) -> str:
+    if not text:
+        return ""
+    text = escape(text)
+    if highlight:
+        text = apply_note_highlights(text)
+    # Block-level headers: ^**Header**$ or ^**Header:**$ (with optional whitespace)
+    text = re.sub(r'(?m)^\s*\*\*(.*?):?\*\*\s*$', r'<div class="note-label">\1</div>', text)
+    # Inline bold:
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+    return text.replace('\n', '<br>')
+
+
+def split_description(text: str) -> tuple[list[str], list[str], list[str]]:
+    """Split a description into visible paragraphs, source/methodology paragraphs, and data footnotes."""
+    visible: list[str] = []
+    sources: list[str] = []
+    footnotes: list[str] = []
+    for paragraph in text.split("\n\n"):
+        if not paragraph.strip():
+            continue
+        if "scripts/" in paragraph or re.search(r"(?m)^\s*\*\*[^*]*sources:\*\*\s*$", paragraph):
+            sources.append(paragraph)
+        elif paragraph.lstrip().startswith("Data is "):
+            footnotes.append(paragraph)
+        else:
+            visible.append(paragraph)
+    return visible, sources, footnotes
+
+
 def render_standard_metrics(metrics: list[dict[str, str]], entry: dict[str, Any] | None = None) -> None:
+    if not metrics:
+        return
+    if len(metrics) == 1:
+        metric = metrics[0]
+        category = metric_category(metric["label"])
+        accent_class = "hl-purple" if category == "storage" else "hl-amber"
+        st.markdown(
+            f"""
+            <div class="stat-single">
+                <div class="zone-label">{escape(metric["label"])}</div>
+                <div class="stat-single-value {accent_class}">{escape(metric["value"])}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
     cols_per_row = max(1, min(3, len(metrics)))
     columns = st.columns(cols_per_row, gap="small")
     for i, metric in enumerate(metrics):
@@ -890,7 +976,7 @@ def render_ch3_research_outline() -> None:
         {
             "href": f"?figure={quote('3::ch3_fig2')}",
             "pair": "2",
-            "color": "#a78bfa",
+            "color": "#8f86e8",
             "eyebrow": "FIG 03 · Q2",
             "title": "Price Volatility",
             "metric": "16.2%",
@@ -908,7 +994,7 @@ def render_ch3_research_outline() -> None:
         {
             "href": f"?figure={quote('3::ch3_fig4')}",
             "pair": "4",
-            "color": "#d4a857",
+            "color": "#f5c063",
             "eyebrow": "FIG 05 · Q4",
             "title": "Value of Firming",
             "metric": "Massive",
@@ -920,7 +1006,7 @@ def render_ch3_research_outline() -> None:
         <a class="ch3-flow-card ch3-pair-{card['pair']}" href="{card['href']}" target="_self" style="--accent: {card['color']};">
             <div class="ch3-card-eyebrow">{card['eyebrow']}</div>
             <div class="ch3-flow-title">{card['title']}</div>
-            <div class="ch3-flow-metric" style="color: {card['color']};">{card['metric']}</div>
+            <div class="ch3-flow-metric">{card['metric']}</div>
             <div class="ch3-flow-label">{card['label']}</div>
         </a>
         """
@@ -933,7 +1019,7 @@ def render_ch3_research_outline() -> None:
         .ch3-outline-wrap {{
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 40px;
         }}
         .ch3-outline-hero .main-title {{
             margin-bottom: 0.65rem !important;
@@ -943,150 +1029,134 @@ def render_ch3_research_outline() -> None:
             font-size: 15px;
             line-height: 1.65;
             margin: 0;
-            max-width: 980px;
-        }}
-        .ch3-thesis-card,
-        .ch3-question-card,
-        .ch3-flow-card,
-        .ch3-source-bar {{
-            background: var(--surface-1);
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-            box-shadow: none;
-        }}
-        .ch3-thesis-card {{
-            border-left: 3px solid #d4a857;
-            border-radius: 0 8px 8px 0;
-            padding: 1rem 1.25rem;
-        }}
-        .ch3-section-label,
-        .ch3-thesis-label {{
-            color: #d4a857;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.11em;
-            text-transform: uppercase;
-            margin-bottom: 0.65rem;
-        }}
-        .ch3-thesis-body {{
-            color: var(--ivory);
-            font-size: 17px;
-            line-height: 1.65;
-            max-width: 1040px;
+            max-width: 72ch;
         }}
         .ch3-question-grid {{
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
+            gap: 0 48px;
+            border-top: 0.5px solid var(--hairline);
         }}
         .ch3-question-card {{
-            border-left: 3px solid var(--accent);
-            border-radius: 10px;
-            padding: 1rem 1.1rem;
+            padding: 18px 0 20px;
+            border-bottom: 0.5px solid var(--hairline);
         }}
         .ch3-question-title {{
+            display: flex;
+            align-items: center;
+            gap: 9px;
             color: var(--ivory);
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 500;
             letter-spacing: 0.02em;
-            margin-bottom: 0.55rem;
+            margin-bottom: 8px;
+            transition: color 140ms ease;
+        }}
+        .ch3-question-title::before {{
+            content: "";
+            flex: 0 0 auto;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.85;
         }}
         .ch3-question-card p {{
-            color: #A7AEA9;
+            color: var(--desc-gray);
             font-size: 14px;
-            line-height: 1.55;
+            line-height: 1.6;
             margin: 0;
+            max-width: 56ch;
         }}
         .ch3-flow-grid {{
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1rem;
+            gap: 12px;
         }}
         .ch3-flow-card {{
             display: block;
-            border-top: 3px solid var(--accent);
-            border-radius: 10px;
-            padding: 1rem;
+            padding: 16px 18px 18px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
             text-decoration: none !important;
-            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+            transition: background 140ms ease, transform 140ms ease;
         }}
         .ch3-flow-card:hover {{
             transform: translateY(-2px);
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.045);
+            background: rgba(255, 255, 255, 0.06);
         }}
-        .ch3-outline-wrap:has(.ch3-pair-1:hover) .ch3-pair-1 {{
-            border-color: #5b8def;
-            transform: translateY(-1px);
-            background: rgba(91, 141, 239, 0.06);
+        .ch3-outline-wrap:has(.ch3-pair-1:hover) .ch3-flow-card.ch3-pair-1,
+        .ch3-outline-wrap:has(.ch3-pair-2:hover) .ch3-flow-card.ch3-pair-2,
+        .ch3-outline-wrap:has(.ch3-pair-3:hover) .ch3-flow-card.ch3-pair-3,
+        .ch3-outline-wrap:has(.ch3-pair-4:hover) .ch3-flow-card.ch3-pair-4 {{
+            background: rgba(255, 255, 255, 0.06);
         }}
-        .ch3-outline-wrap:has(.ch3-pair-2:hover) .ch3-pair-2 {{
-            border-color: #a78bfa;
-            transform: translateY(-1px);
-            background: rgba(167, 139, 250, 0.06);
-        }}
-        .ch3-outline-wrap:has(.ch3-pair-3:hover) .ch3-pair-3 {{
-            border-color: #ec6a5e;
-            transform: translateY(-1px);
-            background: rgba(236, 106, 94, 0.06);
-        }}
-        .ch3-outline-wrap:has(.ch3-pair-4:hover) .ch3-pair-4 {{
-            border-color: #d4a857;
-            transform: translateY(-1px);
-            background: rgba(212, 168, 87, 0.06);
+        .ch3-outline-wrap:has(.ch3-pair-1:hover) .ch3-question-card.ch3-pair-1 .ch3-question-title,
+        .ch3-outline-wrap:has(.ch3-pair-2:hover) .ch3-question-card.ch3-pair-2 .ch3-question-title,
+        .ch3-outline-wrap:has(.ch3-pair-3:hover) .ch3-question-card.ch3-pair-3 .ch3-question-title,
+        .ch3-outline-wrap:has(.ch3-pair-4:hover) .ch3-question-card.ch3-pair-4 .ch3-question-title {{
+            color: var(--accent);
         }}
         .ch3-card-eyebrow {{
-            color: var(--muted);
+            color: var(--label-gray);
             font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
         }}
         .ch3-flow-title {{
             color: var(--ivory);
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 0.9rem;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 14px;
         }}
         .ch3-flow-metric {{
+            font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+            font-feature-settings: 'tnum' on, 'lnum' on;
             font-size: 28px;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 0.35rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            line-height: 1.15;
+            margin-bottom: 6px;
+            color: var(--accent);
         }}
         .ch3-flow-label {{
-            color: #898781;
+            color: var(--label-gray);
             font-size: 12px;
             line-height: 1.35;
         }}
         .ch3-source-bar {{
             display: flex;
             align-items: center;
-            gap: 0.7rem;
+            gap: 10px;
             flex-wrap: wrap;
-            border-radius: 8px;
-            padding: 0.8rem 1rem;
+            padding-top: 18px;
+            border-top: 0.5px solid var(--hairline);
         }}
         .ch3-source-label {{
-            color: var(--muted);
+            color: var(--label-gray);
             font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
+            font-weight: 500;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
-            margin-right: 0.15rem;
+            margin-right: 6px;
         }}
         .ch3-source-pill {{
-            background: rgba(255,255,255,0.04);
-            border: 0.5px solid rgba(255,255,255,0.08);
-            border-radius: 4px;
-            color: #898781;
+            background: transparent;
+            border: 0.5px solid var(--hairline);
+            border-radius: 999px;
+            color: var(--label-gray);
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 11px;
-            padding: 3px 8px;
+            padding: 4px 12px;
         }}
         @media (max-width: 900px) {{
-            .ch3-question-grid,
-            .ch3-flow-grid {{
+            .ch3-question-grid {{
                 grid-template-columns: 1fr;
+            }}
+            .ch3-flow-grid {{
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }}
         }}
         </style>
@@ -1096,9 +1166,9 @@ def render_ch3_research_outline() -> None:
                 <p>Impact of AI Data Center Power Demand on the Grid - assessing whether and where HDRE should enter the Australian green energy market over the next 5-10 years.</p>
             </section>
 
-            <section class="ch3-thesis-card">
-                <div class="ch3-thesis-label">CENTRAL THESIS</div>
-                <div class="ch3-thesis-body">Data centres are heavily clustered in Southern states (71%), while over 62% of upcoming BESS and solar firming capacity is located in the North. This geographic mismatch, combined with predictable intraday spot price volatility (16.2% negative pricing events), defines a lucrative arbitrage and firming opportunity for HDRE.</div>
+            <section class="ch3-thesis-zone">
+                <div class="zone-label">CENTRAL THESIS</div>
+                <div class="takeaway-body">Data centres are heavily clustered in Southern states (<span class="hl-amber">71%</span>), while over <span class="hl-amber">62%</span> of upcoming BESS and solar firming capacity is located in the North. This geographic mismatch, combined with predictable intraday spot price volatility (16.2% negative pricing events), defines a lucrative <span class="hl-purple">arbitrage and firming</span> opportunity for HDRE.</div>
             </section>
 
             <section>
@@ -1107,7 +1177,7 @@ def render_ch3_research_outline() -> None:
                         <div class="ch3-question-title">Q1 · State Mismatch</div>
                         <p>Where are data centres being built compared to where BESS and solar capacity is located?</p>
                     </div>
-                    <div class="ch3-question-card ch3-pair-2" style="--accent: #a78bfa;">
+                    <div class="ch3-question-card ch3-pair-2" style="--accent: #8f86e8;">
                         <div class="ch3-question-title">Q2 · Price Volatility</div>
                         <p>How frequently do negative wholesale prices occur, and how severe are the evening peaks?</p>
                     </div>
@@ -1115,7 +1185,7 @@ def render_ch3_research_outline() -> None:
                         <div class="ch3-question-title">Q3 · The Duck Curve</div>
                         <p>How does solar irradiance directly drive the intraday collapse of energy prices?</p>
                     </div>
-                    <div class="ch3-question-card ch3-pair-4" style="--accent: #d4a857;">
+                    <div class="ch3-question-card ch3-pair-4" style="--accent: #f5c063;">
                         <div class="ch3-question-title">Q4 · Market entry</div>
                         <p>Which NEM state offers the best entry point - pipeline scale or green-energy readiness?</p>
                     </div>
@@ -1123,7 +1193,7 @@ def render_ch3_research_outline() -> None:
             </section>
 
             <section>
-                <div class="ch3-section-label">ANALYSIS FLOW · CLICK ANY STEP TO OPEN THE FIGURE</div>
+                <div class="zone-label">ANALYSIS FLOW · CLICK ANY STEP TO OPEN THE FIGURE</div>
                 <div class="ch3-flow-grid">
                     {step_card_html}
                 </div>
@@ -1258,26 +1328,42 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
     
     takeaway = figure.get("takeaway", "")
     description = figure.get("description", "")
-    
-    def format_text(t: str) -> str:
-        if not t: return ""
-        t = escape(t)
-        # Block-level headers: ^**Header**$ or ^**Header:**$ (with optional whitespace)
-        t = re.sub(r'(?m)^\s*\*\*(.*?):?\*\*\s*$', r'<div class="note-label" style="margin-top: 1rem;">\1</div>', t)
-        # Inline bold:
-        t = re.sub(r'\*\*(.*?)\*\*', r'<strong style="color: var(--ivory);">\1</strong>', t)
-        return t.replace('\n', '<br>')
 
     if takeaway or description:
-        st.markdown(
-            f"""
-            <div class="research-note">
-                {f'<div class="note-label">key takeaway</div><div>{format_text(takeaway)}</div>' if takeaway else ''}
-                {f'<div class="note-label" style="margin-top: 1rem;">graph description</div><div>{format_text(description)}</div>' if description else ''}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        visible_paras, source_paras, footnote_paras = split_description(description)
+        zones = ['<div class="figure-notes">']
+        if takeaway:
+            zones.append(
+                '<div class="note-zone takeaway-zone">'
+                '<div class="zone-label">key takeaway</div>'
+                f'<div class="takeaway-body">{format_note_text(takeaway, highlight=True)}</div>'
+                "</div>"
+            )
+        if visible_paras:
+            visible_text = format_note_text("\n\n".join(visible_paras))
+            zones.append(
+                '<div class="note-zone description-zone">'
+                '<div class="zone-label">about this graph</div>'
+                f'<div class="description-body">{visible_text}</div>'
+                "</div>"
+            )
+        if source_paras:
+            blocks = "".join(
+                f'<div class="methodology-block">{format_note_text(p)}</div>' for p in source_paras
+            )
+            cols_class = " cols-2" if len(source_paras) > 2 else ""
+            zones.append(
+                '<details class="data-methodology">'
+                "<summary>Data &amp; methodology</summary>"
+                f'<div class="methodology-content{cols_class}">{blocks}</div>'
+                "</details>"
+            )
+        for paragraph in footnote_paras:
+            zones.append(
+                f'<div class="data-footnote">{DATA_FOOTNOTE_ICON}<span>{format_note_text(paragraph)}</span></div>'
+            )
+        zones.append("</div>")
+        st.markdown("".join(zones), unsafe_allow_html=True)
 
 
 def main() -> None:
