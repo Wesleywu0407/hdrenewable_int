@@ -16,7 +16,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+import importlib
 from scripts.chapter_1 import generate_infrastructure_charts as infrastructure_charts
+importlib.reload(infrastructure_charts)
 
 try:
     from .components.refresh_ui import render_refresh_control
@@ -449,13 +451,23 @@ def render_standard_figure(entry: dict[str, Any]) -> None:
             # 1. Build the dynamic map using the filtered dataframes
             fig = infrastructure_charts.build_infrastructure_map(bess_df, dc_df, solar_df, selected_states=selected_states)
             
-            # 2. Adjust height to match the dashboard's design
-            fig.update_layout(height=figure.get("height", 750), margin=dict(l=0, r=0, t=60, b=0))
+            # 2. Adjust height and legend to match the dashboard's design
+            fig.update_layout(
+                height=figure.get("height", 750), 
+                margin=dict(l=0, r=0, t=0, b=0),
+                legend=dict(
+                    title=None,
+                    bgcolor="rgba(26, 26, 38, 0.8)",
+                    bordercolor="rgba(255, 255, 255, 0.2)",
+                    font=dict(size=13, color="#e2e8f0"),
+                    grouptitlefont=dict(color="#e2e8f0", size=14)
+                )
+            )
             
             # 3. Render directly in Streamlit using the container
             with map_container:
                 st.markdown('<div class="chart-module legacy-module">', unsafe_allow_html=True)
-                st.plotly_chart(fig, width="stretch", config={"displayModeBar": True, "scrollZoom": True})
+                st.plotly_chart(fig, width="stretch", config={"displayModeBar": False, "scrollZoom": True, "displaylogo": False}, theme=None)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
             bess_operating = bess_df[bess_df['status'].astype(str).str.lower() == 'operating']

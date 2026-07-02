@@ -363,3 +363,6 @@ div[data-testid="stHorizontalBlock"]:has(.analysis-refresh-status) div[data-test
         flex-direction: column;
     }
 }
+
+/* Hide map attribution and plotly logo */
+.mapboxgl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left, .plotly-notifier, .modebar-btn--logo { display: none !important; }

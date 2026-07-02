@@ -66,7 +66,7 @@ def _capacity_to_size(cap: pd.Series, min_px: float = 3, max_px: float = 14) -> 
 
 def save_html(fig: go.Figure, name: str) -> Path:
     path = FIG_DIR / name
-    fig.write_html(path, include_plotlyjs="cdn", config={"scrollZoom": True, "displayModeBar": True})
+    fig.write_html(path, include_plotlyjs="cdn", config={"scrollZoom": True, "displayModeBar": False, "displaylogo": False})
     print(f"  wrote {name} ({path.stat().st_size / 1024:.0f} KB)")
     return path
 
@@ -224,7 +224,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                 fill='toself',
                 fillcolor='rgba(154, 160, 166, 0.1)',
                 line=dict(color='rgba(154, 160, 166, 0.4)', width=2),
-                name='Renewable Energy Zones',
+                name='REZ',
                 legendgroup='REZ',
                 showlegend=not rez_legend_added,
                 hoverinfo='text',
@@ -290,8 +290,8 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             bess_proposed = bess_valid[~existing_mask & ~hdre_mask]
 
             for subset_df, color, name_label, border_color, lg, lg_title in [
-                (bess_existing, BESS_COLOR, "🔋 BESS", BESS_COLOR_BORDER, "current", "Current Sites"),
-                (bess_proposed, "#9b59b6", "🏗️ BESS", "#5e3370", "proposed", "Proposed Sites")
+                (bess_existing, BESS_COLOR, "BESS", BESS_COLOR_BORDER, "current", "Current Sites"),
+                (bess_proposed, "#9b59b6", "BESS", "#5e3370", "proposed", "Proposed Sites")
             ]:
                 if subset_df.empty:
                     continue
@@ -361,8 +361,8 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
             solar_proposed = solar_valid[~solar_valid["status_lower"].isin(["operating", "commissioning"]) & ~hdre_mask]
             
             for subset_df, color, name_label, border_color, lg, lg_title in [
-                (solar_existing, "#FFD700", "☀️ Solar Panels", "#b8860b", "current", "Current Sites"),
-                (solar_proposed, "#ff8833", "🏗️ Solar Panels", "#cc6600", "proposed", "Proposed Sites")
+                (solar_existing, "#FFD700", "Solar Panels", "#b8860b", "current", "Current Sites"),
+                (solar_proposed, "#ff8833", "Solar Panels", "#cc6600", "proposed", "Proposed Sites")
             ]:
                 if subset_df.empty:
                     continue
@@ -460,7 +460,7 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
                     marker=dict(size=7, color=DC_COLOR, opacity=0.8),
                     text=hover_texts,
                     hovertemplate="%{text}<extra></extra>",
-                    name="🖥️ Data Centres",
+                    name="Data Centres",
                     legendgroup="dc",
                     legendgrouptitle_text="Data Centres",
                 )
@@ -469,80 +469,98 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
 
     # -- Overlaid HDRE/ZEBRE traces (drawn last = on top) -------------------
     hdre_curr_pattern = r"(?i)(?:Solar River|Wagga North|Templers)"
-    
-    bess_hdre_curr = bess_hdre[bess_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if bess_hdre is not None else None
-    bess_hdre_seek = bess_hdre[~bess_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if bess_hdre is not None else None
-    
-    solar_hdre_curr = solar_hdre[solar_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if solar_hdre is not None else None
-    solar_hdre_seek = solar_hdre[~solar_hdre["name"].str.contains(hdre_curr_pattern, regex=True)] if solar_hdre is not None else None
 
-    for subset_df, color, name_label, border_color, lg, lg_title, b_op, f_op in [
-        (bess_hdre_curr, "#00d2ff", "⚡ BESS", "white", "hdre_curr", "ZEBRE Current Projects", 0.9, 1.0),
-        (solar_hdre_curr, "#00d2ff", "⚡ Solar Panels", "white", "hdre_curr", "ZEBRE Current Projects", 0.9, 1.0),
-        (bess_hdre_seek, "#00d2ff", "⚡ BESS", "white", "hdre_seek", "ZEBRE Seeking Projects", 0.4, 0.5),
-        (solar_hdre_seek, "#00d2ff", "⚡ Solar Panels", "white", "hdre_seek", "ZEBRE Seeking Projects", 0.4, 0.5)
-    ]:
-        if subset_df is None or subset_df.empty:
-            continue
-        sizes = _capacity_to_size(subset_df["capacity_mw"])
+    hdre_frames = []
+    if bess_hdre is not None and not bess_hdre.empty:
+        b_hdre = bess_hdre.copy()
+        b_hdre["asset_type"] = "Battery (BESS)"
+        hdre_frames.append(b_hdre)
+    if solar_hdre is not None and not solar_hdre.empty:
+        s_hdre = solar_hdre.copy()
+        s_hdre["asset_type"] = "Solar Farm"
+        hdre_frames.append(s_hdre)
 
-        # Build hover text
-        hover_texts = []
-        is_bess = "BESS" in name_label
-        site_type = "Battery (BESS)" if is_bess else "Solar Farm"
+    if hdre_frames:
+        import re
+        combined_hdre = pd.concat(hdre_frames, ignore_index=True)
+        grouped_hdre = []
+        for name_tuple, group in combined_hdre.groupby(['name', 'lat', 'lon', 'status', 'state', 'source'], dropna=False):
+            total_cap = group['capacity_mw'].sum()
+            assets = []
+            for _, r in group.iterrows():
+                cap_str = f"{r['capacity_mw']:,.0f} MW" if pd.notna(r['capacity_mw']) and r['capacity_mw'] else "Unknown"
+                assets.append(f"{r['asset_type']}: {cap_str}")
+            
+            asset_desc = " + ".join([r['asset_type'].split()[0] for _, r in group.iterrows()])
+            if len(group) > 1:
+                site_type_label = "Hybrid Site"
+            else:
+                site_type_label = asset_desc
+
+            is_curr = bool(re.search(hdre_curr_pattern, str(name_tuple[0])))
+            zebre_status = "Current" if is_curr else "Seeking"
+
+            hover_txt = (
+                f"<b>{name_tuple[0]}</b><br>"
+                f"Type: {site_type_label}<br>"
+                f"{'<br>'.join(assets)}<br>"
+                f"Status: <b>{zebre_status}</b><br>"
+                f"State: {name_tuple[4]}<br>"
+                f"<i>Source: {name_tuple[5]}</i>"
+            )
+            
+            grouped_hdre.append({
+                'name': name_tuple[0],
+                'lat': name_tuple[1],
+                'lon': name_tuple[2],
+                'total_cap': total_cap,
+                'hover_text': hover_txt,
+                'is_curr': is_curr
+            })
+            
+        merged_hdre_df = pd.DataFrame(grouped_hdre)
         
-        for _, row in subset_df.iterrows():
-            cap = row.get("capacity_mw")
-            cap_str = f"{cap:,.0f} MW" if pd.notna(cap) and cap else "Unknown"
-            status = _status_label(row.get("status", ""))
-            state = row.get("state", "")
-            source = row.get("source", "")
-            hover_texts.append(
-                f"<b>{row['name']}</b><br>"
-                f"Type: {site_type}<br>"
-                f"Capacity: {cap_str}<br>"
-                f"Status: {status}<br>"
-                f"State: {state}<br>"
-                f"<i>Source: {source}</i>"
-            )
+        if not merged_hdre_df.empty:
+            sizes = _capacity_to_size(merged_hdre_df["total_cap"])
+            b_op_list = [1.0] * len(merged_hdre_df)
+            f_op_list = [1.0 if c else 0.5 for c in merged_hdre_df['is_curr']]
 
-        # Border trace
-        fig.add_trace(
-            go.Scattermapbox(
-                lat=subset_df["lat"],
-                lon=subset_df["lon"],
-                mode="markers",
-                marker=dict(
-                    size=sizes + 2,
-                    color=border_color,
-                    opacity=b_op,
-                ),
-                text=subset_df["name"].tolist(),
-                hoverinfo="skip",
-                showlegend=False,
-                legendgroup=lg,
+            # Border trace
+            fig.add_trace(
+                go.Scattermapbox(
+                    lat=merged_hdre_df["lat"],
+                    lon=merged_hdre_df["lon"],
+                    mode="markers",
+                    marker=dict(
+                        size=sizes + 2,
+                        color="white",
+                        opacity=b_op_list,
+                    ),
+                    text=merged_hdre_df["name"].tolist(),
+                    hoverinfo="skip",
+                    showlegend=False,
+                    legendgroup="hdre_combined",
+                )
             )
-        )
-        # Fill trace
-        fig.add_trace(
-            go.Scattermapbox(
-                lat=subset_df["lat"],
-                lon=subset_df["lon"],
-                mode="markers",
-                marker=dict(
-                    size=sizes - 1,
-                    color=color,
-                    opacity=f_op,
-                ),
-                text=hover_texts,
-                hovertemplate="%{text}<extra></extra>",
-                name=name_label,
-                legendgroup=lg,
-                legendgrouptitle_text=lg_title,
+            # Fill trace
+            fig.add_trace(
+                go.Scattermapbox(
+                    lat=merged_hdre_df["lat"],
+                    lon=merged_hdre_df["lon"],
+                    mode="markers",
+                    marker=dict(
+                        size=sizes - 1,
+                        color="#00d2ff",
+                        opacity=f_op_list,
+                    ),
+                    text=merged_hdre_df["hover_text"].tolist(),
+                    hovertemplate="%{text}<extra></extra>",
+                    name="HDRE Projects",
+                    legendgroup="hdre_combined",
+                    legendgrouptitle_text="HDRE Projects",
+                )
             )
-        )
-        clean_label = name_label.replace("⚡", "").strip()
-        print(f"  [map] added {len(subset_df)} {clean_label} markers (OVERLAID)")
+            print(f"  [map] added {len(merged_hdre_df)} combined ZEBRE markers (OVERLAID)")
 
 
     # -- Layout -------------------------------------------------------------
@@ -556,26 +574,18 @@ def build_infrastructure_map(bess_df: pd.DataFrame, dc_df: pd.DataFrame, solar_d
         # scattermapbox requires the `mapbox` key (not `map`)
         # and works reliably with the CDN-hosted plotly.js bundle.
         mapbox=mapbox_config,
-        title=dict(
-            text="<b>NEM Energy Infrastructure Map</b><br>"
-                 "<sup>Battery Energy Storage Systems (BESS) · Solar Farms · Major Data Centres</sup>",
-            x=0.5,
-            xanchor="center",
-            font=dict(size=20, color="#1a1a2e"),
-        ),
         legend=dict(
             orientation="v",
             x=0.01,
             y=0.99,
             xanchor="left",
             yanchor="top",
-            bgcolor="rgba(255,255,255,0.88)",
-            bordercolor="#cccccc",
+            bgcolor="rgba(26, 26, 38, 0.8)",
+            bordercolor="rgba(255, 255, 255, 0.2)",
             borderwidth=1,
-            font=dict(size=13),
-            title=dict(text="<b>Legend</b>", font=dict(size=12)),
+            font=dict(size=13, color="#e2e8f0"),
         ),
-        margin=dict(l=0, r=0, t=80, b=0),
+        margin=dict(l=0, r=0, t=0, b=0),
         height=750,
         paper_bgcolor="#f4f6f8",
     )
