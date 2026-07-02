@@ -21,24 +21,13 @@ PNG_DIR = FIG_DIR / "png"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 PNG_DIR.mkdir(parents=True, exist_ok=True)
 
-SOURCE_FOOTER = "Source: OpenElectricity API (openelectricity.org.au)"
+
 TEMPLATE = "plotly_white"
 
 def english_title(en: str) -> str:
     return en
 
-def add_source_footer(fig: go.Figure, extra: str = "", source: str = SOURCE_FOOTER) -> None:
-    text = source + (f"　|　{extra}" if extra else "")
-    fig.add_annotation(
-        text=text,
-        xref="paper",
-        yref="paper",
-        x=0,
-        y=-0.16,
-        showarrow=False,
-        font=dict(size=10, color="#888"),
-        align="left",
-    )
+
 
 def save(fig: go.Figure, name: str, png_name: str | None = None) -> Path:
     path = FIG_DIR / name
@@ -80,7 +69,7 @@ def fig2_1_spot_heatmap() -> None:
         yaxis_title="Day of Week",
         margin=dict(b=110),
     )
-    add_source_footer(fig, "QLD1 region · Averaged over the past 365 days")
+
     save(fig, "fig2_1_spot_heatmap.html", "fig2_1_spot_heatmap.png")
 
 def fig2_2_fcas_regulation() -> None:
@@ -143,7 +132,7 @@ def fig2_2_fcas_regulation() -> None:
             rangeslider=dict(visible=True, range=[first_date.strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')])
         )
 
-    add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
+
     save(fig, "fig2_2_fcas_regulation.html", "fig2_2_fcas_regulation.png")
 
 def fig2_3_fcas_contingency() -> None:
@@ -224,7 +213,7 @@ def fig2_3_fcas_contingency() -> None:
             range=[(last_date - pd.Timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')],
             rangeslider=dict(visible=True, range=[first_date.strftime('%Y-%m-%d %H:%M:%S'), last_date.strftime('%Y-%m-%d %H:%M:%S')])
         )
-    add_source_footer(fig, source="Source: NEMOSIS (AEMO MMS Data)")
+
     save(fig, "fig2_3_fcas_contingency.html", "fig2_3_fcas_contingency.png")
 
 

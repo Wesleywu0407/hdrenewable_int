@@ -53,7 +53,7 @@ GEN_GROUPS = ["coal", "gas", "hydro", "wind", "solar", "bioenergy", "distillate"
 # Stack order (bottom -> top): firm/fossil at the bottom, renewables on top.
 STACK_ORDER = ["coal", "gas", "distillate", "hydro", "wind", "solar", "bioenergy", "battery"]
 
-SOURCE_FOOTER = "Source: OpenElectricity API (openelectricity.org.au)"
+
 TEMPLATE = "plotly_white"
 
 
@@ -62,18 +62,6 @@ def english_title(en: str) -> str:
     return en
 
 
-def add_source_footer(fig: go.Figure, extra: str = "") -> None:
-    text = SOURCE_FOOTER + (f"　|　{extra}" if extra else "")
-    fig.add_annotation(
-        text=text,
-        xref="paper",
-        yref="paper",
-        x=0,
-        y=-0.16,
-        showarrow=False,
-        font=dict(size=10, color="#888"),
-        align="left",
-    )
 
 
 def save(fig: go.Figure, name: str) -> Path:
@@ -200,7 +188,7 @@ def fig1_realtime() -> None:
             ])
         )
     )
-    add_source_footer(fig, "Generation-only (battery charging & pumps excluded)")
+
     save(fig, "fig1_nem_realtime_mix.html")
 
 
@@ -240,10 +228,7 @@ def fig2_annual() -> None:
         margin=dict(b=120),
     )
     fig.update_xaxes(tickformat="%Y-%m")
-    add_source_footer(
-        fig,
-        f"COMMUNITY plan: data limited to {dmin:%Y-%m}-{dmax:%Y-%m} (not full 2020-2025)",
-    )
+
     save(fig, "fig2_annual_generation_by_fuel.html")
 
 
@@ -288,7 +273,7 @@ def fig3_state_comparison() -> None:
         legend_title="Fuel group",
         margin=dict(b=110),
     )
-    add_source_footer(fig, "Sum of monthly energy over the latest 12 months")
+
     save(fig, "fig3_state_comparison.html")
 
 
@@ -325,7 +310,7 @@ def fig4_coal_timeline() -> None:
         margin=dict(t=50, b=110, l=250),
     )
     fig.update_xaxes(tickformat="%Y")
-    add_source_footer(fig, "End date for operating units = expected closure date")
+
     save(fig, "fig4_coal_retirement_timeline.html")
 
 

@@ -42,22 +42,11 @@ REGION_COLORS = {
 
 GEN_GROUPS = ["coal", "gas", "hydro", "wind", "solar", "bioenergy", "distillate", "battery"]
 STACK_ORDER = ["coal", "gas", "distillate", "hydro", "wind", "solar", "bioenergy", "battery"]
-SOURCE_FOOTER = "Source: OpenElectricity API (openelectricity.org.au)"
+
 TEMPLATE = "plotly_white"
 
 
-def add_source_footer(fig: go.Figure, extra: str = "") -> None:
-    text = SOURCE_FOOTER + (f"　|　{extra}" if extra else "")
-    fig.add_annotation(
-        text=text,
-        xref="paper",
-        yref="paper",
-        x=0,
-        y=-0.16,
-        showarrow=False,
-        font=dict(size=10, color="#888"),
-        align="left",
-    )
+
 
 
 def save(fig: go.Figure, name: str, png_name: str | None = None) -> Path:
@@ -127,7 +116,7 @@ def fig1_1_qld_renewable_share() -> None:
         margin=dict(b=110),
     )
     fig.update_xaxes(tickformat="%Y-%m")
-    add_source_footer(fig)
+
     save(fig, "fig1_1_qld_renewable_share.html", "fig1_1_qld_renewable_share.png")
 
 
@@ -170,7 +159,7 @@ def fig1_2_qld_fuel_mix() -> None:
         margin=dict(b=120),
     )
     fig.update_xaxes(tickformat="%Y-%m")
-    add_source_footer(fig)
+
     save(fig, "fig1_2_qld_fuel_mix.html", "fig1_2_qld_fuel_mix.png")
 
 
@@ -185,16 +174,18 @@ def fig1_3_qld_negative_prices() -> None:
 
     df = pd.read_csv(path, parse_dates=["interval"])
     
-    # Filter only negative prices
-    neg_df = df[df["price"] < 0].copy()
-    
     # Calculate frequency and magnitude per day.
-    neg_df["day"] = neg_df["interval"].dt.to_period("D").dt.to_timestamp()
-    daily_stats = neg_df.groupby("day").agg(
-        hours=("interval", "count"),
-        avg_price=("price", "mean"),
+    df["day"] = df["interval"].dt.to_period("D").dt.to_timestamp()
+    daily_prices = df.groupby("day").agg(
+        max_price=("price", "max"),
         min_price=("price", "min")
     ).reset_index()
+
+    neg_df = df[df["price"] < 0]
+    neg_hours = neg_df.groupby("day").size().reset_index(name="hours")
+
+    daily_stats = pd.merge(daily_prices, neg_hours, on="day", how="left")
+    daily_stats["hours"] = daily_stats["hours"].fillna(0)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
@@ -211,6 +202,17 @@ def fig1_3_qld_negative_prices() -> None:
     fig.add_trace(
         go.Scatter(
             x=daily_stats["day"],
+            y=daily_stats["max_price"],
+            mode="lines",
+            line=dict(color="#f39c12"),
+            name="Max Price ($/MWh)"
+        ),
+        secondary_y=True,
+    )
+    
+    fig.add_trace(
+        go.Scatter(
+            x=daily_stats["day"],
             y=daily_stats["min_price"],
             mode="lines",
             line=dict(color="#3498db"),
@@ -221,7 +223,7 @@ def fig1_3_qld_negative_prices() -> None:
 
     fig.update_layout(
         template=TEMPLATE,
-        title="QLD Daily Negative Spot-Price Frequency & Magnitude",
+        title="QLD Daily Spot-Price Extremes & Negative Frequency",
         xaxis_title="",
         hovermode="x unified",
         margin=dict(b=110),
@@ -229,7 +231,7 @@ def fig1_3_qld_negative_prices() -> None:
     fig.update_yaxes(title_text="Hours below $0/MWh", secondary_y=False)
     fig.update_yaxes(title_text="Price ($/MWh)", secondary_y=True)
     fig.update_xaxes(tickformat="%Y-%m-%d")
-    add_source_footer(fig, "Count of hourly spot prices < $0/MWh & Min price per day")
+
     save(fig, "fig1_3_qld_negative_prices.html", "fig1_3_qld_negative_prices.png")
 
 

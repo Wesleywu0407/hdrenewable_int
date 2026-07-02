@@ -59,9 +59,9 @@ CHAPTERS = [
             {
                 "id": "fig1_3",
                 "number": 3,
-                "title": "QLD Negative Spot-Price Frequency",
+                "title": "QLD Daily Spot-Price Extremes & Negative Frequency",
                 "sidebar_title": "NEGATIVE PRICES",
-                "subtitle": "Monthly Hours below $0/MWh",
+                "subtitle": "Daily Maximum, Minimum, and Negative Price Frequency",
                 "html_path": "outputs/figures/fig1_3_qld_negative_prices.html",
                 "png_path": "outputs/figures/png/fig1_3_qld_negative_prices.png",
                 "source": "OpenElectricity API",
@@ -71,10 +71,10 @@ CHAPTERS = [
                     {"label": "Historical Peak", "value": ">170 hrs/month"}
                 ],
                 "takeaway": (
-                    "Queensland experiences a high frequency of negative wholesale spot prices, occasionally peaking at over 170 hours per month during high-solar seasons. These frequent negative price events indicate severe daytime oversupply, presenting a highly lucrative arbitrage and firming opportunity for battery storage operators."
+                    "Queensland experiences extreme wholesale spot price volatility. Alongside frequent negative price events that indicate severe daytime solar oversupply, the market also sees massive price spikes (maximums) when demand peaks or supply is constrained. This volatility presents a highly lucrative arbitrage and firming opportunity for battery storage operators."
                 ),
                 "description": (
-                    "This bar chart tracks the frequency of negative wholesale electricity spot prices in Queensland. A negative spot price occurs when the supply of electricity exceeds demand, often during periods of high solar generation, meaning generators effectively pay the market to take their power.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
+                    "This chart tracks the daily maximum and minimum wholesale electricity spot prices in Queensland, alongside the frequency of negative price hours. A negative spot price occurs when the supply of electricity exceeds demand, meaning generators effectively pay the market to take their power, while high maximum prices indicate supply constraints.\n\nData is based off scripts/03_fetch_qld_data.py (which uses the openelectricity Python SDK to pull live timeseries datasets via the OpenElectricity API) and charted by scripts/04_generate_qld_charts.py."
                 ),
             }
         ],

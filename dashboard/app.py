@@ -43,7 +43,7 @@ LOG_DIR = PROJECT_ROOT / "logs"
 
 REFRESH_REGISTRY = {
     "1.2::*": {
-        "scope_label": "National Electricity Market grid analysis",
+        "scope_label": "National Electricity Market grid data",
         "button_label": "Refresh",
         "command": ["bash", "scripts/run_nem_scrape.sh"],
         "status_path": REFRESH_STATUS_DIR / "chapter_1_2_status.json",
@@ -717,7 +717,7 @@ def render_refresh_control(entry: dict[str, Any]) -> None:
     with button_col:
         st.markdown('<div class="refresh-primary-action">', unsafe_allow_html=True)
         if "pyodide" not in sys.modules and st.button(config["button_label"], width="content"):
-            with st.spinner(f"Updating {config['scope_label']}..."):
+            with st.spinner(f"Refreshing {config['scope_label']}..."):
                 ok, message = run_registered_refresh(config)
             if ok:
                 st.cache_data.clear()

@@ -994,15 +994,25 @@ def fetch_osm_infrastructure(plant_source: str) -> pd.DataFrame:
                 name = tags.get("name")
                 if not name or not lat or not lon:
                     continue
-                capacity = tags.get("plant:output:electricity") or tags.get("capacity")
+                capacity = (
+                    tags.get("plant:output:electricity") 
+                    or tags.get("capacity") 
+                    or tags.get("generator:output:electricity") 
+                    or tags.get("generator:capacity") 
+                    or tags.get("power_rating")
+                )
                 try:
                     capacity_mw = float(re.sub(r"[^\d.]", "", str(capacity))) if capacity else None
                 except (ValueError, TypeError):
                     capacity_mw = None
                 
+                state_str = _infer_state(tags.get("addr:state", "") + " " + tags.get("addr:city", ""))
+                if not state_str:
+                    state_str = _infer_state_from_coords(float(lat), float(lon))
+
                 rows.append({
                     "name": name,
-                    "state": _infer_state(tags.get("addr:state", "") + " " + tags.get("addr:city", "")),
+                    "state": state_str,
                     "capacity_mw": capacity_mw,
                     "status": "operating",
                     "lat": float(lat),
@@ -1177,6 +1187,10 @@ def fetch_ga_batteries() -> pd.DataFrame:
             or attrs.get("MW")
             or attrs.get("mw")
             or attrs.get("Power_MW")
+            or attrs.get("nameplatecapacity_mw")
+            or attrs.get("NAMEPLATECAPACITY_MW")
+            or attrs.get("storagecapacity_mwh")
+            or attrs.get("STORAGECAPACITY_MWH")
         )
         try:
             capacity_mw = float(cap_raw) if cap_raw is not None else None

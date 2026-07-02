@@ -57,7 +57,7 @@ FUEL_COLORS = {
 }
 
 TEMPLATE = "plotly_white"
-SOURCE_FOOTER = "Source: OpenElectricity API / Open-Meteo / AEMO MMS"
+
 
 STATE_COLORS = {
     "NSW": "#3498db",
@@ -68,18 +68,7 @@ STATE_COLORS = {
 }
 
 
-def add_source_footer(fig: go.Figure, extra: str = "", source: str = SOURCE_FOOTER) -> None:
-    text = source + (f"\u3000|\u3000{extra}" if extra else "")
-    fig.add_annotation(
-        text=text,
-        xref="paper",
-        yref="paper",
-        x=0,
-        y=-0.16,
-        showarrow=False,
-        font=dict(size=10, color="#888"),
-        align="left",
-    )
+
 
 
 def save(fig: go.Figure, name: str, png_name: str | None = None) -> Path:

@@ -22,23 +22,12 @@ INPUT_CSV = RAW_DIR / "weather_price_correlation.csv"
 OUTPUT_HTML = FIG_DIR / "fig2_4_weather_correlation.html"
 
 TEMPLATE = "plotly_white"
-SOURCE_FOOTER = "Source: Open-Meteo & OpenElectricity API"
+
 
 def english_title(en: str) -> str:
     return en
 
-def add_source_footer(fig: go.Figure, extra: str = "") -> None:
-    text = SOURCE_FOOTER + (f"　|　{extra}" if extra else "")
-    fig.add_annotation(
-        text=text,
-        xref="paper",
-        yref="paper",
-        x=0,
-        y=-0.16,
-        showarrow=False,
-        font=dict(size=10, color="#888"),
-        align="left",
-    )
+
 
 def main() -> int:
     if not INPUT_CSV.exists():
@@ -167,7 +156,7 @@ def main() -> int:
         margin=dict(b=80)
     )
     
-    add_source_footer(fig)
+
     
     fig.write_html(OUTPUT_HTML, include_plotlyjs="cdn")
     print(f"  wrote fig2_4_weather_correlation.html ({OUTPUT_HTML.stat().st_size / 1024:.0f} KB)")
